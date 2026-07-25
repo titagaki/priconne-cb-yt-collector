@@ -63,10 +63,25 @@ priconne-cb-yt-collector/
 │       ├── commands.py      # スラッシュコマンド
 │       ├── embeds.py        # Embed 生成
 │       └── poster.py        # 投稿キュー・スレッド管理
-├── tests/
+├── tests/                   # パッケージと同じ階層構造（下記）
 ├── data/bot.db
 ├── .env.example
 └── README.md
+```
+
+`tests/` は実装と同じ層に分ける。どの層のテストかがパスから分かるようにするため。
+
+```
+tests/
+├── conftest.py              # 共通フィクスチャ（store / bosses）
+├── support.py               # 共有定数とテストダブル（SAMPLE_BOSSES、Discord のフェイク等）
+├── test_layering.py         # 横断: 依存方向を AST で検証
+├── domain/                  # 純粋関数のテスト
+│   ├── test_schedule.py
+│   └── classify/{test_titles,test_battle_type,test_metadata}.py
+├── adapters/{test_config_file,test_sqlite_store}.py
+├── services/{test_collection,test_lifecycle}.py
+└── interface/{test_bot,test_embeds,test_poster}.py
 ```
 
 ## 4. モジュールと仕様章の対応

@@ -17,8 +17,9 @@
 | 7 | スラッシュコマンド（`/suggest_channels` 含む）+ `main.py` | ✅ 完了 |
 
 | 8 | src レイアウトへの再編（domain / services / adapters / interface の4層化）+ ruff 導入 | ✅ 完了（2026-07-25） |
+| 9 | `tests/` を実装と同じ層構造に再編 + PeriodService の直接テスト追加 | ✅ 完了（2026-07-25） |
 
-実装は一巡し、ユニットテスト 239 件が通っている状態。**Discord / YouTube への実接続は未検証**（トークン・チャンネル ID・実チャンネルの設定が必要）。
+実装は一巡し、ユニットテスト 260 件が通っている状態。**Discord / YouTube への実接続は未検証**（トークン・チャンネル ID・実チャンネルの設定が必要）。
 
 レイヤの依存方向（interface → services → adapters → domain の一方向、domain は外部ライブラリ非依存）は
 `tests/test_layering.py` が AST 解析で機械的に検証している。

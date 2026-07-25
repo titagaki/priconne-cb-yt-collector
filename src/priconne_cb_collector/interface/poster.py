@@ -21,6 +21,7 @@ from priconne_cb_collector.interface.embeds import build_video_embed
 logger = logging.getLogger(__name__)
 
 REASON_DAILY_LIMIT = "daily_limit"
+DEFAULT_RETRY_AFTER = 5.0  # used only when Discord sends no Retry-After
 
 
 class Poster:
@@ -116,7 +117,9 @@ class Poster:
                 return await target.send(embed=embed)
             except discord.HTTPException as exc:
                 if exc.status == 429:
-                    wait = float(getattr(exc, "retry_after", 0) or 5)
+                    # retry_after may legitimately be 0; only a missing value falls back.
+                    retry_after = getattr(exc, "retry_after", None)
+                    wait = float(retry_after) if retry_after is not None else DEFAULT_RETRY_AFTER
                     logger.warning("rate limited; waiting %.1fs (attempt %d)", wait, attempt)
                     await asyncio.sleep(wait)
                     continue

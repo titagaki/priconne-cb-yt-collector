@@ -6,8 +6,8 @@ published_in_period=True / enable_ex_notation=True で分類する。
 
 import pytest
 
-from conftest import SAMPLE_BOSSES
 from priconne_cb_collector.domain.classify import classify_video
+from tests.support import SAMPLE_BOSSES
 
 CASES = [
     # --- ボス名・エイリアス一致 ---

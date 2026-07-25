@@ -1,17 +1,23 @@
+"""全レイヤ共通のフィクスチャ。定数とテストダブルは tests/support.py にある。"""
+
 import pytest
 
-from priconne_cb_collector.domain.models import Boss
-
-# docs/spec/03 のサンプル構成と同じ（テスト専用。bosses.yaml の正は運用者が管理）
-SAMPLE_BOSSES = (
-    Boss(1, "ワイバーン", ("ワイバーン", "ワイバン", "wyvern")),
-    Boss(2, "デミカリド", ("デミカリド", "デミカリ")),
-    Boss(3, "ライデン", ("ライデン", "雷電")),
-    Boss(4, "スピリットホーン", ("スピリットホーン", "スピホン")),
-    Boss(5, "オルレオン", ("オルレオン", "オルレ")),
-)
+from priconne_cb_collector.adapters.sqlite_store import Store
+from tests.support import SAMPLE_BOSSES, bosses_config
 
 
 @pytest.fixture
 def bosses():
     return SAMPLE_BOSSES
+
+
+@pytest.fixture
+def bosses_cfg():
+    return bosses_config()
+
+
+@pytest.fixture
+def store(tmp_path):
+    s = Store(tmp_path / "test.db")
+    yield s
+    s.close()

@@ -1,19 +1,11 @@
-"""store.py のテスト（docs/spec/10 §3 の必須ケース）。"""
+"""sqlite_store.py のテスト（docs/spec/10 §3 の必須ケース）。"""
 
 from datetime import UTC, datetime, timedelta
 
-import pytest
-
-from priconne_cb_collector.adapters.sqlite_store import STATUS_POSTED, Store
-from priconne_cb_collector.domain.models import BossMatch, Classification, Period, VideoMeta
+from priconne_cb_collector.adapters.sqlite_store import STATUS_POSTED
+from priconne_cb_collector.domain.models import BossMatch, Classification, VideoMeta
 from priconne_cb_collector.domain.schedule import JST
-
-
-@pytest.fixture
-def store(tmp_path):
-    s = Store(tmp_path / "test.db")
-    yield s
-    s.close()
+from tests.support import july_period
 
 
 def make_video(video_id="abc123", **kwargs):
@@ -118,17 +110,8 @@ def test_status_transitions(store):
 # ---- フェーズ遷移通知フラグ ----
 
 
-def period():
-    return Period(
-        training_start=datetime(2026, 7, 23, tzinfo=JST),
-        battle_start=datetime(2026, 7, 26, tzinfo=JST),
-        battle_end=datetime(2026, 7, 30, 23, 59, 59, tzinfo=JST),
-        cb_period="2026-07",
-    )
-
-
 def test_notification_flag_prevents_duplicate_announcements(store):
-    store.ensure_period(period())
+    store.ensure_period(july_period())
     assert store.mark_notified("2026-07", "training") is True
     assert store.mark_notified("2026-07", "training") is False  # 再起動しても再投稿しない
     assert store.is_notified("2026-07", "training") is True
@@ -138,21 +121,21 @@ def test_notification_flag_prevents_duplicate_announcements(store):
 
 
 def test_reminder_flag_is_independent(store):
-    store.ensure_period(period())
+    store.ensure_period(july_period())
     assert store.mark_notified("2026-07", "reminder") is True
     assert store.mark_notified("2026-07", "reminder") is False
     assert store.is_notified("2026-07", "training") is False
 
 
 def test_ensure_period_is_idempotent(store):
-    store.ensure_period(period())
+    store.ensure_period(july_period())
     store.mark_notified("2026-07", "training")
-    store.ensure_period(period())  # 再起動時の再呼び出しでフラグが消えないこと
+    store.ensure_period(july_period())  # 再起動時の再呼び出しでフラグが消えないこと
     assert store.is_notified("2026-07", "training") is True
 
 
 def test_trigger_start_and_stop(store):
-    p = period()
+    p = july_period()
     assert store.trigger_started_at("2026-07") is None
     store.set_trigger_start(p)
     started = store.trigger_started_at("2026-07")
@@ -162,7 +145,7 @@ def test_trigger_start_and_stop(store):
 
 
 def test_boss_threads_round_trip(store):
-    store.ensure_period(period())
+    store.ensure_period(july_period())
     assert store.load_boss_threads("2026-07") == {}
     store.save_boss_threads("2026-07", {1: 111, 2: 222})
     assert store.load_boss_threads("2026-07") == {1: 111, 2: 222}

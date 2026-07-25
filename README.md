@@ -72,9 +72,14 @@ src/priconne_cb_collector/
 ## テスト
 
 ```bash
-.venv/bin/python -m pytest        # 207件
+.venv/bin/python -m pytest              # 260件
+.venv/bin/python -m pytest tests/domain # 層ごとに実行できる
 .venv/bin/ruff check .
 .venv/bin/ruff format --check .
 ```
 
+`tests/` は実装と同じ層構造です（`tests/domain/`, `tests/adapters/`, `tests/services/`, `tests/interface/`）。
+共通のフィクスチャは `tests/conftest.py`、共有定数とテストダブルは `tests/support.py` にあります。
+
 判定ロジック（`domain/classify/`）は実タイトルを模した表形式のテストケースで検証しています。
+レイヤの依存方向は `tests/test_layering.py` が AST 解析で機械的に検証しています。

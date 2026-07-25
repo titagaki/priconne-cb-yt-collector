@@ -9,11 +9,7 @@ from datetime import UTC, datetime, timedelta
 import httpx
 import pytest
 
-from conftest import SAMPLE_BOSSES
-from priconne_cb_collector.adapters.sqlite_store import Store
 from priconne_cb_collector.adapters.youtube_api import QuotaExceededError, YouTubeClient
-from priconne_cb_collector.domain.models import BossesConfig, Period
-from priconne_cb_collector.domain.schedule import JST
 from priconne_cb_collector.domain.settings import (
     AppConfig,
     ChannelRef,
@@ -28,13 +24,9 @@ from priconne_cb_collector.services.collection import (
     REASON_TOO_SHORT,
     Collector,
 )
+from tests.support import bosses_config, july_period
 
-PERIOD = Period(
-    training_start=datetime(2026, 7, 23, tzinfo=JST),
-    battle_start=datetime(2026, 7, 26, tzinfo=JST),
-    battle_end=datetime(2026, 7, 30, 23, 59, 59, tzinfo=JST),
-    cb_period="2026-07",
-)
+PERIOD = july_period()
 NOW = datetime(2026, 7, 24, 3, 0, tzinfo=UTC)  # training 期間中
 
 FEED_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
@@ -110,13 +102,6 @@ def make_config(exclude=None, quota_limit_per_day=9000):
     )
 
 
-@pytest.fixture
-def store(tmp_path):
-    s = Store(tmp_path / "collector.db")
-    yield s
-    s.close()
-
-
 def http_client(feed_body, status_code=200, headers=None):
     def handler(request):
         return httpx.Response(status_code, text=feed_body, headers=headers or {})
@@ -128,7 +113,7 @@ async def run_collect(store, feed, details=None, config=None, **kwargs):
     async with http_client(feed) as client:
         collector = Collector(
             config or make_config(),
-            BossesConfig(month="2026-07", bosses=SAMPLE_BOSSES),
+            bosses_config(),
             store,
             client,
             FakeYouTube(details=details or {}),
@@ -256,7 +241,7 @@ async def test_rss_304_yields_no_videos(store):
     async with http_client("", status_code=304) as client:
         collector = Collector(
             make_config(),
-            BossesConfig(month="2026-07", bosses=SAMPLE_BOSSES),
+            bosses_config(),
             store,
             client,
             FakeYouTube(),
@@ -270,7 +255,7 @@ async def test_rss_failure_does_not_raise(store):
     async with http_client("", status_code=500) as client:
         collector = Collector(
             make_config(),
-            BossesConfig(month="2026-07", bosses=SAMPLE_BOSSES),
+            bosses_config(),
             store,
             client,
             FakeYouTube(),
@@ -290,7 +275,7 @@ async def test_api_search_consumes_quota_per_boss(store):
         youtube = FakeYouTube()
         collector = Collector(
             make_config(),
-            BossesConfig(month="2026-07", bosses=SAMPLE_BOSSES),
+            bosses_config(),
             store,
             client,
             youtube,
@@ -310,7 +295,7 @@ async def test_api_search_skipped_when_quota_would_be_exceeded(store):
         youtube = FakeYouTube()
         collector = Collector(
             make_config(),
-            BossesConfig(month="2026-07", bosses=SAMPLE_BOSSES),
+            bosses_config(),
             store,
             client,
             youtube,
@@ -330,7 +315,7 @@ async def test_quota_exceeded_degrades_to_rss_only(store):
         youtube = FakeYouTube(raise_quota=True)
         collector = Collector(
             make_config(),
-            BossesConfig(month="2026-07", bosses=SAMPLE_BOSSES),
+            bosses_config(),
             store,
             client,
             youtube,
