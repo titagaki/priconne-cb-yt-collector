@@ -1,9 +1,10 @@
 """config.py の読み込み・バリデーションのテスト。"""
+
 import logging
 
 import pytest
 
-from config import ConfigError, load_bosses, load_config
+from priconne_cb_collector.adapters.config_file import ConfigError, load_bosses, load_config
 
 VALID_BOSSES = """\
 month: "2026-07"

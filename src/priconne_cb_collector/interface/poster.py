@@ -1,101 +1,26 @@
-"""Embed building and the serialized posting queue (docs/spec/08).
+"""Serialized posting queue (docs/spec/08 §3).
 
-The video description is never reproduced in the embed: title and link only.
-status is set to "posted" only after Discord confirms the message.
+Embed construction lives in interface.embeds; this module owns ordering,
+rate-limit handling, the daily cap and thread management.
+status becomes "posted" only after Discord confirms the message.
 """
+
 from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import discord
 
-from models import AppConfig, BossesConfig
-from schedule import JST
-from store import Store
+from priconne_cb_collector.adapters.sqlite_store import Store
+from priconne_cb_collector.domain.models import BossesConfig
+from priconne_cb_collector.domain.settings import LAYOUT_PER_BOSS_THREAD, AppConfig
+from priconne_cb_collector.interface.embeds import build_video_embed
 
 logger = logging.getLogger(__name__)
 
-VIDEO_URL = "https://www.youtube.com/watch?v={video_id}"
-THUMBNAIL_URL = "https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
 REASON_DAILY_LIMIT = "daily_limit"
-
-# Fixed per-boss colors, keyed by index (docs/spec/08 §2).
-BOSS_COLORS = {
-    1: 0xE74C3C,
-    2: 0xE67E22,
-    3: 0xF1C40F,
-    4: 0x2ECC71,
-    5: 0x3498DB,
-}
-SUMMARY_COLOR = 0x9B59B6
-UNKNOWN_COLOR = 0x95A5A6
-
-BATTLE_TYPE_LABELS = {"normal": "通常", "carryover": "持ち越し", "unknown": "不明"}
-
-
-def build_embed(row, bosses: BossesConfig) -> discord.Embed:
-    """Build the embed for one stored video row."""
-    boss_index = row["boss_index"]
-    is_summary = bool(row["is_summary"])
-
-    badges = []
-    if row["training_evidence"] == "keyword":
-        badges.append("🏋️ トレモ")
-    elif row["training_evidence"] == "phase_only":
-        badges.append("🏋️ トレモ期間")
-    if row["match_source"] == "ex_notation":
-        badges.append("※EX表記から推定")
-
-    color = SUMMARY_COLOR if is_summary else BOSS_COLORS.get(boss_index, UNKNOWN_COLOR)
-    embed = discord.Embed(
-        title=row["title"][:256],
-        url=VIDEO_URL.format(video_id=row["video_id"]),
-        color=color,
-    )
-    embed.set_image(url=THUMBNAIL_URL.format(video_id=row["video_id"]))
-
-    embed.add_field(name="ボス", value=_boss_label(row, bosses), inline=True)
-    embed.add_field(name="種別", value=_battle_type_label(row), inline=True)
-    if row["boss_phase"]:
-        embed.add_field(name="段階", value=f"{row['boss_phase']}段階", inline=True)
-    if row["damage"]:
-        embed.add_field(name="ダメージ", value=f"{row['damage']:,}万", inline=True)
-
-    footer_parts = [row["channel_title"] or "不明なチャンネル", _jst_label(row["published_at"])]
-    if row["is_full_auto"]:
-        footer_parts.append("フルオート")
-    elif row["is_manual"]:
-        footer_parts.append("手動")
-    footer_parts.extend(badges)
-    embed.set_footer(text=" ・ ".join(footer_parts))
-    return embed
-
-
-def _boss_label(row, bosses: BossesConfig) -> str:
-    import json
-
-    if row["is_summary"] and row["boss_indices"]:
-        indices = json.loads(row["boss_indices"])
-        names = [f"{i}ボス {bosses.by_index(i).name}" for i in indices]
-        return "まとめ: " + " / ".join(names)
-    if row["boss_index"]:
-        boss = bosses.by_index(row["boss_index"])
-        return f"{boss.index}ボス {boss.name}"
-    return "判定できず"
-
-
-def _battle_type_label(row) -> str:
-    label = BATTLE_TYPE_LABELS.get(row["battle_type"], "不明")
-    if row["battle_type"] == "carryover" and row["carryover_sec"]:
-        return f"{label} ({row['carryover_sec']}秒)"
-    return label
-
-
-def _jst_label(published_at_utc: str) -> str:
-    dt = datetime.fromisoformat(published_at_utc).astimezone(JST)
-    return dt.strftime("%m/%d %H:%M")
 
 
 class Poster:
@@ -117,7 +42,7 @@ class Poster:
 
     async def ensure_boss_threads(self, cb_period: str) -> dict[int, int]:
         """Create the per-boss threads once per period; reuse them on restart."""
-        if self.config.discord.layout != "per_boss_thread":
+        if self.config.discord.layout != LAYOUT_PER_BOSS_THREAD:
             return {}
 
         existing = self.store.load_boss_threads(cb_period)
@@ -145,7 +70,7 @@ class Poster:
 
     async def post_pending(self, cb_period: str, now: datetime | None = None) -> int:
         """Post every pending video for the period. Returns the count posted."""
-        now = now or datetime.now(timezone.utc)
+        now = now or datetime.now(UTC)
         posted = 0
         async with self._lock:
             for row in self.store.pending_videos(cb_period):
@@ -170,7 +95,7 @@ class Poster:
             logger.warning("no target channel for video: video_id=%s", row["video_id"])
             return False
 
-        embed = build_embed(row, self.bosses)
+        embed = build_video_embed(row, self.bosses)
         message = await self._send_with_retry(target, embed)
         if message is None:
             return False
@@ -201,7 +126,7 @@ class Poster:
 
     async def _resolve_target(self, cb_period: str, row):
         channel = await self._get_channel()
-        if self.config.discord.layout != "per_boss_thread":
+        if self.config.discord.layout != LAYOUT_PER_BOSS_THREAD:
             return channel
         # Summary videos and unclassified ones go to the parent channel.
         if row["is_summary"] or not row["boss_index"]:
@@ -241,7 +166,9 @@ class Poster:
     async def send_notice(self, content: str = "", embed: discord.Embed | None = None):
         channel = await self._get_channel()
         if channel is None:
-            logger.error("notice channel unavailable: channel_id=%s", self.config.discord.channel_id)
+            logger.error(
+                "notice channel unavailable: channel_id=%s", self.config.discord.channel_id
+            )
             return None
         try:
             return await channel.send(content=content or None, embed=embed)

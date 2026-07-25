@@ -2,14 +2,14 @@
 
 No YouTube / Discord dependencies. Entry point: classify_video().
 """
+
 from __future__ import annotations
 
-from models import Boss, Classification
-
-from classify.battle_type import classify_battle_type
-from classify.boss import classify_boss
-from classify.metadata import extract_metadata
-from classify.normalize import build_target_text
+from priconne_cb_collector.domain.classify.battle_type import classify_battle_type
+from priconne_cb_collector.domain.classify.boss import classify_boss
+from priconne_cb_collector.domain.classify.metadata import extract_metadata
+from priconne_cb_collector.domain.classify.normalize import build_target_text
+from priconne_cb_collector.domain.models import Boss, Classification
 
 
 def classify_video(

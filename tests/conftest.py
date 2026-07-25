@@ -1,6 +1,6 @@
 import pytest
 
-from models import Boss
+from priconne_cb_collector.domain.models import Boss
 
 # docs/spec/03 のサンプル構成と同じ（テスト専用。bosses.yaml の正は運用者が管理）
 SAMPLE_BOSSES = (

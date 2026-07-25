@@ -1,14 +1,16 @@
 """Normal vs carryover decision (docs/spec/06 §3). Pure functions."""
+
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
 
-from classify.normalize import normalize
-
-BATTLE_NORMAL = "normal"
-BATTLE_CARRYOVER = "carryover"
-BATTLE_UNKNOWN = "unknown"
+from priconne_cb_collector.domain.classify.normalize import normalize
+from priconne_cb_collector.domain.models import (
+    BATTLE_CARRYOVER,
+    BATTLE_NORMAL,
+    BATTLE_UNKNOWN,
+)
 
 # Carryover patterns. "持ち" alone is deliberately excluded (持ち込み/気持ち).
 _CARRYOVER_WORD = re.compile(r"持ち越し|持越し|持越|もちこし|繰り越し|繰越")
@@ -17,9 +19,7 @@ _CARRYOVER_SEC_AFTER = re.compile(r"(?:持ち越し|持越し|持越)\s?(\d{1,2}
 
 # Normal patterns. フル needs a lookahead so フルオート/フルオ (full-auto,
 # a separate attribute) is not mistaken for "full time".
-_NORMAL = re.compile(
-    r"通常編成|通常凸|通常|初手|初凸|素凸|1凸目|フルタイム|90秒|フル(?!オ)"
-)
+_NORMAL = re.compile(r"通常編成|通常凸|通常|初手|初凸|素凸|1凸目|フルタイム|90秒|フル(?!オ)")
 
 _MIN_CARRYOVER_SEC = 1
 _MAX_CARRYOVER_SEC = 90

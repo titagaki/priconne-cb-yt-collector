@@ -3,10 +3,11 @@
 各行: (タイトル, 説明文, 期待ボス indices, 期待 match_source, 期待 battle_type)
 published_in_period=True / enable_ex_notation=True で分類する。
 """
+
 import pytest
 
-from classify import classify_video
 from conftest import SAMPLE_BOSSES
+from priconne_cb_collector.domain.classify import classify_video
 
 CASES = [
     # --- ボス名・エイリアス一致 ---
@@ -19,7 +20,8 @@ CASES = [
     ("wyvern 1段階目 フルオート", "", [1], "boss_name", "unknown"),
     ("ＷＹＶＥＲＮ討伐！通常編成", "", [1], "boss_name", "normal"),  # 全角→半角正規化
     ("Wyvern Full Auto 2000万", "", [1], "boss_name", "unknown"),  # 大文字→小文字
-    ("タイトルに無し", "説明文にワイバーンの編成解説あり", [1], "boss_name", "unknown"),  # 説明文も見る
+    # 説明文も判定対象に含める
+    ("タイトルに無し", "説明文にワイバーンの編成解説あり", [1], "boss_name", "unknown"),
     ("【プリコネR】第2ボス デミカリド 3段階目", "", [2], "boss_name", "unknown"),
     ("ライデン(雷電) 90秒フル", "", [3], "boss_name", "normal"),
     ("オルレオン 繰り越し20秒", "", [5], "boss_name", "carryover"),
@@ -27,7 +29,13 @@ CASES = [
     ("スピリットホーン もちこし 60秒から", "", [4], "boss_name", "carryover"),
     # --- 複数ヒット・まとめ動画 ---
     ("ワイバーン&デミカリド比較 通常", "", [1, 2], "boss_name", "normal"),
-    ("【クラバト】ワイバーン/ライデン/オルレオン 全編成まとめ", "", [1, 3, 5], "boss_name", "unknown"),
+    (
+        "【クラバト】ワイバーン/ライデン/オルレオン 全編成まとめ",
+        "",
+        [1, 3, 5],
+        "boss_name",
+        "unknown",
+    ),
     # --- EX表記（ボス名なし + プリコネ文脈語 + 期間内） ---
     ("【プリコネ】クラバト ex2 検証 トレモ", "", [2], "ex_notation", "unknown"),
     ("【プリコネR】4ボス 通常 フルオート", "クラバト編成", [4], "ex_notation", "normal"),

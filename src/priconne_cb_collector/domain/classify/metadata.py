@@ -1,10 +1,12 @@
 """Optional metadata extraction (docs/spec/06 §4). All fields may be None."""
+
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass
 
-from classify.normalize import normalize
+from priconne_cb_collector.domain.classify.normalize import normalize
+from priconne_cb_collector.domain.models import EVIDENCE_KEYWORD, EVIDENCE_PHASE_ONLY
 
 _PHASE = re.compile(r"([1-5])\s?段階|段階\s?([1-5])")
 # 億 optionally followed by a 万 remainder ("2億3000万"), else 万 alone.
@@ -13,9 +15,6 @@ _DAMAGE_MAN = re.compile(r"(\d+(?:\.\d+)?)\s?万")
 _FULL_AUTO = re.compile(r"フルオート|full\s?auto|フルオ")
 _MANUAL = re.compile(r"手動|マニュアル")
 _TRAINING = re.compile(r"トレーニングモード|トレモ|練習モード|検証")
-
-EVIDENCE_KEYWORD = "keyword"
-EVIDENCE_PHASE_ONLY = "phase_only"
 
 
 @dataclass(frozen=True)

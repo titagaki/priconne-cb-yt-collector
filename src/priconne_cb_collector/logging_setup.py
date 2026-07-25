@@ -1,10 +1,11 @@
 """Structured logging: JSON Lines to file, plain text to stderr (docs/spec/10 §2)."""
+
 from __future__ import annotations
 
 import json
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 _RESERVED = set(logging.LogRecord("", 0, "", 0, "", (), None).__dict__) | {
@@ -17,7 +18,7 @@ _RESERVED = set(logging.LogRecord("", 0, "", 0, "", (), None).__dict__) | {
 class JsonLinesFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         payload = {
-            "time": datetime.fromtimestamp(record.created, timezone.utc).isoformat(),
+            "time": datetime.fromtimestamp(record.created, UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),

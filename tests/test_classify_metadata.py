@@ -1,7 +1,12 @@
 """metadata.py のテスト。トレモ判定の根拠（keyword / phase_only）の区別が要点。"""
+
 import pytest
 
-from classify.metadata import EVIDENCE_KEYWORD, EVIDENCE_PHASE_ONLY, extract_metadata
+from priconne_cb_collector.domain.classify.metadata import (
+    EVIDENCE_KEYWORD,
+    EVIDENCE_PHASE_ONLY,
+    extract_metadata,
+)
 
 
 @pytest.mark.parametrize(

@@ -3,25 +3,27 @@
 Spec: docs/spec/05, 06 §5, 10 §1. A failure on one video is recorded as
 status="error" and never aborts the run.
 """
+
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import httpx
 
-from classify import classify_video
-from models import AppConfig, BossesConfig, Period, VideoMeta
-from schedule import phase_at
-from sources import rss
-from sources.youtube_api import (
-    QuotaExceededError,
+from priconne_cb_collector.adapters import youtube_rss as rss
+from priconne_cb_collector.adapters.sqlite_store import STATUS_FILTERED, STATUS_PENDING, Store
+from priconne_cb_collector.adapters.youtube_api import (
     SEARCH_COST,
+    QuotaExceededError,
     YouTubeClient,
     apply_details,
 )
-from store import STATUS_FILTERED, STATUS_PENDING, Store
+from priconne_cb_collector.domain.classify import classify_video
+from priconne_cb_collector.domain.models import BossesConfig, Period, VideoMeta
+from priconne_cb_collector.domain.schedule import phase_at
+from priconne_cb_collector.domain.settings import AppConfig
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +68,7 @@ class Collector:
         now: datetime | None = None,
         run_api_search: bool = False,
     ) -> CollectResult:
-        now = now or datetime.now(timezone.utc)
+        now = now or datetime.now(UTC)
         phase = phase_at(now, period)
         result = CollectResult()
 
@@ -87,9 +89,7 @@ class Collector:
         fresh = {vid: v for vid, v in candidates.items() if vid not in known}
         result.new = len(fresh)
         if not fresh:
-            logger.info(
-                "collect done: fetched=%d new=0 phase=%s", result.fetched, phase
-            )
+            logger.info("collect done: fetched=%d new=0 phase=%s", result.fetched, phase)
             return result
 
         await self._enrich(fresh, result)
@@ -255,17 +255,12 @@ class Collector:
                 return REASON_TOO_LONG
         if any(word in video.title for word in exclude.title_ng_words):
             return REASON_NG_WORD
-        if (
-            not classification.boss.indices
-            and self.config.classify.on_boss_unknown == "skip"
-        ):
+        if not classification.boss.indices and self.config.classify.on_boss_unknown == "skip":
             return REASON_BOSS_UNKNOWN
         return None
 
-    def _store_error(
-        self, video: VideoMeta, period: Period, phase: str, message: str
-    ) -> None:
-        from models import Classification
+    def _store_error(self, video: VideoMeta, period: Period, phase: str, message: str) -> None:
+        from priconne_cb_collector.domain.models import Classification
 
         try:
             inserted = self.store.add_video(

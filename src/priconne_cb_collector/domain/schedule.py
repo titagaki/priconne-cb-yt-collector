@@ -2,13 +2,20 @@
 
 Spec: docs/spec/04-schedule.md
 """
+
 from __future__ import annotations
 
 import calendar
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from models import PHASE_BATTLE, PHASE_IDLE, PHASE_TRAINING, Period, ScheduleConfig
+from priconne_cb_collector.domain.models import (
+    PHASE_BATTLE,
+    PHASE_IDLE,
+    PHASE_TRAINING,
+    Period,
+)
+from priconne_cb_collector.domain.settings import ScheduleConfig
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -17,9 +24,7 @@ def offset_period(year: int, month: int, sched: ScheduleConfig) -> Period:
     """Compute the period for a given month from its last day."""
     last_day = calendar.monthrange(year, month)[1]
     battle_start = datetime(year, month, last_day - sched.start_offset_days, tzinfo=JST)
-    battle_end = datetime(
-        year, month, last_day - sched.end_offset_days, 23, 59, 59, tzinfo=JST
-    )
+    battle_end = datetime(year, month, last_day - sched.end_offset_days, 23, 59, 59, tzinfo=JST)
     training_start = battle_start - timedelta(days=sched.training_days_before)
     return Period(
         training_start=training_start,

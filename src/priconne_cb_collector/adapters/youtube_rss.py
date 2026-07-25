@@ -3,15 +3,17 @@
 Returns at most the 15 latest videos per channel and carries no description,
 duration or view count — those come from videos.list (youtube_api.py).
 """
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import feedparser
 import httpx
 
-from models import ChannelRef, VideoMeta
+from priconne_cb_collector.domain.models import VideoMeta
+from priconne_cb_collector.domain.settings import ChannelRef
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +58,7 @@ async def fetch_channel(
 
 def _entry_to_video(entry, channel: ChannelRef) -> VideoMeta:
     video_id = getattr(entry, "yt_videoid", None) or entry.id.split(":")[-1]
-    published = datetime.fromisoformat(entry.published).astimezone(timezone.utc)
+    published = datetime.fromisoformat(entry.published).astimezone(UTC)
     return VideoMeta(
         video_id=video_id,
         title=entry.title,
@@ -68,5 +70,5 @@ def _entry_to_video(entry, channel: ChannelRef) -> VideoMeta:
 
 
 def _to_http_date(iso_utc: str) -> str:
-    dt = datetime.fromisoformat(iso_utc).astimezone(timezone.utc)
+    dt = datetime.fromisoformat(iso_utc).astimezone(UTC)
     return dt.strftime("%a, %d %b %Y %H:%M:%S GMT")

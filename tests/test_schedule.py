@@ -1,10 +1,18 @@
 """schedule.py のテスト（docs/spec/10 の必須ケース）。"""
-from datetime import datetime, timedelta
+
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from models import PHASE_BATTLE, PHASE_IDLE, PHASE_TRAINING, ScheduleConfig
-from schedule import JST, offset_period, phase_at, resolve_period, should_remind
+from priconne_cb_collector.domain.models import PHASE_BATTLE, PHASE_IDLE, PHASE_TRAINING
+from priconne_cb_collector.domain.schedule import (
+    JST,
+    offset_period,
+    phase_at,
+    resolve_period,
+    should_remind,
+)
+from priconne_cb_collector.domain.settings import ScheduleConfig
 
 OFFSET = ScheduleConfig(mode="offset")
 TRIGGER = ScheduleConfig(mode="trigger")
@@ -16,13 +24,14 @@ def jst(*args):
 
 # ---- offset: 月末 28 / 29 / 30 / 31 日の各パターン ----
 
+
 @pytest.mark.parametrize(
     ("year", "month", "training", "battle_start", "battle_end_day"),
     [
-        (2026, 7, 23, 26, 30),   # 末日31
-        (2026, 6, 22, 25, 29),   # 末日30
-        (2026, 2, 20, 23, 27),   # 末日28
-        (2028, 2, 21, 24, 28),   # 末日29（閏年）
+        (2026, 7, 23, 26, 30),  # 末日31
+        (2026, 6, 22, 25, 29),  # 末日30
+        (2026, 2, 20, 23, 27),  # 末日28
+        (2028, 2, 21, 24, 28),  # 末日29（閏年）
     ],
 )
 def test_offset_period_month_lengths(year, month, training, battle_start, battle_end_day):
@@ -35,18 +44,19 @@ def test_offset_period_month_lengths(year, month, training, battle_start, battle
 
 # ---- 3フェーズの境界（前後1秒） ----
 
+
 @pytest.mark.parametrize(
     ("now", "expected"),
     [
-        (jst(2026, 7, 22, 23, 59, 59), PHASE_IDLE),      # トレモ開始 1秒前
-        (jst(2026, 7, 23, 0, 0, 0), PHASE_TRAINING),     # トレモ開始ちょうど
-        (jst(2026, 7, 23, 0, 0, 1), PHASE_TRAINING),     # トレモ開始 1秒後
+        (jst(2026, 7, 22, 23, 59, 59), PHASE_IDLE),  # トレモ開始 1秒前
+        (jst(2026, 7, 23, 0, 0, 0), PHASE_TRAINING),  # トレモ開始ちょうど
+        (jst(2026, 7, 23, 0, 0, 1), PHASE_TRAINING),  # トレモ開始 1秒後
         (jst(2026, 7, 25, 23, 59, 59), PHASE_TRAINING),  # 本番開始 1秒前
-        (jst(2026, 7, 26, 0, 0, 0), PHASE_BATTLE),       # 本番開始ちょうど
-        (jst(2026, 7, 26, 0, 0, 1), PHASE_BATTLE),       # 本番開始 1秒後
-        (jst(2026, 7, 30, 23, 59, 58), PHASE_BATTLE),    # 終了 1秒前
-        (jst(2026, 7, 30, 23, 59, 59), PHASE_BATTLE),    # 終了時刻ちょうど（含む）
-        (jst(2026, 7, 31, 0, 0, 0), PHASE_IDLE),         # 終了 1秒後
+        (jst(2026, 7, 26, 0, 0, 0), PHASE_BATTLE),  # 本番開始ちょうど
+        (jst(2026, 7, 26, 0, 0, 1), PHASE_BATTLE),  # 本番開始 1秒後
+        (jst(2026, 7, 30, 23, 59, 58), PHASE_BATTLE),  # 終了 1秒前
+        (jst(2026, 7, 30, 23, 59, 59), PHASE_BATTLE),  # 終了時刻ちょうど（含む）
+        (jst(2026, 7, 31, 0, 0, 0), PHASE_IDLE),  # 終了 1秒後
     ],
 )
 def test_phase_boundaries(now, expected):
@@ -55,6 +65,7 @@ def test_phase_boundaries(now, expected):
 
 
 # ---- 月またぎ ----
+
 
 def test_offset_rolls_over_to_next_month_after_end():
     now = jst(2026, 7, 31, 12, 0, 0)  # 7月期間の終了後
@@ -95,9 +106,7 @@ def test_manual_mode_uses_explicit_dates():
 
 
 def test_manual_mode_training_null_falls_back_to_battle_start():
-    sched = ScheduleConfig(
-        mode="manual", manual_battle_start="2026-07-24", manual_end="2026-07-28"
-    )
+    sched = ScheduleConfig(mode="manual", manual_battle_start="2026-07-24", manual_end="2026-07-28")
     p = resolve_period(sched, jst(2026, 7, 22))
     assert p.training_start == p.battle_start
 
@@ -109,6 +118,7 @@ def test_manual_mode_unconfigured_is_idle():
 
 
 # ---- trigger モード ----
+
 
 def test_trigger_mode_idle_until_started():
     assert resolve_period(TRIGGER, jst(2026, 7, 25)) is None
@@ -134,6 +144,7 @@ def test_trigger_started_late_goes_straight_to_battle():
 
 # ---- 再起動時のフェーズ再計算 ----
 
+
 def test_restart_recomputes_same_phase():
     """resolve_period は純粋関数なので、再起動後も同じ入力から同じ期間を得る。"""
     started = jst(2026, 7, 23, 9, 0, 0)
@@ -146,14 +157,15 @@ def test_restart_recomputes_same_phase():
 
 # ---- /start 催促（11-1 決定） ----
 
+
 @pytest.mark.parametrize(
     ("now", "started", "reminded", "expected"),
     [
         (jst(2026, 7, 22, 23, 59, 59), False, False, False),  # トレモ開始前
-        (jst(2026, 7, 23, 0, 0, 0), False, False, True),      # 開始日時を過ぎて未 start
-        (jst(2026, 7, 25), False, True, False),               # 催促済み
-        (jst(2026, 7, 25), True, False, False),               # /start 済み
-        (jst(2026, 7, 31), False, False, False),              # 期間終了後は催促しない
+        (jst(2026, 7, 23, 0, 0, 0), False, False, True),  # 開始日時を過ぎて未 start
+        (jst(2026, 7, 25), False, True, False),  # 催促済み
+        (jst(2026, 7, 25), True, False, False),  # /start 済み
+        (jst(2026, 7, 31), False, False, False),  # 期間終了後は催促しない
     ],
 )
 def test_should_remind(now, started, reminded, expected):
@@ -169,11 +181,11 @@ def test_should_remind_disabled_by_config_or_mode():
 
 # ---- タイムゾーン: UTC で渡しても JST 基準で判定される ----
 
+
 def test_phase_with_utc_input():
-    from datetime import timezone
 
     p = offset_period(2026, 7, OFFSET)
     # 2026-07-23 00:00 JST == 2026-07-22 15:00 UTC
-    utc_now = datetime(2026, 7, 22, 15, 0, 0, tzinfo=timezone.utc)
+    utc_now = datetime(2026, 7, 22, 15, 0, 0, tzinfo=UTC)
     assert phase_at(utc_now, p) == PHASE_TRAINING
     assert phase_at(utc_now - timedelta(seconds=1), p) == PHASE_IDLE

@@ -2,6 +2,7 @@
 
 NFKC → lowercase → separators to spaces. Katakana is kept as-is.
 """
+
 from __future__ import annotations
 
 import unicodedata

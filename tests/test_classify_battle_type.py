@@ -1,7 +1,8 @@
 """battle_type.py のテスト（docs/spec/10 §3 の必須ケース）。"""
+
 import pytest
 
-from classify.battle_type import (
+from priconne_cb_collector.domain.classify.battle_type import (
     BATTLE_CARRYOVER,
     BATTLE_NORMAL,
     BATTLE_UNKNOWN,

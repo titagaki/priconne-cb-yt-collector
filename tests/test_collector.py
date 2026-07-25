@@ -3,12 +3,24 @@
 RSS は httpx.MockTransport、videos.list はダミークライアントで差し替える。
 Discord へは投稿せず、DB の status だけを検証する。
 """
-from datetime import datetime, timedelta, timezone
+
+from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
 
-from collector import (
+from conftest import SAMPLE_BOSSES
+from priconne_cb_collector.adapters.sqlite_store import Store
+from priconne_cb_collector.adapters.youtube_api import QuotaExceededError, YouTubeClient
+from priconne_cb_collector.domain.models import BossesConfig, Period
+from priconne_cb_collector.domain.schedule import JST
+from priconne_cb_collector.domain.settings import (
+    AppConfig,
+    ChannelRef,
+    ExcludeConfig,
+    YoutubeConfig,
+)
+from priconne_cb_collector.services.collection import (
     REASON_BOSS_UNKNOWN,
     REASON_LIVE,
     REASON_NG_WORD,
@@ -16,12 +28,6 @@ from collector import (
     REASON_TOO_SHORT,
     Collector,
 )
-from models import AppConfig, BossesConfig, ChannelRef, ExcludeConfig, Period, YoutubeConfig
-from schedule import JST
-from sources.youtube_api import QuotaExceededError, YouTubeClient
-from store import Store
-
-from conftest import SAMPLE_BOSSES
 
 PERIOD = Period(
     training_start=datetime(2026, 7, 23, tzinfo=JST),
@@ -29,7 +35,7 @@ PERIOD = Period(
     battle_end=datetime(2026, 7, 30, 23, 59, 59, tzinfo=JST),
     cb_period="2026-07",
 )
-NOW = datetime(2026, 7, 24, 3, 0, tzinfo=timezone.utc)  # training 期間中
+NOW = datetime(2026, 7, 24, 3, 0, tzinfo=UTC)  # training 期間中
 
 FEED_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns="http://www.w3.org/2005/Atom">
@@ -168,7 +174,11 @@ async def test_description_is_used_for_classification(store):
     [
         ("ワイバーン 通常凸", {"duration": "PT30S"}, REASON_TOO_SHORT),
         ("ワイバーン 通常凸", {"duration": "PT2H"}, REASON_TOO_LONG),
-        ("ワイバーン 通常凸", {"live": {"scheduledStartTime": "2026-07-25T00:00:00Z"}}, REASON_LIVE),
+        (
+            "ワイバーン 通常凸",
+            {"live": {"scheduledStartTime": "2026-07-25T00:00:00Z"}},
+            REASON_LIVE,
+        ),
         ("ワイバーン ガチャ100連", {}, REASON_NG_WORD),
         ("今月の編成まとめ", {}, REASON_BOSS_UNKNOWN),
     ],
@@ -215,7 +225,7 @@ async def test_already_known_videos_are_skipped(store):
 @pytest.mark.asyncio
 async def test_one_bad_video_does_not_abort_the_run(store, monkeypatch):
     """1件の判定失敗でジョブ全体を落とさない（docs/spec/10 §1）。"""
-    import collector as collector_module
+    from priconne_cb_collector.services import collection as collector_module
 
     real_classify = collector_module.classify_video
 
@@ -271,6 +281,7 @@ async def test_rss_failure_does_not_raise(store):
 
 
 # ---- クォータ管理 ----
+
 
 @pytest.mark.asyncio
 async def test_api_search_consumes_quota_per_boss(store):
@@ -336,7 +347,7 @@ async def test_quota_exceeded_degrades_to_rss_only(store):
 @pytest.mark.asyncio
 async def test_ex_notation_requires_publication_within_period(store):
     """期間前に投稿された EX表記動画は今月のボスに割り当てない（docs/spec/06 §2.2）。"""
-    old = (PERIOD.training_start - timedelta(days=40)).astimezone(timezone.utc).isoformat()
+    old = (PERIOD.training_start - timedelta(days=40)).astimezone(UTC).isoformat()
     feed = make_feed([("vid_old", "【プリコネ】クラバト 4ボス 通常凸", old)])
     result = await run_collect(store, feed, {"vid_old": detail()})
 

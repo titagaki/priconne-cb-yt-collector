@@ -3,17 +3,18 @@
 Datetimes are stored as ISO8601 UTC; only quota_usage.date is a JST date.
 Deduplication relies solely on the video_id primary key.
 """
+
 from __future__ import annotations
 
 import json
 import sqlite3
+from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterator
 
-from models import Classification, Period, VideoMeta
-from schedule import JST
+from priconne_cb_collector.domain.models import Classification, Period, VideoMeta
+from priconne_cb_collector.domain.schedule import JST
 
 STATUS_PENDING = "pending"
 STATUS_POSTED = "posted"
@@ -130,7 +131,7 @@ class Store:
             video.duration_sec,
             video.view_count,
             video.discovered_via,
-            _to_utc_iso(discovered_at or datetime.now(timezone.utc)),
+            _to_utc_iso(discovered_at or datetime.now(UTC)),
             discovered_phase,
             boss.primary_index,
             json.dumps(boss.indices) if boss.indices else None,
@@ -196,10 +197,11 @@ class Store:
         """Only ever called after a successful Discord post (docs/spec/08)."""
         with self._tx() as conn:
             conn.execute(
-                "UPDATE videos SET status = ?, posted_at = ?, discord_msg_id = ? WHERE video_id = ?",
+                "UPDATE videos SET status = ?, posted_at = ?, discord_msg_id = ? "
+                "WHERE video_id = ?",
                 (
                     STATUS_POSTED,
-                    _to_utc_iso(now or datetime.now(timezone.utc)),
+                    _to_utc_iso(now or datetime.now(UTC)),
                     str(discord_msg_id),
                     video_id,
                 ),
@@ -221,7 +223,7 @@ class Store:
 
     def count_posted_today(self, boss_index: int | None, now: datetime | None = None) -> int:
         """Posts made today (JST) for one boss, for the daily cap."""
-        now = now or datetime.now(timezone.utc)
+        now = now or datetime.now(UTC)
         start_jst = now.astimezone(JST).replace(hour=0, minute=0, second=0, microsecond=0)
         if boss_index is None:
             cur = self._conn.execute(
@@ -288,9 +290,7 @@ class Store:
             )
 
     def get_period_state(self, cb_period: str) -> sqlite3.Row | None:
-        cur = self._conn.execute(
-            "SELECT * FROM period_state WHERE cb_period = ?", (cb_period,)
-        )
+        cur = self._conn.execute("SELECT * FROM period_state WHERE cb_period = ?", (cb_period,))
         return cur.fetchone()
 
     def set_trigger_start(self, period: Period) -> None:
@@ -336,8 +336,7 @@ class Store:
         }[kind]
         with self._tx() as conn:
             cur = conn.execute(
-                f"UPDATE period_state SET {column} = 1 "
-                f"WHERE cb_period = ? AND {column} = 0",
+                f"UPDATE period_state SET {column} = 1 WHERE cb_period = ? AND {column} = 0",
                 (cb_period,),
             )
         return cur.rowcount > 0
@@ -402,17 +401,17 @@ class Store:
                 (
                     channel_id,
                     etag,
-                    _to_utc_iso(now or datetime.now(timezone.utc)),
+                    _to_utc_iso(now or datetime.now(UTC)),
                     etag,
-                    _to_utc_iso(now or datetime.now(timezone.utc)),
+                    _to_utc_iso(now or datetime.now(UTC)),
                 ),
             )
 
 
 def _to_utc_iso(dt: datetime) -> str:
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc).isoformat()
+        dt = dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC).isoformat()
 
 
 def _from_utc_iso(value: str) -> datetime:
@@ -420,7 +419,7 @@ def _from_utc_iso(value: str) -> datetime:
 
 
 def _jst_date(now: datetime | None = None) -> str:
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     return now.astimezone(JST).date().isoformat()
 
 

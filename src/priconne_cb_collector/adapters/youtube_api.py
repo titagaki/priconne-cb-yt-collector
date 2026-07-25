@@ -3,16 +3,17 @@
 Quota costs: search.list = 100 units per call, videos.list = 1 unit per call
 (up to 50 ids). Always batch through videos.list; it is nearly free.
 """
+
 from __future__ import annotations
 
 import asyncio
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
-from models import VideoMeta
+from priconne_cb_collector.domain.models import VideoMeta
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +26,7 @@ DISCOVERED_VIA = "api_search"
 MAX_RETRIES = 3
 INITIAL_BACKOFF_SECONDS = 2.0
 
-_ISO_DURATION = re.compile(
-    r"^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$"
-)
+_ISO_DURATION = re.compile(r"^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$")
 
 
 class QuotaExceededError(Exception):
@@ -51,9 +50,7 @@ class YouTubeClient:
             "maxResults": max_results,
             "regionCode": "JP",
             "relevanceLanguage": "ja",
-            "publishedAfter": published_after.astimezone(timezone.utc).strftime(
-                "%Y-%m-%dT%H:%M:%SZ"
-            ),
+            "publishedAfter": published_after.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "q": query,
         }
         data = await self._get("search", params)
@@ -92,7 +89,9 @@ class YouTubeClient:
             units += VIDEOS_LIST_COST
             for item in data.get("items", []):
                 details[item["id"]] = item
-        logger.info("videos.list: requested=%d got=%d units=%d", len(video_ids), len(details), units)
+        logger.info(
+            "videos.list: requested=%d got=%d units=%d", len(video_ids), len(details), units
+        )
         return details, units
 
     async def _get(self, endpoint: str, params: dict) -> dict:
@@ -159,9 +158,7 @@ def _is_live(item: dict, live: dict | None) -> bool:
     """Live now or scheduled. A finished archive has actualEndTime and is fine."""
     if item.get("snippet", {}).get("liveBroadcastContent") in ("live", "upcoming"):
         return True
-    if live and "actualEndTime" not in live:
-        return True
-    return False
+    return bool(live and "actualEndTime" not in live)
 
 
 def _is_quota_exceeded(response: httpx.Response) -> bool:
@@ -173,4 +170,4 @@ def _is_quota_exceeded(response: httpx.Response) -> bool:
 
 
 def _parse_rfc3339(value: str) -> datetime:
-    return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
+    return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)

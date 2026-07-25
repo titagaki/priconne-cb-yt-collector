@@ -1,4 +1,9 @@
-"""Load and validate config/bosses.yaml and config/config.yaml."""
+"""Read config/bosses.yaml and config/config.yaml into domain settings.
+
+This is the only place that touches the YAML files; everything downstream
+works with the frozen dataclasses in domain.settings / domain.models.
+"""
+
 from __future__ import annotations
 
 import logging
@@ -7,10 +12,16 @@ from pathlib import Path
 
 import yaml
 
-from models import (
+from priconne_cb_collector.domain.models import Boss, BossesConfig
+from priconne_cb_collector.domain.settings import (
+    LAYOUT_PER_BOSS_THREAD,
+    LAYOUT_SINGLE,
+    MODE_MANUAL,
+    MODE_OFFSET,
+    MODE_TRIGGER,
+    ON_UNKNOWN_POST,
+    ON_UNKNOWN_SKIP,
     AppConfig,
-    Boss,
-    BossesConfig,
     ChannelRef,
     ClassifyConfig,
     DiscordConfig,
@@ -77,28 +88,30 @@ def load_config(path: str | Path) -> AppConfig:
     data = _read_yaml(path)
 
     sched = data.get("schedule") or {}
-    mode = sched.get("mode", "trigger")
-    if mode not in ("offset", "manual", "trigger"):
+    mode = sched.get("mode", MODE_TRIGGER)
+    if mode not in (MODE_OFFSET, MODE_MANUAL, MODE_TRIGGER):
         raise ConfigError(f"config.yaml: schedule.mode must be offset/manual/trigger, got {mode!r}")
 
     youtube = data.get("youtube") or {}
     exclude = youtube.get("exclude") or {}
     discord = data.get("discord") or {}
-    layout = discord.get("layout", "per_boss_thread")
-    if layout not in ("single", "per_boss_thread"):
-        raise ConfigError(f"config.yaml: discord.layout must be single/per_boss_thread, got {layout!r}")
+    layout = discord.get("layout", LAYOUT_PER_BOSS_THREAD)
+    if layout not in (LAYOUT_SINGLE, LAYOUT_PER_BOSS_THREAD):
+        raise ConfigError(
+            f"config.yaml: discord.layout must be single/per_boss_thread, got {layout!r}"
+        )
 
     classify = data.get("classify") or {}
-    on_unknown = classify.get("on_boss_unknown", "skip")
-    if on_unknown not in ("skip", "post_as_unknown"):
+    on_unknown = classify.get("on_boss_unknown", ON_UNKNOWN_SKIP)
+    if on_unknown not in (ON_UNKNOWN_SKIP, ON_UNKNOWN_POST):
         raise ConfigError(
-            f"config.yaml: classify.on_boss_unknown must be skip/post_as_unknown, got {on_unknown!r}"
+            "config.yaml: classify.on_boss_unknown must be skip/post_as_unknown, "
+            f"got {on_unknown!r}"
         )
 
     polling = data.get("polling") or {}
     channels = tuple(
-        ChannelRef(id=c["id"], name=c.get("name", ""))
-        for c in (youtube.get("channels") or [])
+        ChannelRef(id=c["id"], name=c.get("name", "")) for c in (youtube.get("channels") or [])
     )
 
     return AppConfig(

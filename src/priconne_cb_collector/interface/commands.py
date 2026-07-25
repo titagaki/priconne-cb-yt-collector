@@ -4,17 +4,21 @@
 posting with a stale bosses.yaml is the failure mode this bot is designed to
 prevent, /collect because it spends API quota.
 """
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import discord
 from discord import app_commands
 
-from models import PHASE_BATTLE, PHASE_IDLE, PHASE_TRAINING
-from schedule import JST, offset_period, resolve_period
-from store import STATUS_POSTED
+from priconne_cb_collector.adapters.sqlite_store import STATUS_POSTED
+from priconne_cb_collector.adapters.youtube_api import SEARCH_COST
+from priconne_cb_collector.domain.models import PHASE_BATTLE, PHASE_IDLE, PHASE_TRAINING
+from priconne_cb_collector.domain.schedule import JST
+from priconne_cb_collector.domain.settings import MODE_TRIGGER
+from priconne_cb_collector.interface.embeds import NOTICE_COLOR
 
 logger = logging.getLogger(__name__)
 
@@ -57,30 +61,17 @@ class ConfirmView(discord.ui.View):
         self.confirmed = False
 
 
-def bosses_embed(bot) -> discord.Embed:
-    embed = discord.Embed(title="今月のボス構成", color=0x5865F2)
-    embed.add_field(name="対象月", value=bot.bosses.month, inline=False)
-    for boss in bot.bosses.bosses:
-        aliases = "、".join(boss.aliases)
-        embed.add_field(name=f"{boss.index}ボス", value=f"**{boss.name}**\n別名: {aliases}", inline=False)
-
-    current_month = datetime.now(JST).strftime("%Y-%m")
-    if bot.bosses.month != current_month:
-        embed.set_footer(text=f"⚠️ bosses.yaml の month ({bot.bosses.month}) が当月 ({current_month}) と一致しません")
-    return embed
-
-
 def setup_commands(bot) -> None:
     """Register every slash command against the bot's command tree."""
     tree = bot.tree
 
     @tree.command(name="status", description="現在のフェーズと収集状況を表示します")
     async def status(interaction: discord.Interaction):
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         period = bot.current_period()
         phase = bot.current_phase(now)
 
-        embed = discord.Embed(title="Bot ステータス", color=0x5865F2)
+        embed = discord.Embed(title="Bot ステータス", color=NOTICE_COLOR)
         embed.add_field(name="フェーズ", value=PHASE_LABELS.get(phase, phase), inline=False)
         embed.add_field(name="稼働モード", value=bot.config.schedule.mode, inline=True)
         embed.add_field(name="ボス構成", value=bot.bosses.month, inline=True)
@@ -89,7 +80,7 @@ def setup_commands(bot) -> None:
             embed.add_field(
                 name="次の遷移",
                 value="`/start` で稼働を開始してください（trigger モード）"
-                if bot.config.schedule.mode == "trigger"
+                if bot.config.schedule.mode == MODE_TRIGGER
                 else "期間が未設定です",
                 inline=False,
             )
@@ -111,7 +102,7 @@ def setup_commands(bot) -> None:
 
     @tree.command(name="bosses", description="設定中のボス一覧を表示します")
     async def bosses_cmd(interaction: discord.Interaction):
-        await interaction.response.send_message(embed=bosses_embed(bot))
+        await interaction.response.send_message(embed=bot.bosses_embed())
 
     @tree.command(name="recent", description="直近の収集結果を表示します")
     @app_commands.describe(boss="ボス番号 (1-5)。省略時は全ボス")
@@ -122,10 +113,12 @@ def setup_commands(bot) -> None:
             return
         rows = bot.store.recent_videos(period.cb_period, boss_index=boss, limit=10)
         if not rows:
-            await interaction.response.send_message("収集済みの動画はまだありません。", ephemeral=True)
+            await interaction.response.send_message(
+                "収集済みの動画はまだありません。", ephemeral=True
+            )
             return
 
-        embed = discord.Embed(title="直近の収集結果", color=0x5865F2)
+        embed = discord.Embed(title="直近の収集結果", color=NOTICE_COLOR)
         for row in rows:
             status_label = {
                 "pending": "投稿待ち",
@@ -145,7 +138,7 @@ def setup_commands(bot) -> None:
     @app_commands.default_permissions(administrator=True)
     async def start(interaction: discord.Interaction):
         view = ConfirmView(interaction.user.id)
-        embed = bosses_embed(bot)
+        embed = bot.bosses_embed()
         embed.description = (
             "**この構成で収集を開始します。**\n"
             "毎月ボスは入れ替わります。内容が今月のものか確認してください。"
@@ -157,17 +150,17 @@ def setup_commands(bot) -> None:
             await interaction.followup.send("開始をキャンセルしました。", ephemeral=True)
             return
 
-        period = await bot.start_period(datetime.now(timezone.utc))
-        await interaction.followup.send(
-            f"収集を開始しました（対象期間 {period.cb_period}）。"
-        )
+        period = await bot.start_period(datetime.now(UTC))
+        await interaction.followup.send(f"収集を開始しました（対象期間 {period.cb_period}）。")
 
     @tree.command(name="stop", description="[管理者] 稼働を停止し idle に戻します")
     @app_commands.default_permissions(administrator=True)
     async def stop(interaction: discord.Interaction):
         stopped = bot.stop_period()
         if stopped:
-            await interaction.response.send_message("稼働を停止しました。収集済みデータは保持されます。")
+            await interaction.response.send_message(
+                "稼働を停止しました。収集済みデータは保持されます。"
+            )
         else:
             await interaction.response.send_message("現在稼働していません。", ephemeral=True)
 
@@ -179,7 +172,7 @@ def setup_commands(bot) -> None:
         except Exception as exc:
             await interaction.response.send_message(f"再読込に失敗しました: {exc}", ephemeral=True)
             return
-        await interaction.response.send_message(embed=bosses_embed(bot))
+        await interaction.response.send_message(embed=bot.bosses_embed())
 
     @tree.command(name="collect", description="[管理者] 手動で収集を1回実行します")
     @app_commands.default_permissions(administrator=True)
@@ -192,11 +185,15 @@ def setup_commands(bot) -> None:
             )
             return
 
-        planned = 100 * len(bot.bosses.bosses) if api_search else 0
+        planned = SEARCH_COST * len(bot.bosses.bosses) if api_search else 0
         used = bot.store.quota_used()
         view = ConfirmView(interaction.user.id)
         embed = discord.Embed(title="手動収集の確認", color=0xF1C40F)
-        embed.add_field(name="RSS 巡回", value=f"{len(bot.config.youtube.channels)}チャンネル（0ユニット）", inline=False)
+        embed.add_field(
+            name="RSS 巡回",
+            value=f"{len(bot.config.youtube.channels)}チャンネル（0ユニット）",
+            inline=False,
+        )
         embed.add_field(
             name="API 検索",
             value=f"実行する（約{planned}ユニット）" if api_search else "実行しない",
@@ -227,7 +224,9 @@ def setup_commands(bot) -> None:
         default_permissions=discord.Permissions(administrator=True),
     )
 
-    @period_group.command(name="set", description="トレモ開始 / 本番開始 / 終了日を手動で上書きします")
+    @period_group.command(
+        name="set", description="トレモ開始 / 本番開始 / 終了日を手動で上書きします"
+    )
     @app_commands.describe(
         training_start="トレモ開始日 (YYYY-MM-DD)",
         battle_start="本番開始日 (YYYY-MM-DD)",
@@ -242,7 +241,9 @@ def setup_commands(bot) -> None:
         try:
             period = bot.set_manual_period(training_start, battle_start, end)
         except Exception as exc:
-            await interaction.response.send_message(f"日付の解釈に失敗しました: {exc}", ephemeral=True)
+            await interaction.response.send_message(
+                f"日付の解釈に失敗しました: {exc}", ephemeral=True
+            )
             return
         await interaction.response.send_message(
             "manual モードに切り替えました。\n"
@@ -269,13 +270,14 @@ def setup_commands(bot) -> None:
             return
 
         lines = [
-            f"{i}. **{row['channel_title'] or '(名称不明)'}** — {row['hits']}件\n`{row['channel_id']}`"
+            f"{i}. **{row['channel_title'] or '(名称不明)'}** — {row['hits']}件\n"
+            f"`{row['channel_id']}`"
             for i, row in enumerate(rows, start=1)
         ]
         embed = discord.Embed(
             title="RSS 監視候補",
             description="\n".join(lines),
-            color=0x5865F2,
+            color=NOTICE_COLOR,
         )
         embed.set_footer(text="config.yaml の youtube.channels に追記して /reload してください")
         await interaction.response.send_message(embed=embed)

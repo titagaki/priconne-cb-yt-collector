@@ -2,14 +2,19 @@
 
 Spec: docs/spec/06 §2. Pure functions; no YouTube/Discord dependencies.
 """
+
 from __future__ import annotations
 
 import logging
 import re
 
-from models import Boss, BossMatch
-
-from classify.normalize import normalize
+from priconne_cb_collector.domain.classify.normalize import normalize
+from priconne_cb_collector.domain.models import (
+    MATCH_BOSS_NAME,
+    MATCH_EX_NOTATION,
+    Boss,
+    BossMatch,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +50,7 @@ def match_boss_names(raw_text: str, bosses: tuple[Boss, ...]) -> BossMatch:
         return BossMatch()
     return BossMatch(
         indices=indices,
-        match_source="boss_name",
+        match_source=MATCH_BOSS_NAME,
         matched_strings=matched,
         is_summary=len(indices) >= SUMMARY_HIT_THRESHOLD,
     )
@@ -101,8 +106,6 @@ def classify_boss(
         and has_priconne_context(raw_text)
         and published_in_period
     ):
-        return BossMatch(
-            indices=[ex[0]], match_source="ex_notation", matched_strings=[ex[1]]
-        )
+        return BossMatch(indices=[ex[0]], match_source=MATCH_EX_NOTATION, matched_strings=[ex[1]])
 
     return BossMatch()

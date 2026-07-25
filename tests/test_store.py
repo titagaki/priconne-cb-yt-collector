@@ -1,11 +1,12 @@
 """store.py のテスト（docs/spec/10 §3 の必須ケース）。"""
-from datetime import datetime, timedelta, timezone
+
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from models import BossMatch, Classification, Period, VideoMeta
-from schedule import JST
-from store import STATUS_PENDING, STATUS_POSTED, Store
+from priconne_cb_collector.adapters.sqlite_store import STATUS_POSTED, Store
+from priconne_cb_collector.domain.models import BossMatch, Classification, Period, VideoMeta
+from priconne_cb_collector.domain.schedule import JST
 
 
 @pytest.fixture
@@ -21,7 +22,7 @@ def make_video(video_id="abc123", **kwargs):
         title="【プリコネ】ワイバーン 通常凸",
         channel_id="UC_test",
         channel_title="テストチャンネル",
-        published_at=datetime(2026, 7, 24, 3, 0, tzinfo=timezone.utc),
+        published_at=datetime(2026, 7, 24, 3, 0, tzinfo=UTC),
         discovered_via="rss",
         description="説明文",
         duration_sec=300,
@@ -48,6 +49,7 @@ def add(store, video, classification=None, **kwargs):
 
 
 # ---- 重複 INSERT ----
+
 
 def test_insert_then_duplicate_is_ignored(store):
     assert add(store, make_video()) is True
@@ -115,6 +117,7 @@ def test_status_transitions(store):
 
 # ---- フェーズ遷移通知フラグ ----
 
+
 def period():
     return Period(
         training_start=datetime(2026, 7, 23, tzinfo=JST),
@@ -167,20 +170,21 @@ def test_boss_threads_round_trip(store):
 
 # ---- クォータ ----
 
+
 def test_quota_accumulates_per_jst_day(store):
-    now = datetime(2026, 7, 24, 3, 0, tzinfo=timezone.utc)  # JST 12:00
+    now = datetime(2026, 7, 24, 3, 0, tzinfo=UTC)  # JST 12:00
     assert store.quota_used(now) == 0
     assert store.add_quota(100, now) == 100
     assert store.add_quota(1, now) == 101
 
     # JST の日付が変われば別カウント（UTC 15:00 = 翌日 00:00 JST）
-    next_day = datetime(2026, 7, 24, 15, 0, tzinfo=timezone.utc)
+    next_day = datetime(2026, 7, 24, 15, 0, tzinfo=UTC)
     assert store.quota_used(next_day) == 0
 
 
 def test_quota_boundary_is_jst_midnight_not_utc(store):
-    before = datetime(2026, 7, 24, 14, 59, 59, tzinfo=timezone.utc)  # JST 23:59:59
-    after = datetime(2026, 7, 24, 15, 0, 0, tzinfo=timezone.utc)  # JST 翌日 00:00
+    before = datetime(2026, 7, 24, 14, 59, 59, tzinfo=UTC)  # JST 23:59:59
+    after = datetime(2026, 7, 24, 15, 0, 0, tzinfo=UTC)  # JST 翌日 00:00
     store.add_quota(500, before)
     assert store.quota_used(before) == 500
     assert store.quota_used(after) == 0
@@ -188,8 +192,9 @@ def test_quota_boundary_is_jst_midnight_not_utc(store):
 
 # ---- 日次投稿上限のカウント ----
 
+
 def test_count_posted_today_per_boss(store):
-    now = datetime(2026, 7, 26, 6, 0, tzinfo=timezone.utc)  # JST 15:00
+    now = datetime(2026, 7, 26, 6, 0, tzinfo=UTC)  # JST 15:00
     for i in range(3):
         add(store, make_video(f"boss1_{i}"), make_classification((1,)))
         store.mark_posted(f"boss1_{i}", i, now)
@@ -203,7 +208,7 @@ def test_count_posted_today_per_boss(store):
 
 
 def test_count_posted_today_resets_next_jst_day(store):
-    now = datetime(2026, 7, 26, 6, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 7, 26, 6, 0, tzinfo=UTC)
     add(store, make_video("v1"))
     store.mark_posted("v1", 1, now)
     assert store.count_posted_today(1, now) == 1
@@ -212,6 +217,7 @@ def test_count_posted_today_resets_next_jst_day(store):
 
 
 # ---- 集計・ETag ----
+
 
 def test_count_by_boss(store):
     add(store, make_video("a"), make_classification((1,)))

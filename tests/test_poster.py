@@ -1,18 +1,25 @@
 """poster.py のテスト。Discord へは繋がず、送信先をダミーに差し替える。"""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 import discord
 import pytest
 
-from discord_bot.poster import REASON_DAILY_LIMIT, Poster, build_embed
-from models import AppConfig, BossesConfig, BossMatch, Classification, DiscordConfig, VideoMeta
-from schedule import JST
-from store import Store
-
 from conftest import SAMPLE_BOSSES
+from priconne_cb_collector.adapters.sqlite_store import Store
+from priconne_cb_collector.domain.models import (
+    BossesConfig,
+    BossMatch,
+    Classification,
+    VideoMeta,
+)
+from priconne_cb_collector.domain.schedule import JST
+from priconne_cb_collector.domain.settings import AppConfig, DiscordConfig
+from priconne_cb_collector.interface.embeds import build_video_embed
+from priconne_cb_collector.interface.poster import REASON_DAILY_LIMIT, Poster
 
 BOSSES = BossesConfig(month="2026-07", bosses=SAMPLE_BOSSES)
-NOW = datetime(2026, 7, 26, 6, 0, tzinfo=timezone.utc)  # JST 15:00
+NOW = datetime(2026, 7, 26, 6, 0, tzinfo=UTC)  # JST 15:00
 
 
 @pytest.fixture
@@ -43,7 +50,7 @@ def add_video(store, video_id="vid1", title="【プリコネ】ワイバーン �
         title=title,
         channel_id=fields.pop("channel_id", "UC_test"),
         channel_title="テストチャンネル",
-        published_at=datetime(2026, 7, 26, 5, 0, tzinfo=timezone.utc),
+        published_at=datetime(2026, 7, 26, 5, 0, tzinfo=UTC),
         discovered_via="rss",
         description="この説明文は Embed に転載してはいけない",
     )
@@ -58,10 +65,11 @@ def add_video(store, video_id="vid1", title="【プリコネ】ワイバーン �
 
 # ---- Embed ----
 
+
 def test_embed_never_reproduces_the_description(store):
     """説明文を Embed に転載しない（docs/spec/08 §2）。"""
     row = add_video(store)
-    embed = build_embed(row, BOSSES)
+    embed = build_video_embed(row, BOSSES)
 
     assert embed.description in (None, "")
     rendered = str(embed.to_dict())
@@ -71,10 +79,8 @@ def test_embed_never_reproduces_the_description(store):
 
 
 def test_embed_fields_for_carryover(store):
-    row = add_video(
-        store, battle_type="carryover", carryover_sec=35, boss_phase=4, damage=2150
-    )
-    embed = build_embed(row, BOSSES)
+    row = add_video(store, battle_type="carryover", carryover_sec=35, boss_phase=4, damage=2150)
+    embed = build_video_embed(row, BOSSES)
     fields = {f.name: f.value for f in embed.fields}
 
     assert fields["ボス"] == "1ボス ワイバーン"
@@ -85,7 +91,7 @@ def test_embed_fields_for_carryover(store):
 
 def test_embed_omits_optional_fields_when_absent(store):
     row = add_video(store)
-    fields = {f.name for f in build_embed(row, BOSSES).fields}
+    fields = {f.name for f in build_video_embed(row, BOSSES).fields}
     assert fields == {"ボス", "種別"}
 
 
@@ -95,7 +101,7 @@ def test_embed_omits_optional_fields_when_absent(store):
 )
 def test_battle_type_labels(store, battle_type, expected):
     row = add_video(store, battle_type=battle_type)
-    fields = {f.name: f.value for f in build_embed(row, BOSSES).fields}
+    fields = {f.name: f.value for f in build_video_embed(row, BOSSES).fields}
     assert fields["種別"] == expected
 
 
@@ -106,17 +112,17 @@ def test_battle_type_labels(store, battle_type, expected):
 def test_training_badges_distinguish_evidence(store, evidence, badge):
     """推定（phase_only）と確証（keyword）を表示上区別する（docs/spec/08 §2）。"""
     row = add_video(store, is_training_footage=True, training_evidence=evidence)
-    assert badge in build_embed(row, BOSSES).footer.text
+    assert badge in build_video_embed(row, BOSSES).footer.text
 
 
 def test_ex_notation_badge(store):
     row = add_video(store, match_source="ex_notation")
-    assert "※EX表記から推定" in build_embed(row, BOSSES).footer.text
+    assert "※EX表記から推定" in build_video_embed(row, BOSSES).footer.text
 
 
 def test_footer_has_channel_and_jst_time(store):
     row = add_video(store, is_full_auto=True)
-    footer = build_embed(row, BOSSES).footer.text
+    footer = build_video_embed(row, BOSSES).footer.text
     assert "テストチャンネル" in footer
     assert "07/26 14:00" in footer  # UTC 05:00 → JST 14:00
     assert "フルオート" in footer
@@ -124,7 +130,7 @@ def test_footer_has_channel_and_jst_time(store):
 
 def test_summary_video_lists_every_boss(store):
     row = add_video(store, indices=[1, 3, 5], is_summary=True)
-    fields = {f.name: f.value for f in build_embed(row, BOSSES).fields}
+    fields = {f.name: f.value for f in build_video_embed(row, BOSSES).fields}
     assert fields["ボス"].startswith("まとめ:")
     assert "3ボス ライデン" in fields["ボス"]
 
@@ -133,11 +139,12 @@ def test_boss_colors_are_distinct_per_index(store):
     colors = set()
     for index in range(1, 6):
         row = add_video(store, video_id=f"v{index}", indices=[index])
-        colors.add(build_embed(row, BOSSES).color.value)
+        colors.add(build_video_embed(row, BOSSES).color.value)
     assert len(colors) == 5
 
 
 # ---- 投稿制御 ----
+
 
 class FakeMessage:
     def __init__(self, message_id):
@@ -275,7 +282,7 @@ async def test_boss_threads_are_reused_across_restarts(store):
 
 
 def _period():
-    from models import Period
+    from priconne_cb_collector.domain.models import Period
 
     return Period(
         training_start=datetime(2026, 7, 23, tzinfo=JST),

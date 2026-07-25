@@ -1,20 +1,19 @@
-"""main.py のフェーズ遷移まわりのテスト。Discord へは接続しない。
+"""interface/bot.py のフェーズ遷移まわりのテスト。Discord へは接続しない。
 
 CollectorBot の poster / collector をダミーに差し替え、_tick_once の副作用
 （通知投稿・収集実行・催促）だけを検証する。
 """
-from dataclasses import replace
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 import pytest
 
-from collector import CollectResult
-from main import CollectorBot
-from models import AppConfig, BossesConfig, DiscordConfig, ScheduleConfig
-from schedule import JST
-from store import Store
-
 from conftest import SAMPLE_BOSSES
+from priconne_cb_collector.adapters.sqlite_store import Store
+from priconne_cb_collector.domain.models import BossesConfig
+from priconne_cb_collector.domain.settings import AppConfig, DiscordConfig, ScheduleConfig
+from priconne_cb_collector.interface.bot import CollectorBot
+from priconne_cb_collector.services.collection import CollectResult
 
 
 class FakePoster:
@@ -72,9 +71,9 @@ def bot(tmp_path):
     b.store.close()
 
 
-TRAINING_NOW = datetime(2026, 7, 24, 3, 0, tzinfo=timezone.utc)  # JST 7/24 12:00
-BATTLE_NOW = datetime(2026, 7, 27, 3, 0, tzinfo=timezone.utc)
-AFTER_END = datetime(2026, 7, 31, 3, 0, tzinfo=timezone.utc)
+TRAINING_NOW = datetime(2026, 7, 24, 3, 0, tzinfo=UTC)  # JST 7/24 12:00
+BATTLE_NOW = datetime(2026, 7, 27, 3, 0, tzinfo=UTC)
+AFTER_END = datetime(2026, 7, 31, 3, 0, tzinfo=UTC)
 
 
 async def start_at(bot, when):
@@ -84,8 +83,9 @@ async def start_at(bot, when):
 
 # ---- trigger モード: /start するまで動かない ----
 
+
 async def test_idle_until_start(bot, monkeypatch):
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await bot._tick_once()
 
     assert bot.collector.calls == []
@@ -93,7 +93,7 @@ async def test_idle_until_start(bot, monkeypatch):
 
 
 async def test_start_triggers_collection_and_threads(bot, monkeypatch):
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await start_at(bot, TRAINING_NOW)
 
     await bot._tick_once()
@@ -105,9 +105,10 @@ async def test_start_triggers_collection_and_threads(bot, monkeypatch):
 
 # ---- 前月のボス構成のまま起動しない ----
 
+
 async def test_stale_bosses_yaml_blocks_collection(tmp_path, monkeypatch):
     bot = make_bot(tmp_path, bosses_month="2026-06")  # 当月は 2026-07
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await start_at(bot, TRAINING_NOW)
 
     await bot._tick_once()
@@ -120,7 +121,7 @@ async def test_stale_bosses_yaml_blocks_collection(tmp_path, monkeypatch):
 
 async def test_collection_resumes_after_bosses_updated(tmp_path, monkeypatch):
     bot = make_bot(tmp_path, bosses_month="2026-06")
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await start_at(bot, TRAINING_NOW)
     await bot._tick_once()
     assert bot.collector.calls == []
@@ -136,23 +137,17 @@ async def test_collection_resumes_after_bosses_updated(tmp_path, monkeypatch):
 
 # ---- 遷移通知の重複防止（再起動時） ----
 
+
 async def test_training_notice_is_not_repeated_after_restart(tmp_path, monkeypatch):
     bot = make_bot(tmp_path)
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await start_at(bot, TRAINING_NOW)
     await bot._tick_once()
     assert sum("収集を開始" in n for n in bot.poster.notices) == 1
-    db_path = bot.store.db_path
     bot.store.close()
 
-    # 同じ DB で起動し直す
+    # 同じ DB ファイルで起動し直す（/start 済みの状態が DB から復元される）
     restarted = make_bot(tmp_path)
-    restarted.store.close()
-    restarted.store = Store(db_path)
-    restarted.config = replace(
-        restarted.config, schedule=replace(restarted.config.schedule, mode="trigger")
-    )
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
     await restarted._tick_once()
 
     assert not any("収集を開始" in n for n in restarted.poster.notices)
@@ -161,11 +156,11 @@ async def test_training_notice_is_not_repeated_after_restart(tmp_path, monkeypat
 
 
 async def test_battle_transition_announced_once(bot, monkeypatch):
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await start_at(bot, TRAINING_NOW)
     await bot._tick_once()
 
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(BATTLE_NOW))
+    freeze(monkeypatch, BATTLE_NOW)
     await bot._tick_once()
     await bot._tick_once()
 
@@ -174,13 +169,14 @@ async def test_battle_transition_announced_once(bot, monkeypatch):
 
 # ---- 期間終了 ----
 
+
 async def test_period_end_flushes_queue_then_announces(bot, monkeypatch):
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(BATTLE_NOW))
+    freeze(monkeypatch, BATTLE_NOW)
     await start_at(bot, BATTLE_NOW)
     await bot._tick_once()
     bot.poster.posted_calls.clear()
 
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(AFTER_END))
+    freeze(monkeypatch, AFTER_END)
     await bot._tick_once()
 
     assert any("期間が終了" in n for n in bot.poster.notices)
@@ -189,8 +185,9 @@ async def test_period_end_flushes_queue_then_announces(bot, monkeypatch):
 
 # ---- /start 催促（11-1 決定） ----
 
+
 async def test_reminder_posted_once_when_start_forgotten(bot, monkeypatch):
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
 
     await bot._tick_once()
     await bot._tick_once()
@@ -201,14 +198,14 @@ async def test_reminder_posted_once_when_start_forgotten(bot, monkeypatch):
 
 
 async def test_no_reminder_before_offset_training_start(bot, monkeypatch):
-    early = datetime(2026, 7, 20, 3, 0, tzinfo=timezone.utc)  # トレモ開始(7/23)前
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(early))
+    early = datetime(2026, 7, 20, 3, 0, tzinfo=UTC)  # トレモ開始(7/23)前
+    freeze(monkeypatch, early)
     await bot._tick_once()
     assert not any("まだ収集が始まっていません" in n for n in bot.poster.notices)
 
 
 async def test_no_reminder_once_started(bot, monkeypatch):
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await start_at(bot, TRAINING_NOW)
     await bot._tick_once()
     assert not any("まだ収集が始まっていません" in n for n in bot.poster.notices)
@@ -216,8 +213,9 @@ async def test_no_reminder_once_started(bot, monkeypatch):
 
 # ---- /stop ----
 
+
 async def test_stop_returns_to_idle(bot, monkeypatch):
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await start_at(bot, TRAINING_NOW)
     await bot._tick_once()
     assert bot.collector.calls
@@ -230,28 +228,30 @@ async def test_stop_returns_to_idle(bot, monkeypatch):
 
 # ---- ポーリング間隔 ----
 
+
 async def test_rss_interval_is_respected(bot, monkeypatch):
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW))
+    freeze(monkeypatch, TRAINING_NOW)
     await start_at(bot, TRAINING_NOW)
     await bot._tick_once()
     assert len(bot.collector.calls) == 1
 
     # training の RSS 間隔は 20分。1分後の tick では走らない
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW.replace(minute=1)))
+    freeze(monkeypatch, TRAINING_NOW.replace(minute=1))
     await bot._tick_once()
     assert len(bot.collector.calls) == 1
 
-    monkeypatch.setattr("main.datetime", _FrozenDatetime(TRAINING_NOW.replace(minute=25)))
+    freeze(monkeypatch, TRAINING_NOW.replace(minute=25))
     await bot._tick_once()
     assert len(bot.collector.calls) == 2
 
 
-def _FrozenDatetime(frozen):
-    """main.datetime を差し替え、now() だけを固定する。"""
+def freeze(monkeypatch, frozen):
+    """now() を固定する。時刻を読むのは bot と lifecycle の両モジュール。"""
 
     class Frozen(datetime):
         @classmethod
         def now(cls, tz=None):
             return frozen.astimezone(tz) if tz else frozen.replace(tzinfo=None)
 
-    return Frozen
+    for module in ("interface.bot", "services.lifecycle"):
+        monkeypatch.setattr(f"priconne_cb_collector.{module}.datetime", Frozen)
