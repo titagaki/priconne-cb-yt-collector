@@ -16,7 +16,7 @@ cp .env.example .env      # DISCORD_BOT_TOKEN / YOUTUBE_API_KEY を記入
 
 | ファイル | 項目 |
 |---|---|
-| `.env` | `DISCORD_BOT_TOKEN` / `YOUTUBE_API_KEY` |
+| `.env` | `DISCORD_BOT_TOKEN` / `YOUTUBE_API_KEY`（`LOG_LEVEL` は任意、既定 INFO） |
 | `config/config.yaml` | `discord.channel_id`、`youtube.channels`（サンプル値のまま） |
 | `config/bosses.yaml` | 今月のボス構成。**毎月書き換える** |
 

@@ -19,7 +19,7 @@
 - 誤爆（無関係な動画の投稿）より取りこぼしを許容する。判定に迷う実装は投稿しない側へ倒す
 - YouTube API のクォータを消費する変更（`search.list` の追加・間隔短縮など）は消費量の見積もりを添えて提案する
 - 1件の動画の処理失敗が収集ジョブ全体を落とさないようにする（個別 try/except + `status="error"` 記録）
-- 判定ロジック（`classify/`）は YouTube / Discord に依存しない純粋関数として書き、表形式のテストケースを添える
+- 判定ロジック（`domain/classify/`）は YouTube / Discord に依存しない純粋関数として書き、表形式のテストケースを添える
 - 実装順序は `docs/spec/12-implementation-order.md` に従う（classify を先に固める）
 
 ## Documentation

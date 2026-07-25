@@ -1,6 +1,6 @@
 # 09. スラッシュコマンド
 
-実装先: `src/discord_bot/commands.py`
+実装先: `src/priconne_cb_collector/interface/commands.py`
 
 ## 1. コマンド一覧
 

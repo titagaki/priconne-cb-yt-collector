@@ -19,10 +19,12 @@
 
 | 対象 | ケース |
 |---|---|
-| `schedule.py` | 月末が28/29/30/31日の各パターン、月またぎ、3フェーズの境界（training開始 / battle開始 / battle終了の各前後1秒）、manual モード、trigger モード、再起動時のフェーズ再計算 |
-| `classify/boss.py` | 名前一致、エイリアス一致、複数ヒット、EX表記、名前とEXの衝突、正規化（全角/半角/大小文字） |
-| `classify/battle_type.py` | 持ち越し各表記、秒数抽出、`フル` と `フルオート` の切り分け、判定不能ケース |
-| `classify/metadata.py` | トレモ判定（キーワード由来と期間由来の区別） |
-| `store.py` | 重複 INSERT が既存レコードを壊さないこと、フェーズ遷移通知フラグが二重投稿を防ぐこと |
+| `domain/schedule.py`<br>`services/lifecycle.py` | 月末が28/29/30/31日の各パターン、月またぎ、3フェーズの境界（training開始 / battle開始 / battle終了の各前後1秒）、manual モード、trigger モード、再起動時のフェーズ再計算 |
+| `domain/classify/boss.py` | 名前一致、エイリアス一致、複数ヒット、EX表記、名前とEXの衝突、正規化（全角/半角/大小文字） |
+| `domain/classify/battle_type.py` | 持ち越し各表記、秒数抽出、`フル` と `フルオート` の切り分け、判定不能ケース |
+| `domain/classify/metadata.py` | トレモ判定（キーワード由来と期間由来の区別） |
+| `adapters/sqlite_store.py` | 重複 INSERT が既存レコードを壊さないこと、フェーズ遷移通知フラグが二重投稿を防ぐこと |
 
 判定系のテストは、**実際の動画タイトルを模したサンプルを 30 件以上用意した表形式のテストケース**として書くこと。
+
+`tests/` は実装と同じ層構造に分ける（[02](02-architecture.md) §3）。

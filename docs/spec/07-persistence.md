@@ -1,6 +1,6 @@
 # 07. 永続化（SQLite）
 
-実装先: `src/store.py`（DB ファイルは `data/bot.db`）
+実装先: `src/priconne_cb_collector/adapters/sqlite_store.py`（DB ファイルは `data/bot.db`）
 
 日時はすべて **ISO8601 UTC で保存し、表示時に JST 変換**する（[02](02-architecture.md)）。ただし `quota_usage.date` のみ JST の日付。
 

@@ -1,6 +1,7 @@
 # 04. 稼働期間・フェーズ判定
 
-実装先: `src/schedule.py`
+実装先: `src/priconne_cb_collector/domain/schedule.py`（期間計算の純粋関数）、
+`src/priconne_cb_collector/services/lifecycle.py`（期間の解決・遷移・通知フラグ）
 
 ## 1. 3つのフェーズ
 

@@ -1,6 +1,7 @@
 # 05. 動画の取得
 
-実装先: `src/sources/rss.py`, `src/sources/youtube_api.py`
+実装先: `src/priconne_cb_collector/adapters/youtube_rss.py`, `src/priconne_cb_collector/adapters/youtube_api.py`、
+パイプラインは `src/priconne_cb_collector/services/collection.py`
 
 2 経路を併用する。両方の結果は `video_id` でマージし、重複は 1 件として扱う（[07](07-persistence.md)）。
 
@@ -44,7 +45,10 @@ GET https://www.googleapis.com/youtube/v3/videos
 - **`videos.list` は 50 件まとめて 1 ユニット。** 極めて安いので必ず経由すること
 - ここで取れる `contentDetails.duration`（ISO 8601）でショート/長時間配信を除外
 - `snippet.description` はここで初めて取得できる。判定ロジックはタイトルと説明文の両方を見る
-- `liveStreamingDetails` が存在し、かつ配信中/配信予定のものは除外
+- 配信中/配信予定のものは除外する。判定は次の OR:
+  - `snippet.liveBroadcastContent` が `live` / `upcoming`
+  - `liveStreamingDetails` があるのに `actualEndTime` が無い（＝まだ終わっていない）
+- **配信終了済みのアーカイブ（`actualEndTime` あり）は除外しない。** 攻略アーカイブを丸ごと落としてしまうため
 
 ## 4. クォータ管理
 
