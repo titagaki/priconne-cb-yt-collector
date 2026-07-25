@@ -19,23 +19,23 @@
 | 7 | スラッシュコマンド（`/suggest_channels` 含む）+ `interface/bot.py` / `cli.py` | ✅ 完了 |
 | 8 | src レイアウトへの再編（domain / services / adapters / interface の4層化）+ ruff 導入 | ✅ 完了 |
 | 9 | `tests/` を実装と同じ層構造に再編 + `PeriodService` の直接テスト追加 | ✅ 完了 |
+| 10 | ドキュメント監査（実装先パスの更新、仕様と実装の食い違い4件の解消） | ✅ 完了 |
 
-実装は一巡し、ユニットテスト 260 件が通っている状態。**Discord / YouTube への実接続は未検証**（トークン・チャンネル ID・実チャンネルの設定が必要）。
+実装は一巡し、ユニットテスト 268 件が通っている状態。**Discord / YouTube への実接続は未検証**（トークン・チャンネル ID・実チャンネルの設定が必要）。
 
 レイヤの依存方向（interface → services → adapters → domain の一方向、domain は外部ライブラリ非依存）は
 `tests/test_layering.py` が AST 解析で機械的に検証している。
 
-## 仕様と実装の食い違い（未解決）
+## 仕様と実装の食い違い（2026-07-25 監査 → 解消済み）
 
-2026-07-25 のドキュメント監査で検出。**いずれも実装側が仕様に届いていない**もので、コードは未修正。
-どちらに寄せるか（実装を直すか仕様を緩めるか）を決めてから着手する。
+いずれも実装側が仕様に届いていなかったもの。**4件とも実装を仕様に合わせて修正済み**（回帰テスト付き）。
 
-| # | 内容 | 該当仕様 | 影響 |
-|---|---|---|---|
-| A | `polling.idle_check_interval_minutes` が実装で使われていない。tick は全フェーズ一律 60 秒 | [04](spec/04-schedule.md) §3 | 小。idle 中は DB 参照のみで通信しないが、設定項目が効かない |
-| B | クォータ消費の**日次サマリ INFO ログ**が未実装。API 呼び出しごとのログも仕様は DEBUG だが実装は INFO | [10](spec/10-non-functional.md) §2 | 小。消費量の日次把握が `/status` 頼みになる |
-| C | `/collect` を稼働期間外に実行すると `videos.discovered_phase` に `"idle"` が入る。仕様上の定義域は `training` / `battle` | [07](spec/07-persistence.md) §1 | 小。トレモ判定は「根拠なし」に倒れるだけで誤判定はしない |
-| D | 日次投稿上限の到達通知が**プロセス起動中に1回だけ**。日付が変わって再度上限に達しても通知されない（フラグは期間終了時にしかリセットされない） | [08](spec/08-discord-posting.md) §3 | 中。2日目以降、投稿が止まっていることに気付きにくい |
+| # | 内容 | 対応 |
+|---|---|---|
+| A | `polling.idle_check_interval_minutes` が使われず、tick が全フェーズ一律 60 秒だった | idle 中はループ間隔をこの値へ落とすようにした。`/start`・`/period set` はループを即時再起動するので手動起動は待たされない（[04](spec/04-schedule.md) §3） |
+| B | クォータ消費の日次サマリ INFO ログが無く、API 呼び出しごとのログも INFO だった | 呼び出しごとを DEBUG に下げ、その日の累計を INFO で出すようにした（[10](spec/10-non-functional.md) §2） |
+| C | 稼働期間外の `/collect` が `videos.discovered_phase` に `"idle"` を書き込んでいた | 期間外の `/collect` を拒否するようにした（[09](spec/09-slash-commands.md) §1） |
+| D | 日次投稿上限の到達通知がプロセス起動中に1回だけで、翌日以降は無言になっていた | 通知フラグを JST の日付ごとに持つようにした（[08](spec/08-discord-posting.md) §3） |
 
 ## 実接続で確認したいこと
 

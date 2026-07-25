@@ -72,7 +72,7 @@ src/priconne_cb_collector/
 ## テスト
 
 ```bash
-.venv/bin/python -m pytest              # 260件
+.venv/bin/python -m pytest              # 268件
 .venv/bin/python -m pytest tests/domain # 層ごとに実行できる
 .venv/bin/ruff check .
 .venv/bin/ruff format --check .

@@ -15,6 +15,7 @@ import discord
 
 from priconne_cb_collector.adapters.sqlite_store import Store
 from priconne_cb_collector.domain.models import BossesConfig
+from priconne_cb_collector.domain.schedule import JST
 from priconne_cb_collector.domain.settings import LAYOUT_PER_BOSS_THREAD, AppConfig
 from priconne_cb_collector.interface.embeds import build_video_embed
 
@@ -39,7 +40,8 @@ class Poster:
         self.bosses = bosses
         self.store = store
         self._lock = asyncio.Lock()
-        self._limit_notified: set[tuple[str, int | None]] = set()
+        # Keyed by JST date so the notice repeats on each new day the cap is hit.
+        self._limit_notified: set[tuple[str, str, int | None]] = set()
 
     async def ensure_boss_threads(self, cb_period: str) -> dict[int, int]:
         """Create the per-boss threads once per period; reuse them on restart."""
@@ -88,7 +90,7 @@ class Poster:
         cap = self.config.discord.max_posts_per_boss_per_day
         if cap and self.store.count_posted_today(boss_index, now) >= cap:
             self.store.mark_filtered(row["video_id"], REASON_DAILY_LIMIT)
-            await self._notify_daily_limit(cb_period, boss_index)
+            await self._notify_daily_limit(cb_period, boss_index, now)
             return False
 
         target = await self._resolve_target(cb_period, row)
@@ -140,9 +142,15 @@ class Poster:
             return channel
         return await self._fetch_channel(thread_id) or channel
 
-    async def _notify_daily_limit(self, cb_period: str, boss_index: int | None) -> None:
-        """Announce the cap once per boss per run (docs/spec/08 §3)."""
-        key = (cb_period, boss_index)
+    async def _notify_daily_limit(
+        self, cb_period: str, boss_index: int | None, now: datetime
+    ) -> None:
+        """Announce the cap once per boss per JST day (docs/spec/08 §3).
+
+        Keying on the day matters: the cap is refilled at JST midnight, so a
+        multi-day クラバト would otherwise go silent from the second day on.
+        """
+        key = (now.astimezone(JST).date().isoformat(), cb_period, boss_index)
         if key in self._limit_notified:
             return
         self._limit_notified.add(key)

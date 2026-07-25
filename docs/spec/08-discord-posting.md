@@ -53,6 +53,6 @@
 - 429 を受けたら `Retry-After` に従って待機して再送する（**同一動画につき最大3回**）。
   諦めた動画は `pending` のまま残し、次の収集サイクルで再試行する
 - `Retry-After` が付かない場合のみ既定の5秒待つ（`0` は「即再送してよい」として扱う）
-- `max_posts_per_boss_per_day` を超えた分は投稿せず `status = "filtered"`, `filter_reason = "daily_limit"` とする。上限到達時はスレッドに 1 回だけその旨を通知する
+- `max_posts_per_boss_per_day` を超えた分は投稿せず `status = "filtered"`, `filter_reason = "daily_limit"` とする。上限到達時はスレッドにその旨を通知する（**JST の日付ごとに1回**。上限は JST 深夜にリセットされるため、翌日また到達したら再度通知する）
 - **投稿成功時のみ `status = "posted"` に更新する。投稿前に更新しない**（失敗時の取りこぼしを防ぐ）
 - Discord への接続断は discord.py の再接続に任せる。投稿キューは保持する（[10](10-non-functional.md)）

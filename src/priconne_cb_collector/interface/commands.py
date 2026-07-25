@@ -178,10 +178,9 @@ def setup_commands(bot) -> None:
     @app_commands.default_permissions(administrator=True)
     @app_commands.describe(api_search="API 検索も実行する（クォータを消費します）")
     async def collect(interaction: discord.Interaction, api_search: bool = False):
-        period = bot.current_period()
-        if period is None:
+        if bot.current_phase() == PHASE_IDLE:
             await interaction.response.send_message(
-                "稼働期間が未設定です。先に `/start` を実行してください。", ephemeral=True
+                "稼働期間外です。先に `/start` を実行してください。", ephemeral=True
             )
             return
 

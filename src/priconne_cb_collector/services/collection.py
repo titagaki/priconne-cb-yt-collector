@@ -22,7 +22,7 @@ from priconne_cb_collector.adapters.youtube_api import (
 )
 from priconne_cb_collector.domain.classify import classify_video
 from priconne_cb_collector.domain.models import BossesConfig, Period, VideoMeta
-from priconne_cb_collector.domain.schedule import phase_at
+from priconne_cb_collector.domain.schedule import JST, phase_at
 from priconne_cb_collector.domain.settings import AppConfig
 
 logger = logging.getLogger(__name__)
@@ -90,6 +90,8 @@ class Collector:
         result.new = len(fresh)
         if not fresh:
             logger.info("collect done: fetched=%d new=0 phase=%s", result.fetched, phase)
+            # An API search round can spend quota even when it finds nothing new.
+            self._log_daily_quota(now, result)
             return result
 
         await self._enrich(fresh, result)
@@ -111,7 +113,23 @@ class Collector:
             result.errors,
             result.quota_used,
         )
+        self._log_daily_quota(now, result)
         return result
+
+    def _log_daily_quota(self, now: datetime, result: CollectResult) -> None:
+        """Daily running total at INFO (docs/spec/10 §2).
+
+        Per-call consumption is logged at DEBUG by the API client; this is the
+        line an operator greps to see how much of the day's budget is gone.
+        """
+        if not result.quota_used:
+            return
+        logger.info(
+            "quota daily total: date=%s used=%d limit=%d",
+            now.astimezone(JST).date().isoformat(),
+            self.store.quota_used(now),
+            self.config.youtube.quota_limit_per_day,
+        )
 
     # ---- fetching ----
 

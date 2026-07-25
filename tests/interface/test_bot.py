@@ -247,3 +247,59 @@ async def test_rss_interval_is_respected(bot, monkeypatch):
     freeze_now(monkeypatch, TRAINING_NOW.replace(minute=25))
     await bot._tick_once()
     assert len(bot.collector.calls) == 2
+
+
+# ---- ポーリング間隔の切り替え（roadmap 監査 A） ----
+
+
+async def test_tick_slows_down_while_idle(bot, monkeypatch):
+    """idle 中は idle_check_interval_minutes 間隔に落とす（docs/spec/04 §3）。"""
+    freeze_now(monkeypatch, TRAINING_NOW)
+    await bot._tick_once()
+
+    assert bot.tick.seconds == bot.config.polling.idle_check_interval_minutes * 60
+
+
+async def test_tick_returns_to_short_interval_once_running(bot, monkeypatch):
+    freeze_now(monkeypatch, TRAINING_NOW)
+    await bot._tick_once()  # idle でいったん遅くなる
+    assert bot.tick.seconds > 60
+
+    await start_at(bot, TRAINING_NOW)  # /start は即座に間隔を戻す
+    assert bot.tick.seconds == 60
+
+    await bot._tick_once()
+    assert bot.tick.seconds == 60
+
+
+async def test_stop_slows_the_tick_again(bot, monkeypatch):
+    freeze_now(monkeypatch, TRAINING_NOW)
+    await start_at(bot, TRAINING_NOW)
+    await bot._tick_once()
+    assert bot.tick.seconds == 60
+
+    bot.stop_period()
+    assert bot.tick.seconds == bot.config.polling.idle_check_interval_minutes * 60
+
+
+# ---- 稼働期間外の /collect（roadmap 監査 C） ----
+
+
+async def test_manual_collect_is_refused_outside_the_period(bot, monkeypatch):
+    """discovered_phase に idle を書き込まないため、期間外の収集は拒否する。"""
+    freeze_now(monkeypatch, TRAINING_NOW)
+
+    with pytest.raises(RuntimeError, match="稼働期間外"):
+        await bot.run_collection()
+
+    assert bot.collector.calls == []
+
+
+async def test_manual_collect_runs_inside_the_period(bot, monkeypatch):
+    freeze_now(monkeypatch, TRAINING_NOW)
+    await start_at(bot, TRAINING_NOW)
+
+    await bot.run_collection(run_api_search=True)
+
+    assert bot.collector.calls == [(CB_PERIOD, True)]
+    assert bot.poster.posted_calls == [CB_PERIOD]

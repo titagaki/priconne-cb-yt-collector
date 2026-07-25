@@ -43,7 +43,10 @@ mode == "trigger" → training_start = /start コマンドが実行された時�
 
 ## 3. フェーズごとの挙動と遷移
 
-- **`idle` 中:** `idle_check_interval_minutes` 間隔で期間判定のみ実行。YouTube への通信は一切しない
+- **`idle` 中:** ポーリングループの間隔自体を `idle_check_interval_minutes` へ落とし、期間判定のみ実行する。
+  YouTube への通信は一切しない。`training` / `battle` に入ると 1 分間隔へ戻す
+  - この間隔ぶん、`offset` / `manual` モードでは稼働開始が遅れうる（既定 60 分）。
+    `/start`・`/period set` はループを即時再起動するため、**手動起動は待たされない**
 - **`idle` → `training` 遷移時:**
   - **`bosses.yaml` の `month` が当月と一致するか検証する。不一致なら収集を開始せず、Discord に「ボス構成が未更新」の警告を投稿して `idle` に留まる**（前月のボス名で検索し続ける事故を防ぐ）
   - 一致していれば開始通知（ボス構成一覧つき）を投稿し、初回収集を実行

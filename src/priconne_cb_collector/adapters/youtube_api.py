@@ -71,7 +71,7 @@ class YouTubeClient:
                 )
             except Exception:
                 logger.exception("failed to parse search item: query=%r", query)
-        logger.info("api search: query=%r count=%d units=%d", query, len(videos), SEARCH_COST)
+        logger.debug("api search: query=%r count=%d units=%d", query, len(videos), SEARCH_COST)
         return videos, SEARCH_COST
 
     async def enrich_videos(self, video_ids: list[str]) -> tuple[dict[str, dict], int]:
@@ -89,7 +89,7 @@ class YouTubeClient:
             units += VIDEOS_LIST_COST
             for item in data.get("items", []):
                 details[item["id"]] = item
-        logger.info(
+        logger.debug(
             "videos.list: requested=%d got=%d units=%d", len(video_ids), len(details), units
         )
         return details, units

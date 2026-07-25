@@ -90,6 +90,7 @@ class CollectorBot(discord.Client):
         self._apply_config(self.periods.config)
         self._last_phase = None  # let the next tick emit the training announcement
         self._threads_ready = False
+        self._retune_tick(self.periods.current_phase(now), restart=True)
         return period
 
     def stop_period(self) -> bool:
@@ -97,6 +98,7 @@ class CollectorBot(discord.Client):
             return False
         self._last_phase = PHASE_IDLE
         self._threads_ready = False
+        self._retune_tick(PHASE_IDLE)
         return True
 
     def set_manual_period(self, training_start, battle_start, end) -> Period:
@@ -104,6 +106,7 @@ class CollectorBot(discord.Client):
         self._apply_config(self.periods.config)
         self._last_phase = None
         self._threads_ready = False
+        self._retune_tick(self.periods.current_phase(), restart=True)
         return period
 
     def reload_config(self) -> None:
@@ -124,11 +127,16 @@ class CollectorBot(discord.Client):
         return build_bosses_embed(self.bosses, datetime.now(JST).strftime("%Y-%m"))
 
     async def run_collection(self, *, run_api_search: bool = False):
-        """One collection round on demand (/collect). Posts what it finds."""
+        """One collection round on demand (/collect). Posts what it finds.
+
+        Refused outside the active period: videos discovered then belong to no
+        phase, and videos.discovered_phase is only ever "training" or "battle"
+        (docs/spec/07 §1).
+        """
         now = datetime.now(UTC)
         period = self.periods.current_period(now)
-        if period is None:
-            raise RuntimeError("稼働期間が未設定です")
+        if period is None or self.periods.current_phase(now) == PHASE_IDLE:
+            raise RuntimeError("稼働期間外です")
         result = await self.collector.collect(period, now=now, run_api_search=run_api_search)
         self._last_rss = now
         if run_api_search and not result.api_search_skipped:
@@ -165,10 +173,25 @@ class CollectorBot(discord.Client):
     async def before_tick(self) -> None:
         await self.wait_until_ready()
 
+    def _retune_tick(self, phase: str, *, restart: bool = False) -> None:
+        """Poll slowly while idle (docs/spec/04 §3).
+
+        restart=True is for manual transitions (/start): the loop may be in the
+        middle of a long idle sleep and must wake up now, not an hour from now.
+        """
+        polling = self.config.polling
+        seconds = polling.idle_check_interval_minutes * 60 if phase == PHASE_IDLE else TICK_SECONDS
+        if self.tick.seconds != seconds:
+            self.tick.change_interval(seconds=seconds)
+            logger.info("tick interval changed: phase=%s seconds=%d", phase, seconds)
+        if restart and self.tick.is_running():
+            self.tick.restart()
+
     async def _tick_once(self) -> None:
         now = datetime.now(UTC)
         period = self.periods.current_period(now)
         phase = self.periods.current_phase(now)
+        self._retune_tick(phase)
 
         if period is None:
             await self._maybe_remind(now)

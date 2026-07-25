@@ -1,6 +1,6 @@
 """poster.py のテスト（docs/spec/08 §3）。送信先はダミーに差し替える。"""
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from priconne_cb_collector.domain.settings import (
     LAYOUT_PER_BOSS_THREAD,
@@ -154,3 +154,28 @@ async def test_threads_are_not_created_in_single_layout(store):
 
     assert await poster.ensure_boss_threads(CB_PERIOD) == {}
     assert channel.created == []
+
+
+async def test_daily_limit_notice_repeats_on_the_next_jst_day(store):
+    """上限通知は JST の日付ごとに1回（roadmap 監査 D）。
+
+    キャップは JST 深夜にリセットされるため、2日目以降も無言にならないこと。
+    """
+    channel = FakeChannel()
+    poster = make_poster(store, channel, max_posts_per_boss_per_day=1)
+    store_video(store, "day1_a")
+    store_video(store, "day1_b")
+    await poster.post_pending(CB_PERIOD, NOW)
+    assert len(channel.notices) == 1
+
+    # 同じ日のうちは通知を繰り返さない
+    store_video(store, "day1_c")
+    await poster.post_pending(CB_PERIOD, NOW)
+    assert len(channel.notices) == 1
+
+    # JST で日付が変わればまた通知する
+    next_day = NOW + timedelta(days=1)
+    store_video(store, "day2_a")
+    store_video(store, "day2_b")
+    await poster.post_pending(CB_PERIOD, next_day)
+    assert len(channel.notices) == 2

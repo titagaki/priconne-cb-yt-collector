@@ -341,3 +341,34 @@ async def test_ex_notation_requires_publication_within_period(store):
     assert row["status"] == "filtered"
     assert row["filter_reason"] == REASON_BOSS_UNKNOWN
     assert result.pending == 0
+
+
+# ---- クォータのログ（roadmap 監査 B） ----
+
+
+async def test_daily_quota_total_is_logged_at_info(store, caplog):
+    """日次の消費合計を INFO で残す（docs/spec/10 §2）。"""
+    import logging
+
+    store.add_quota(1200, NOW)  # その日すでに消費済みの分
+    feed = make_feed([])
+    with caplog.at_level(logging.INFO, logger="priconne_cb_collector.services.collection"):
+        async with http_client(feed) as client:
+            collector = Collector(make_config(), bosses_config(), store, client, FakeYouTube())
+            await collector.collect(PERIOD, now=NOW, run_api_search=True)
+
+    summaries = [r.message for r in caplog.records if "quota daily total" in r.message]
+    assert len(summaries) == 1
+    assert "used=1700" in summaries[0]  # 1200 + 検索 500
+    assert "limit=9000" in summaries[0]
+    assert "date=2026-07-24" in summaries[0]  # JST の日付
+
+
+async def test_no_quota_summary_when_nothing_was_consumed(store, caplog):
+    import logging
+
+    feed = make_feed([])
+    with caplog.at_level(logging.INFO, logger="priconne_cb_collector.services.collection"):
+        await run_collect(store, feed)
+
+    assert not [r for r in caplog.records if "quota daily total" in r.message]
