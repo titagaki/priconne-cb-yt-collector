@@ -1,0 +1,85 @@
+# 07. 永続化（SQLite）
+
+実装先: `src/store.py`（DB ファイルは `data/bot.db`）
+
+日時はすべて **ISO8601 UTC で保存し、表示時に JST 変換**する（[02](02-architecture.md)）。ただし `quota_usage.date` のみ JST の日付。
+
+## 1. スキーマ
+
+```sql
+CREATE TABLE videos (
+  video_id        TEXT PRIMARY KEY,
+  title           TEXT NOT NULL,
+  description     TEXT,
+  channel_id      TEXT NOT NULL,
+  channel_title   TEXT,
+  published_at    TEXT NOT NULL,   -- ISO8601 UTC
+  duration_sec    INTEGER,
+  view_count      INTEGER,
+  discovered_via  TEXT NOT NULL,   -- "rss" | "api_search"
+  discovered_at   TEXT NOT NULL,
+  discovered_phase TEXT NOT NULL,  -- "training" | "battle"
+
+  boss_index      INTEGER,         -- NULL = 判定不能
+  boss_indices    TEXT,            -- 複数ヒット時の JSON 配列
+  match_source    TEXT,            -- "boss_name" | "ex_notation"
+  is_summary      INTEGER DEFAULT 0,
+
+  battle_type     TEXT,            -- "normal" | "carryover" | "unknown"
+  carryover_sec   INTEGER,
+  boss_phase      INTEGER,         -- 段階（1〜5）。稼働フェーズとは別物なので名前を分けている
+  damage          INTEGER,
+  is_full_auto    INTEGER,
+  is_manual       INTEGER,
+  is_training_footage INTEGER,     -- トレモ動画と判定されたか
+  training_evidence   TEXT,        -- "keyword" | "phase_only" | NULL
+
+  status          TEXT NOT NULL,   -- "pending" | "posted" | "filtered" | "error"
+  filter_reason   TEXT,
+  posted_at       TEXT,
+  discord_msg_id  TEXT,
+  cb_period       TEXT NOT NULL    -- "2026-07" 形式。期間ごとの集計用
+);
+
+CREATE INDEX idx_videos_status ON videos(status);
+CREATE INDEX idx_videos_period_boss ON videos(cb_period, boss_index);
+
+-- フェーズ遷移通知の重複投稿を防ぐための状態管理
+CREATE TABLE period_state (
+  cb_period            TEXT PRIMARY KEY,  -- "2026-07"
+  training_start       TEXT,              -- 確定した稼働開始日時（trigger モードでは /start 実行時刻）
+  battle_start         TEXT,
+  battle_end           TEXT,
+  notified_training    INTEGER DEFAULT 0,
+  notified_battle      INTEGER DEFAULT 0,
+  notified_end         INTEGER DEFAULT 0,
+  boss_thread_ids      TEXT,              -- {boss_index: thread_id} の JSON
+  started_manually     INTEGER DEFAULT 0  -- /start で開始されたか
+);
+
+CREATE TABLE quota_usage (
+  date        TEXT PRIMARY KEY,    -- JST の日付
+  units_used  INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE channel_etags (
+  channel_id  TEXT PRIMARY KEY,
+  etag        TEXT,
+  last_fetch  TEXT
+);
+```
+
+## 2. 重複排除
+
+**重複排除は `video_id` の PRIMARY KEY 制約のみで行う。** `INSERT OR IGNORE` を使い、既存レコードがあれば投稿処理をスキップする。
+
+タイトル類似度による重複判定は行わない（別チャンネルの別編成動画を潰してしまうため）。
+
+## 3. `status` の遷移
+
+| 値 | 意味 |
+|---|---|
+| `pending` | 収集済み・投稿待ち |
+| `posted` | Discord へ投稿成功（**投稿成功時のみ**更新する。[08](08-discord-posting.md)） |
+| `filtered` | 除外フィルタ・日次上限に該当。`filter_reason` に理由を記録 |
+| `error` | 判定・投稿で個別エラー（ジョブ全体は落とさない。[10](10-non-functional.md)） |
