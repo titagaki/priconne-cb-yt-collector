@@ -21,6 +21,13 @@ STATUS_POSTED = "posted"
 STATUS_FILTERED = "filtered"
 STATUS_ERROR = "error"
 
+# One-shot notification flags, keyed by the name callers pass to mark_notified.
+NOTICE_COLUMNS = {
+    "start": "notified_start",
+    "end": "notified_end",
+    "reminder": "notified_reminder",
+}
+
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS videos (
   video_id        TEXT PRIMARY KEY,
@@ -33,7 +40,6 @@ CREATE TABLE IF NOT EXISTS videos (
   view_count      INTEGER,
   discovered_via  TEXT NOT NULL,
   discovered_at   TEXT NOT NULL,
-  discovered_phase TEXT NOT NULL,
 
   boss_index      INTEGER,
   boss_indices    TEXT,
@@ -42,12 +48,10 @@ CREATE TABLE IF NOT EXISTS videos (
 
   battle_type     TEXT,
   carryover_sec   INTEGER,
-  boss_phase      INTEGER,
   damage          INTEGER,
   is_full_auto    INTEGER,
   is_manual       INTEGER,
   is_training_footage INTEGER,
-  training_evidence   TEXT,
 
   status          TEXT NOT NULL,
   filter_reason   TEXT,
@@ -61,11 +65,9 @@ CREATE INDEX IF NOT EXISTS idx_videos_period_boss ON videos(cb_period, boss_inde
 
 CREATE TABLE IF NOT EXISTS period_state (
   cb_period            TEXT PRIMARY KEY,
-  training_start       TEXT,
-  battle_start         TEXT,
-  battle_end           TEXT,
-  notified_training    INTEGER DEFAULT 0,
-  notified_battle      INTEGER DEFAULT 0,
+  start_at             TEXT,
+  end_at               TEXT,
+  notified_start       INTEGER DEFAULT 0,
   notified_end         INTEGER DEFAULT 0,
   notified_reminder    INTEGER DEFAULT 0,
   boss_thread_ids      TEXT,
@@ -109,7 +111,6 @@ class Store:
         video: VideoMeta,
         classification: Classification,
         *,
-        discovered_phase: str,
         cb_period: str,
         status: str = STATUS_PENDING,
         filter_reason: str | None = None,
@@ -132,19 +133,16 @@ class Store:
             video.view_count,
             video.discovered_via,
             _to_utc_iso(discovered_at or datetime.now(UTC)),
-            discovered_phase,
             boss.primary_index,
             json.dumps(boss.indices) if boss.indices else None,
             boss.match_source,
             int(boss.is_summary),
             classification.battle_type,
             classification.carryover_sec,
-            classification.boss_phase,
             classification.damage,
             _to_int_or_none(classification.is_full_auto),
             _to_int_or_none(classification.is_manual),
             int(classification.is_training_footage),
-            classification.training_evidence,
             status,
             filter_reason,
             cb_period,
@@ -155,12 +153,12 @@ class Store:
                 INSERT OR IGNORE INTO videos (
                   video_id, title, description, channel_id, channel_title,
                   published_at, duration_sec, view_count, discovered_via,
-                  discovered_at, discovered_phase, boss_index, boss_indices,
+                  discovered_at, boss_index, boss_indices,
                   match_source, is_summary, battle_type, carryover_sec,
-                  boss_phase, damage, is_full_auto, is_manual,
-                  is_training_footage, training_evidence, status,
+                  damage, is_full_auto, is_manual,
+                  is_training_footage, status,
                   filter_reason, cb_period
-                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 row,
             )
@@ -278,13 +276,11 @@ class Store:
         with self._tx() as conn:
             conn.execute(
                 "INSERT OR IGNORE INTO period_state "
-                "(cb_period, training_start, battle_start, battle_end, started_manually) "
-                "VALUES (?,?,?,?,?)",
+                "(cb_period, start_at, end_at, started_manually) VALUES (?,?,?,?)",
                 (
                     period.cb_period,
-                    _to_utc_iso(period.training_start),
-                    _to_utc_iso(period.battle_start),
-                    _to_utc_iso(period.battle_end),
+                    _to_utc_iso(period.start),
+                    _to_utc_iso(period.end),
                     int(started_manually),
                 ),
             )
@@ -298,12 +294,11 @@ class Store:
         self.ensure_period(period, started_manually=True)
         with self._tx() as conn:
             conn.execute(
-                "UPDATE period_state SET training_start = ?, battle_start = ?, "
-                "battle_end = ?, started_manually = 1 WHERE cb_period = ?",
+                "UPDATE period_state SET start_at = ?, end_at = ?, "
+                "started_manually = 1 WHERE cb_period = ?",
                 (
-                    _to_utc_iso(period.training_start),
-                    _to_utc_iso(period.battle_start),
-                    _to_utc_iso(period.battle_end),
+                    _to_utc_iso(period.start),
+                    _to_utc_iso(period.end),
                     period.cb_period,
                 ),
             )
@@ -318,9 +313,9 @@ class Store:
 
     def trigger_started_at(self, cb_period: str) -> datetime | None:
         row = self.get_period_state(cb_period)
-        if row is None or not row["started_manually"] or not row["training_start"]:
+        if row is None or not row["started_manually"] or not row["start_at"]:
             return None
-        return _from_utc_iso(row["training_start"])
+        return _from_utc_iso(row["start_at"])
 
     def mark_notified(self, cb_period: str, kind: str) -> bool:
         """Set a notification flag. Returns False if it was already set.
@@ -328,12 +323,7 @@ class Store:
         Callers post only when this returns True, so a restart cannot cause
         a duplicate transition announcement (docs/spec/04 §3).
         """
-        column = {
-            "training": "notified_training",
-            "battle": "notified_battle",
-            "end": "notified_end",
-            "reminder": "notified_reminder",
-        }[kind]
+        column = NOTICE_COLUMNS[kind]
         with self._tx() as conn:
             cur = conn.execute(
                 f"UPDATE period_state SET {column} = 1 WHERE cb_period = ? AND {column} = 0",
@@ -342,12 +332,7 @@ class Store:
         return cur.rowcount > 0
 
     def is_notified(self, cb_period: str, kind: str) -> bool:
-        column = {
-            "training": "notified_training",
-            "battle": "notified_battle",
-            "end": "notified_end",
-            "reminder": "notified_reminder",
-        }[kind]
+        column = NOTICE_COLUMNS[kind]
         row = self.get_period_state(cb_period)
         return bool(row and row[column])
 

@@ -14,8 +14,8 @@ from priconne_cb_collector.adapters.sqlite_store import Store
 from priconne_cb_collector.domain.models import Period
 from priconne_cb_collector.domain.schedule import (
     JST,
+    is_collecting,
     offset_period,
-    phase_at,
     resolve_period,
     should_remind,
 )
@@ -48,9 +48,9 @@ class PeriodService:
         started = self.trigger_started_at(now) if self.schedule.mode == MODE_TRIGGER else None
         return resolve_period(self.schedule, now, started)
 
-    def current_phase(self, now: datetime | None = None) -> str:
+    def is_collecting(self, now: datetime | None = None) -> bool:
         now = now or datetime.now(UTC)
-        return phase_at(now, self.current_period(now))
+        return is_collecting(now, self.current_period(now))
 
     def trigger_started_at(self, now: datetime | None = None) -> datetime | None:
         """The /start time, if any. A period started late in the month can still
@@ -84,13 +84,12 @@ class PeriodService:
         logger.info("period stopped manually: cb_period=%s", period.cb_period)
         return period
 
-    def override(self, training_start, battle_start, end) -> Period:
+    def override(self, start, end) -> Period:
         """/period set: switch to manual mode with explicit dates."""
         sched = replace(
             self.schedule,
             mode=MODE_MANUAL,
-            manual_training_start=training_start,
-            manual_battle_start=battle_start,
+            manual_start=start,
             manual_end=end,
         )
         period = resolve_period(sched, datetime.now(UTC))

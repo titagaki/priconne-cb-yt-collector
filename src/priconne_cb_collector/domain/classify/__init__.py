@@ -19,7 +19,6 @@ def classify_video(
     *,
     enable_ex_notation: bool = True,
     published_in_period: bool = False,
-    discovered_phase: str | None = None,
 ) -> Classification:
     text = build_target_text(title, description)
     boss = classify_boss(
@@ -29,15 +28,13 @@ def classify_video(
         published_in_period=published_in_period,
     )
     battle = classify_battle_type(text)
-    meta = extract_metadata(text, discovered_phase=discovered_phase)
+    meta = extract_metadata(text)
     return Classification(
         boss=boss,
         battle_type=battle.battle_type,
         carryover_sec=battle.carryover_sec,
-        boss_phase=meta.boss_phase,
         damage=meta.damage,
         is_full_auto=meta.is_full_auto,
         is_manual=meta.is_manual,
         is_training_footage=meta.is_training_footage,
-        training_evidence=meta.training_evidence,
     )

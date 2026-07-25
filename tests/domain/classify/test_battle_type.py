@@ -16,9 +16,10 @@ CASES = [
     ("持越し編成", BATTLE_CARRYOVER, None),
     ("持越", BATTLE_CARRYOVER, None),
     ("もちこし", BATTLE_CARRYOVER, None),
-    ("繰り越し", BATTLE_CARRYOVER, None),
-    ("繰越", BATTLE_CARRYOVER, None),
-    # --- 秒数の抽出 ---
+    # 「繰り越し」はこのゲームでは使われない表記なので拾わない
+    ("繰り越し", BATTLE_UNKNOWN, None),
+    ("繰越", BATTLE_UNKNOWN, None),
+    # --- 秒数の抽出（秒） ---
     ("35秒持ち越し", BATTLE_CARRYOVER, 35),
     ("持ち越し35秒", BATTLE_CARRYOVER, 35),
     ("持越20秒", BATTLE_CARRYOVER, 20),
@@ -27,6 +28,18 @@ CASES = [
     ("30秒start", BATTLE_CARRYOVER, 30),
     ("９０秒持ち越し", BATTLE_CARRYOVER, 90),  # 全角数字
     ("1秒持ち越し", BATTLE_CARRYOVER, 1),  # 下限
+    # --- 秒数の抽出（s 表記。実データではこちらが主流） ---
+    ("24s持ち越し編成", BATTLE_CARRYOVER, 24),
+    ("持ち越し38s", BATTLE_CARRYOVER, 38),
+    ("【プリコネR】4段階 オルレオン 11145万 34s", BATTLE_CARRYOVER, 34),  # 持ち越し語なし
+    ("4段階 ワイバーン 16640万 41s", BATTLE_CARRYOVER, 41),
+    ("21 s 持ち越し", BATTLE_CARRYOVER, 21),
+    # 素の 90s はフルタイム（通常）と読む。持ち越し語があれば持ち越し
+    ("4段階 オルレオン 90s", BATTLE_NORMAL, None),
+    ("90秒持ち越し", BATTLE_CARRYOVER, 90),
+    # s が他の語の一部なら拾わない
+    ("ARK ASA 12shorts", BATTLE_UNKNOWN, None),
+    ("#Shorts", BATTLE_UNKNOWN, None),
     # --- 範囲外の秒数は捨てるが、持ち越し自体は成立させる ---
     ("99秒持ち越し", BATTLE_CARRYOVER, None),
     ("0秒持ち越し", BATTLE_CARRYOVER, None),

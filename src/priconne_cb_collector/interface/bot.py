@@ -1,4 +1,4 @@
-"""The Discord client: polling loop and phase-transition announcements.
+"""The Discord client: polling loop and start/end announcements.
 
 Spec: docs/spec/04. Period arithmetic lives in services.lifecycle; this class
 owns only the Discord-facing side effects and the loop cadence.
@@ -18,13 +18,7 @@ from discord.ext import tasks
 from priconne_cb_collector.adapters.config_file import load_bosses, load_config
 from priconne_cb_collector.adapters.sqlite_store import Store
 from priconne_cb_collector.adapters.youtube_api import YouTubeClient
-from priconne_cb_collector.domain.models import (
-    PHASE_BATTLE,
-    PHASE_IDLE,
-    PHASE_TRAINING,
-    BossesConfig,
-    Period,
-)
+from priconne_cb_collector.domain.models import BossesConfig, Period
 from priconne_cb_collector.domain.schedule import JST
 from priconne_cb_collector.domain.settings import AppConfig
 from priconne_cb_collector.interface.embeds import build_bosses_embed
@@ -74,7 +68,7 @@ class CollectorBot(discord.Client):
 
         self._last_rss: datetime | None = None
         self._last_api: datetime | None = None
-        self._last_phase: str | None = None
+        self._was_collecting: bool | None = None
         self._threads_ready = False
 
     # ---- period delegation (used by the slash commands) ----
@@ -82,31 +76,31 @@ class CollectorBot(discord.Client):
     def current_period(self) -> Period | None:
         return self.periods.current_period()
 
-    def current_phase(self, now: datetime | None = None) -> str:
-        return self.periods.current_phase(now)
+    def is_collecting(self, now: datetime | None = None) -> bool:
+        return self.periods.is_collecting(now)
 
     async def start_period(self, now: datetime) -> Period:
         period = self.periods.start(now)
         self._apply_config(self.periods.config)
-        self._last_phase = None  # let the next tick emit the training announcement
+        self._was_collecting = None  # let the next tick emit the start announcement
         self._threads_ready = False
-        self._retune_tick(self.periods.current_phase(now), restart=True)
+        self._retune_tick(self.periods.is_collecting(now), restart=True)
         return period
 
     def stop_period(self) -> bool:
         if self.periods.stop() is None:
             return False
-        self._last_phase = PHASE_IDLE
+        self._was_collecting = False
         self._threads_ready = False
-        self._retune_tick(PHASE_IDLE)
+        self._retune_tick(False)
         return True
 
-    def set_manual_period(self, training_start, battle_start, end) -> Period:
-        period = self.periods.override(training_start, battle_start, end)
+    def set_manual_period(self, start, end) -> Period:
+        period = self.periods.override(start, end)
         self._apply_config(self.periods.config)
-        self._last_phase = None
+        self._was_collecting = None
         self._threads_ready = False
-        self._retune_tick(self.periods.current_phase(), restart=True)
+        self._retune_tick(self.periods.is_collecting(), restart=True)
         return period
 
     def reload_config(self) -> None:
@@ -129,14 +123,13 @@ class CollectorBot(discord.Client):
     async def run_collection(self, *, run_api_search: bool = False):
         """One collection round on demand (/collect). Posts what it finds.
 
-        Refused outside the active period: videos discovered then belong to no
-        phase, and videos.discovered_phase is only ever "training" or "battle"
-        (docs/spec/07 §1).
+        Refused outside the collection period: a video collected then belongs
+        to no cb_period, which is a NOT NULL column (docs/spec/07 §1).
         """
         now = datetime.now(UTC)
         period = self.periods.current_period(now)
-        if period is None or self.periods.current_phase(now) == PHASE_IDLE:
-            raise RuntimeError("稼働期間外です")
+        if period is None or not self.periods.is_collecting(now):
+            raise RuntimeError("収集期間外です")
         result = await self.collector.collect(period, now=now, run_api_search=run_api_search)
         self._last_rss = now
         if run_api_search and not result.api_search_skipped:
@@ -173,58 +166,51 @@ class CollectorBot(discord.Client):
     async def before_tick(self) -> None:
         await self.wait_until_ready()
 
-    def _retune_tick(self, phase: str, *, restart: bool = False) -> None:
-        """Poll slowly while idle (docs/spec/04 §3).
+    def _retune_tick(self, collecting: bool, *, restart: bool = False) -> None:
+        """Poll slowly while not collecting (docs/spec/04 §3).
 
         restart=True is for manual transitions (/start): the loop may be in the
         middle of a long idle sleep and must wake up now, not an hour from now.
         """
         polling = self.config.polling
-        seconds = polling.idle_check_interval_minutes * 60 if phase == PHASE_IDLE else TICK_SECONDS
+        seconds = TICK_SECONDS if collecting else polling.idle_check_interval_minutes * 60
         if self.tick.seconds != seconds:
             self.tick.change_interval(seconds=seconds)
-            logger.info("tick interval changed: phase=%s seconds=%d", phase, seconds)
+            logger.info("tick interval changed: collecting=%s seconds=%d", collecting, seconds)
         if restart and self.tick.is_running():
             self.tick.restart()
 
     async def _tick_once(self) -> None:
         now = datetime.now(UTC)
         period = self.periods.current_period(now)
-        phase = self.periods.current_phase(now)
-        self._retune_tick(phase)
+        collecting = self.periods.is_collecting(now)
+        self._retune_tick(collecting)
 
         if period is None:
             await self._maybe_remind(now)
-            self._last_phase = phase
+            self._was_collecting = collecting
             return
 
         self.store.ensure_period(period)
 
-        if phase != self._last_phase:
-            await self._handle_transition(self._last_phase, phase, period, now)
-            self._last_phase = phase
+        if collecting != self._was_collecting:
+            await self._handle_transition(self._was_collecting, collecting, period, now)
+            self._was_collecting = collecting
 
-        if phase == PHASE_IDLE:
+        if not collecting:
             await self._maybe_remind(now)
             return
 
         if not self._month_matches():
             return  # the stale-bosses warning was already posted on transition
 
-        await self._run_due_collections(phase, period, now)
+        await self._run_due_collections(period, now)
         await self.poster.post_pending(period.cb_period, now)
 
-    async def _run_due_collections(self, phase: str, period: Period, now: datetime) -> None:
+    async def _run_due_collections(self, period: Period, now: datetime) -> None:
         polling = self.config.polling
-        if phase == PHASE_TRAINING:
-            rss_minutes = polling.training_rss_interval_minutes
-            api_hours = polling.training_api_search_interval_hours
-        else:
-            rss_minutes = polling.rss_interval_minutes
-            api_hours = polling.api_search_interval_hours
-
-        rss_due = self._is_due(self._last_rss, now, rss_minutes * 60)
-        api_due = self._is_due(self._last_api, now, api_hours * 3600)
+        rss_due = self._is_due(self._last_rss, now, polling.rss_interval_minutes * 60)
+        api_due = self._is_due(self._last_api, now, polling.api_search_interval_hours * 3600)
         if not rss_due and not api_due:
             return
 
@@ -238,25 +224,16 @@ class CollectorBot(discord.Client):
         return last is None or (now - last).total_seconds() >= interval_seconds
 
     async def _handle_transition(
-        self, previous: str | None, phase: str, period: Period, now: datetime
+        self, previously_collecting: bool | None, collecting: bool, period: Period, now: datetime
     ) -> None:
-        if phase in (PHASE_TRAINING, PHASE_BATTLE) and not self._month_matches():
-            await self._warn_stale_bosses()
-            return
-
-        if phase == PHASE_TRAINING:
-            if self.periods.claim_notice(period.cb_period, "training"):
-                await self._announce_training(period)
+        if collecting:
+            if not self._month_matches():
+                await self._warn_stale_bosses()
+                return
+            if self.periods.claim_notice(period.cb_period, "start"):
+                await self._announce_start(period)
             await self._ensure_threads(period)
-        elif phase == PHASE_BATTLE:
-            await self._ensure_threads(period)
-            if self.periods.claim_notice(period.cb_period, "battle"):
-                await self.poster.send_notice(
-                    f"**クラバト本番が始まりました**"
-                    f"（{period.battle_end.astimezone(JST):%m/%d} まで）。"
-                    "収集間隔を短くします。"
-                )
-        elif phase == PHASE_IDLE and previous in (PHASE_TRAINING, PHASE_BATTLE):
+        elif previously_collecting:
             await self._finish_period(period, now)
 
     async def _ensure_threads(self, period: Period) -> None:
@@ -265,13 +242,12 @@ class CollectorBot(discord.Client):
         await self.poster.ensure_boss_threads(period.cb_period)
         self._threads_ready = True
 
-    async def _announce_training(self, period: Period) -> None:
+    async def _announce_start(self, period: Period) -> None:
         embed = self.bosses_embed()
         embed.title = "収集を開始しました"
         embed.description = (
-            f"トレーニング期間: {period.training_start.astimezone(JST):%m/%d %H:%M} 〜\n"
-            f"クラバト本番: {period.battle_start.astimezone(JST):%m/%d} 〜 "
-            f"{period.battle_end.astimezone(JST):%m/%d}"
+            f"収集期間: {period.start.astimezone(JST):%m/%d %H:%M} 〜 "
+            f"{period.end.astimezone(JST):%m/%d %H:%M}"
         )
         await self.poster.send_notice(embed=embed)
 
@@ -290,7 +266,7 @@ class CollectorBot(discord.Client):
             for boss in self.bosses.bosses
         ]
         await self.poster.send_notice(
-            f"**クラバト期間が終了しました**（合計 {sum(counts.values())}件）\n" + "\n".join(lines)
+            f"**収集期間が終了しました**（合計 {sum(counts.values())}件）\n" + "\n".join(lines)
         )
         self.poster.reset_daily_limit_notices()
 
@@ -300,7 +276,7 @@ class CollectorBot(discord.Client):
         if offset is None:
             return
         await self.poster.send_notice(
-            f"**クラバト期間（{offset.training_start.astimezone(JST):%m/%d} 開始予定）ですが、"
+            f"**収集期間（{offset.start.astimezone(JST):%m/%d} 開始予定）ですが、"
             "まだ収集が始まっていません。**\n"
             "`config/bosses.yaml` を今月のボス構成に更新してから `/start` を実行してください。"
         )

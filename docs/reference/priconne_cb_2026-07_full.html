@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>プリコネR クランバトル 2026年7月 — 検索結果（全件）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E0B18; --line:rgba(255,255,255,.10);
+    --text:#EDE9FB; --text-dim:#9A93C4;
+    --b1:#38BDF8; --b2:#818CF8; --b3:#C084FC; --b4:#34D399; --b5:#FB923C;
+    --jp:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    --num:"Saira Condensed","Zen Kaku Gothic New",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 520px at 12% -8%, #2A1F5C 0%, transparent 62%),
+      radial-gradient(800px 400px at 96% 4%, #3A1A47 0%, transparent 58%),
+      var(--ink);
+    color:var(--text); font-family:var(--jp); line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+
+  header{padding:64px 0 28px}
+  .eyebrow{font-family:var(--num);font-size:14px;letter-spacing:.34em;text-transform:uppercase;color:var(--text-dim);margin:0 0 10px}
+  h1{margin:0;font-weight:700;font-size:clamp(30px,5.2vw,52px);letter-spacing:-.01em;line-height:1.18}
+  h1 .month{font-family:var(--num);font-size:1.06em;font-weight:700;
+    background:linear-gradient(92deg,var(--b1),var(--b3) 48%,var(--b5));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .meta{margin:18px 0 0;color:var(--text-dim);font-size:14px;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center}
+  .cmd{font-family:var(--num);font-size:15px;color:var(--text);background:rgba(255,255,255,.055);
+    border:1px solid var(--line);border-radius:6px;padding:2px 10px}
+
+  /* filter */
+  .filter{margin-top:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .switch{display:inline-flex;align-items:center;gap:11px;cursor:pointer;user-select:none;
+    border:1px solid var(--line);border-radius:999px;padding:8px 16px 8px 12px;background:rgba(255,255,255,.04)}
+  .switch input{position:absolute;opacity:0;width:0;height:0}
+  .knob{width:38px;height:21px;border-radius:999px;background:rgba(255,255,255,.14);position:relative;transition:background .2s}
+  .knob::after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;
+    background:var(--text);transition:transform .2s}
+  .switch input:checked + .knob{background:var(--b3)}
+  .switch input:checked + .knob::after{transform:translateX(17px)}
+  .switch input:focus-visible + .knob{outline:2px solid var(--b3);outline-offset:3px}
+  .switch span{font-size:14px}
+  .filter .note{font-size:13px;color:var(--text-dim)}
+
+  nav{position:sticky;top:0;z-index:20;margin:26px 0 0;padding:12px 0;
+    background:rgba(14,11,24,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .navrow{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none}
+  .navrow::-webkit-scrollbar{display:none}
+  .navrow a{flex:0 0 auto;display:flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--text-dim);
+    border:1px solid var(--line);border-radius:999px;padding:7px 15px 7px 11px;font-size:14px;white-space:nowrap;
+    transition:color .18s,border-color .18s,background .18s}
+  .navrow a .n{font-family:var(--num);font-weight:700;font-size:15px;color:var(--c)}
+  .navrow a:hover,.navrow a:focus-visible{color:var(--text);border-color:var(--c);background:rgba(255,255,255,.04)}
+
+  section{padding-top:62px;scroll-margin-top:70px}
+  .bosshead{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .bossno{font-family:var(--num);font-weight:700;font-size:44px;line-height:1;color:var(--c)}
+  .bossname{font-size:26px;font-weight:700;margin:0}
+  .element{font-family:var(--num);font-size:13px;letter-spacing:.2em;color:var(--c);
+    border:1px solid var(--c);border-radius:4px;padding:1px 8px;opacity:.85}
+  .count{margin-left:auto;font-family:var(--num);font-size:15px;color:var(--text-dim);letter-spacing:.06em}
+  .count b{color:var(--c);font-weight:700}
+
+  ol{list-style:none;margin:0;padding:0}
+  li{position:relative;border-bottom:1px solid var(--line);padding:20px 0 18px 18px}
+  li::before{content:"";position:absolute;left:0;top:20px;bottom:18px;width:2px;background:var(--c);
+    opacity:.28;border-radius:2px;transition:opacity .18s}
+  li:hover::before{opacity:1}
+  li.off{opacity:.4}
+  li.off::before{background:var(--text-dim);opacity:.2}
+  li.off:hover{opacity:.75}
+  .title{display:block;color:var(--text);text-decoration:none;font-size:16px;font-weight:500;text-underline-offset:3px}
+  .title:hover,.title:focus-visible{text-decoration:underline;text-decoration-color:var(--c)}
+  .sub{margin-top:9px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;
+    font-family:var(--num);font-size:14px;color:var(--text-dim);letter-spacing:.03em}
+  .date{font-variant-numeric:tabular-nums}
+  .carry{color:var(--text);border:1px solid var(--line);border-radius:4px;padding:0 7px}
+  .url{color:var(--text-dim);text-decoration:none;overflow-wrap:anywhere}
+  .url:hover,.url:focus-visible{color:var(--c);text-decoration:underline}
+
+  .dmg{margin-top:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;max-width:560px}
+  .track{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+  .fill{height:100%;width:var(--w);border-radius:3px;
+    background:linear-gradient(90deg,color-mix(in srgb,var(--c) 45%,transparent),var(--c));
+    transform-origin:left;animation:grow .7s cubic-bezier(.2,.8,.25,1) both}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .figure{font-family:var(--num);font-weight:700;font-size:19px;color:var(--c);line-height:1}
+
+  .empty{display:none;color:var(--text-dim);font-size:14px;padding:22px 0}
+  body.only-priconne li.off{display:none}
+  body.only-priconne section.blank .empty{display:block}
+
+  footer{margin-top:76px;padding-top:22px;border-top:1px solid var(--line);color:var(--text-dim);font-size:13px}
+  a:focus-visible{outline:2px solid var(--c,var(--b3));outline-offset:3px;border-radius:3px}
+
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.fill{animation:none}}
+  @media (max-width:560px){.bossno{font-size:34px}.bossname{font-size:21px}.count{width:100%;margin-left:0}}
+</style>
+</head>
+<body class="only-priconne">
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">priconne-cb-yt-collector</p>
+  <h1>クランバトル 攻略動画<br><span class="month">2026 / 07</span></h1>
+  <p class="meta">
+    <span class="cmd">ytyt.py --boss 1..5（全件出力）</span>
+    <span>取得日時 2026-07-25</span>
+    <span>プリコネ関連 53 件 / 全 126 件</span>
+  </p>
+  <div class="filter">
+    <label class="switch">
+      <input type="checkbox" id="pf" checked>
+      <span class="knob"></span>
+      <span>プリコネ関連のみ表示</span>
+    </label>
+    <span class="note">オフにすると同名の他ゲーム・地名などを含む検索結果も表示します。</span>
+  </div>
+</header>
+
+<nav>
+  <div class="navrow">
+    <a href="#boss1" style="--c:var(--b1)"><span class="n">1</span>ワイバーン</a>
+    <a href="#boss2" style="--c:var(--b2)"><span class="n">2</span>デミ・カリド</a>
+    <a href="#boss3" style="--c:var(--b3)"><span class="n">3</span>ライデン</a>
+    <a href="#boss4" style="--c:var(--b4)"><span class="n">4</span>スピリットホーン</a>
+    <a href="#boss5" style="--c:var(--b5)"><span class="n">5</span>オルレオン</a>
+  </div>
+</nav>
+<section id="boss1" style="--c:var(--b1)">
+  <div class="bosshead">
+    <span class="bossno">01</span>
+    <h2 class="bossname">ワイバーン</h2>
+    <span class="element">水</span>
+    <span class="count"><b>12</b> / 50 件</span>
+  </div>
+  <ol>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=R_rpNozsiGs" target="_blank" rel="noopener">【プリコネR】4段階目 ワイバーン 10351万 24s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:19.0%"></div></div><span class="figure">10351万</span></div>
+      <div class="sub"><span class="date">2026-07-25T13:07:35Z</span><span class="carry">24s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=R_rpNozsiGs" target="_blank" rel="noopener">https://www.youtube.com/watch?v=R_rpNozsiGs</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=RqP7ppkEdtc" target="_blank" rel="noopener">【ASA/ARK】ゆるりおARKでワイバーンGETだぜ！！！【Center/エピファニー】</a>
+      <div class="sub"><span class="date">2026-07-25T13:04:13Z</span><a class="url" href="https://www.youtube.com/watch?v=RqP7ppkEdtc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=RqP7ppkEdtc</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=DbX5kK-Lymo" target="_blank" rel="noopener">【ARK】前回のリベンジ！絶対にファイアワイバーンの高レベル卵手に入れる！ #ARKasa #scorchedearth【Foreigner/Capsule】</a>
+      <div class="sub"><span class="date">2026-07-25T11:39:38Z</span><a class="url" href="https://www.youtube.com/watch?v=DbX5kK-Lymo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=DbX5kK-Lymo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=uOjqYkyrgUU" target="_blank" rel="noopener">【ARK：ASA】目指せ！190のワイバーン卵！※参加条件ある参加型です</a>
+      <div class="sub"><span class="date">2026-07-25T11:40:39Z</span><a class="url" href="https://www.youtube.com/watch?v=uOjqYkyrgUU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=uOjqYkyrgUU</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=PRqHPyGRpBs" target="_blank" rel="noopener">【#ARK: Survival Ascended】　ワイバーン探すぞおら！！　またびぃ鯖</a>
+      <div class="sub"><span class="date">2026-07-25T10:10:47Z</span><a class="url" href="https://www.youtube.com/watch?v=PRqHPyGRpBs" target="_blank" rel="noopener">https://www.youtube.com/watch?v=PRqHPyGRpBs</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=VaFO4DKQZMU" target="_blank" rel="noopener">【プリコネ】ワイバーン魔法参考5.46億（目押し8）</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">5.46億</span></div>
+      <div class="sub"><span class="date">2026-07-25T06:32:23Z</span><a class="url" href="https://www.youtube.com/watch?v=VaFO4DKQZMU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=VaFO4DKQZMU</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=pcvSa-vLnaI" target="_blank" rel="noopener">【モンスターのテーマ曲】🐉 ワイバーン🌪️ 空を裂く双翼の襲撃　Wyvern</a>
+      <div class="sub"><span class="date">2026-07-25T03:21:07Z</span><a class="url" href="https://www.youtube.com/watch?v=pcvSa-vLnaI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=pcvSa-vLnaI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=rAni2GXDklI" target="_blank" rel="noopener">POV: Lava Citadel Assault on an Inferno Wyvern 🌋🐉 | Epic Dragon Flight #Shorts</a>
+      <div class="sub"><span class="date">2026-07-25T03:12:17Z</span><a class="url" href="https://www.youtube.com/watch?v=rAni2GXDklI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=rAni2GXDklI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=yukEFh6FqRk" target="_blank" rel="noopener">【紅の砂漠】ワイバーンに浮気をしドラゴンが実家から出て行ったけど、戻ってきたのでメインストーリーを進めたいと思います</a>
+      <div class="sub"><span class="date">2026-07-25T01:58:06Z</span><a class="url" href="https://www.youtube.com/watch?v=yukEFh6FqRk" target="_blank" rel="noopener">https://www.youtube.com/watch?v=yukEFh6FqRk</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=jRX0AZe05d8" target="_blank" rel="noopener">すいません、強いライトニングワイバーンでもよろしいですか？ | #minetaros (#Twitch)＃ARK＃ASA</a>
+      <div class="sub"><span class="date">2026-07-25T00:48:21Z</span><a class="url" href="https://www.youtube.com/watch?v=jRX0AZe05d8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=jRX0AZe05d8</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=J93UVX2VM8I" target="_blank" rel="noopener">大切に育てたﾜｲﾊﾞｰﾝが…(´;ω;｀) | #minetaros (#Twitch)＃ASA</a>
+      <div class="sub"><span class="date">2026-07-25T00:38:26Z</span><a class="url" href="https://www.youtube.com/watch?v=J93UVX2VM8I" target="_blank" rel="noopener">https://www.youtube.com/watch?v=J93UVX2VM8I</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=9OMbOxLEka8" target="_blank" rel="noopener">【ARK:SA/PC版】 ワイバーンの巣を探索</a>
+      <div class="sub"><span class="date">2026-07-24T23:10:30Z</span><a class="url" href="https://www.youtube.com/watch?v=9OMbOxLEka8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=9OMbOxLEka8</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Tmkk2O0n_OI" target="_blank" rel="noopener">What is Kaiba (DSOD) Voice Line With Assault Wyvern? Yu-Gi-Oh! Duel Links</a>
+      <div class="sub"><span class="date">2026-07-24T21:00:05Z</span><a class="url" href="https://www.youtube.com/watch?v=Tmkk2O0n_OI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Tmkk2O0n_OI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=I4FT0Lnj1uY" target="_blank" rel="noopener">【#大ARK 】アルゲンをお迎えに行く5日目【ドラク・ワイバーン/JPVTuber】</a>
+      <div class="sub"><span class="date">2026-07-24T19:01:53Z</span><a class="url" href="https://www.youtube.com/watch?v=I4FT0Lnj1uY" target="_blank" rel="noopener">https://www.youtube.com/watch?v=I4FT0Lnj1uY</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=8S0SXoyApPk" target="_blank" rel="noopener">親ガチャに失敗するワイバーン | #kimimikimi (#Twitch)</a>
+      <div class="sub"><span class="date">2026-07-24T17:32:30Z</span><a class="url" href="https://www.youtube.com/watch?v=8S0SXoyApPk" target="_blank" rel="noopener">https://www.youtube.com/watch?v=8S0SXoyApPk</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=UB-73zrT6KA" target="_blank" rel="noopener">ワイバーン 水魔法v2 46585 m1</a>
+      <div class="sub"><span class="date">2026-07-24T16:55:49Z</span><a class="url" href="https://www.youtube.com/watch?v=UB-73zrT6KA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UB-73zrT6KA</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Ff_ODW16AcU" target="_blank" rel="noopener">【ARK】スコーチドアースの支配者！100レベル越え個体！ファイアワイバーン・ポイズンワイバーンのテイムを目指す！#ARKasa #scorchedearth【Foreigner/Capsule】</a>
+      <div class="sub"><span class="date">2026-07-24T14:03:28Z</span><a class="url" href="https://www.youtube.com/watch?v=Ff_ODW16AcU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Ff_ODW16AcU</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=Q2Sr6TDoaMU" target="_blank" rel="noopener">【プリコネR】4段階 ワイバーン 4.46億 目押し4</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:81.7%"></div></div><span class="figure">4.46億</span></div>
+      <div class="sub"><span class="date">2026-07-24T13:02:19Z</span><a class="url" href="https://www.youtube.com/watch?v=Q2Sr6TDoaMU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Q2Sr6TDoaMU</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=wlQxbto51jQ" target="_blank" rel="noopener">【プリコネ】ワイバーン魔法参考5.44億（目押し7）</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:99.6%"></div></div><span class="figure">5.44億</span></div>
+      <div class="sub"><span class="date">2026-07-24T10:52:02Z</span><a class="url" href="https://www.youtube.com/watch?v=wlQxbto51jQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=wlQxbto51jQ</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=PkqIvFHxxXU" target="_blank" rel="noopener">【dark and darker】＃36：マグマワイバーン【ダークアンドダーカー】</a>
+      <div class="sub"><span class="date">2026-07-24T09:20:08Z</span><a class="url" href="https://www.youtube.com/watch?v=PkqIvFHxxXU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=PkqIvFHxxXU</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=UoW7iGzLEzM" target="_blank" rel="noopener">【ASA SA編】ワイバーンの卵を採るのは命がけだ！</a>
+      <div class="sub"><span class="date">2026-07-24T08:00:29Z</span><a class="url" href="https://www.youtube.com/watch?v=UoW7iGzLEzM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UoW7iGzLEzM</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=SCbXtPXShc8" target="_blank" rel="noopener">POV: Riding an Inferno Wyvern Over a Burning Fortress 🔥🐉 | Cinematic Dragon Ride #shorts</a>
+      <div class="sub"><span class="date">2026-07-24T03:25:18Z</span><a class="url" href="https://www.youtube.com/watch?v=SCbXtPXShc8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=SCbXtPXShc8</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=oWuOir7yeEo" target="_blank" rel="noopener">BATTLE 27! BREAKING HOVER WYVERN! #beyblade #beybladex</a>
+      <div class="sub"><span class="date">2026-07-24T02:46:21Z</span><a class="url" href="https://www.youtube.com/watch?v=oWuOir7yeEo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=oWuOir7yeEo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=zT71m2fQvpk" target="_blank" rel="noopener">有間の配信：ワイバーンf-0</a>
+      <div class="sub"><span class="date">2026-07-24T01:51:36Z</span><a class="url" href="https://www.youtube.com/watch?v=zT71m2fQvpk" target="_blank" rel="noopener">https://www.youtube.com/watch?v=zT71m2fQvpk</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=_gprRP4wf_A" target="_blank" rel="noopener">【30MF】みんなでワイバーン隊を作ろう！！！！！！！！【プラモデル】</a>
+      <div class="sub"><span class="date">2026-07-24T01:38:45Z</span><a class="url" href="https://www.youtube.com/watch?v=_gprRP4wf_A" target="_blank" rel="noopener">https://www.youtube.com/watch?v=_gprRP4wf_A</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=pw4rhACDE8o" target="_blank" rel="noopener">【プリコネR】クランバトル　ワイバーン　２．７億【水物】【フルオート】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:49.5%"></div></div><span class="figure">2.7億</span></div>
+      <div class="sub"><span class="date">2026-07-24T00:18:34Z</span><a class="url" href="https://www.youtube.com/watch?v=pw4rhACDE8o" target="_blank" rel="noopener">https://www.youtube.com/watch?v=pw4rhACDE8o</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=in8jBwlC8Z0" target="_blank" rel="noopener">スレイヤーレジェンド。火のワイバーン。</a>
+      <div class="sub"><span class="date">2026-07-23T23:15:16Z</span><a class="url" href="https://www.youtube.com/watch?v=in8jBwlC8Z0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=in8jBwlC8Z0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=znSUnKIgbP4" target="_blank" rel="noopener">BREAKING HOVER WYVERN! SMALL UPDATE! #beyblade #beybladex</a>
+      <div class="sub"><span class="date">2026-07-23T21:45:59Z</span><a class="url" href="https://www.youtube.com/watch?v=znSUnKIgbP4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=znSUnKIgbP4</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=PQiZxcTtGJw" target="_blank" rel="noopener">Tales of Zestiria Playthrough Part 121 Wyvern at the Wetlands</a>
+      <div class="sub"><span class="date">2026-07-23T21:00:24Z</span><a class="url" href="https://www.youtube.com/watch?v=PQiZxcTtGJw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=PQiZxcTtGJw</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=JdE8gT9ndyE" target="_blank" rel="noopener">ワイバーンからは逃げ切ったのに！ | #kimimikimi (#Twitch)</a>
+      <div class="sub"><span class="date">2026-07-23T20:57:55Z</span><a class="url" href="https://www.youtube.com/watch?v=JdE8gT9ndyE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=JdE8gT9ndyE</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=f2cfTwxZODk" target="_blank" rel="noopener">Hotfix #120 難易度が少し上がったファイアワイバーンの倒し方【Dark and Darker】</a>
+      <div class="sub"><span class="date">2026-07-23T20:24:30Z</span><a class="url" href="https://www.youtube.com/watch?v=f2cfTwxZODk" target="_blank" rel="noopener">https://www.youtube.com/watch?v=f2cfTwxZODk</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=VYh-_pDi19g" target="_blank" rel="noopener">#anime</a>
+      <div class="sub"><span class="date">2026-07-23T16:58:10Z</span><a class="url" href="https://www.youtube.com/watch?v=VYh-_pDi19g" target="_blank" rel="noopener">https://www.youtube.com/watch?v=VYh-_pDi19g</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=BdgJMYp02C8" target="_blank" rel="noopener">【ARK：ASA】目指せ！190のワイバーン卵！※参加条件ある参加型です</a>
+      <div class="sub"><span class="date">2026-07-23T14:40:59Z</span><a class="url" href="https://www.youtube.com/watch?v=BdgJMYp02C8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=BdgJMYp02C8</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=63dvd6MAiuU" target="_blank" rel="noopener">【プリコネ】ワイバーン魔法参考5.31億（目押し1）</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:97.3%"></div></div><span class="figure">5.31億</span></div>
+      <div class="sub"><span class="date">2026-07-23T14:11:19Z</span><a class="url" href="https://www.youtube.com/watch?v=63dvd6MAiuU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=63dvd6MAiuU</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=rezuD_-H0_0" target="_blank" rel="noopener">【プリコネR】4段階 ワイバーン 16640万 41s</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:30.5%"></div></div><span class="figure">16640万</span></div>
+      <div class="sub"><span class="date">2026-07-23T13:54:25Z</span><span class="carry">41s</span><a class="url" href="https://www.youtube.com/watch?v=rezuD_-H0_0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=rezuD_-H0_0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=EcpKbXaVino" target="_blank" rel="noopener">molten wyvern virals shorts# #mechanical #robot</a>
+      <div class="sub"><span class="date">2026-07-23T13:40:08Z</span><a class="url" href="https://www.youtube.com/watch?v=EcpKbXaVino" target="_blank" rel="noopener">https://www.youtube.com/watch?v=EcpKbXaVino</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=zK0lFITg4Ig" target="_blank" rel="noopener">【復活して！】ワイバーンワーディアン 言獣覚醒ワーディアン レビュー 食玩 バンダイキャンディ</a>
+      <div class="sub"><span class="date">2026-07-23T13:04:10Z</span><a class="url" href="https://www.youtube.com/watch?v=zK0lFITg4Ig" target="_blank" rel="noopener">https://www.youtube.com/watch?v=zK0lFITg4Ig</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=slPnJrVP3hc" target="_blank" rel="noopener">ポロ　『ワイバーン』</a>
+      <div class="sub"><span class="date">2026-07-23T12:48:58Z</span><a class="url" href="https://www.youtube.com/watch?v=slPnJrVP3hc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=slPnJrVP3hc</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=UHq4gBK6Ji0" target="_blank" rel="noopener">プリコネ クラバト 2026年7月 2段階目 ワイバーン(1ボス) ＆ デミ・カリド(2ボス)共通 魔法消滅編成(クリイリヤ、アンパイ、水ナナカ、水ハツネ、水キョウカ)</a>
+      <div class="sub"><span class="date">2026-07-23T11:08:30Z</span><a class="url" href="https://www.youtube.com/watch?v=UHq4gBK6Ji0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UHq4gBK6Ji0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=IteN7qNGSXE" target="_blank" rel="noopener">🐉 Baby Wyvern Hatches from Its Egg! | Epic Fantasy #Shorts</a>
+      <div class="sub"><span class="date">2026-07-23T10:00:12Z</span><a class="url" href="https://www.youtube.com/watch?v=IteN7qNGSXE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=IteN7qNGSXE</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=rBcGoLU07a8" target="_blank" rel="noopener">【プリコネ】ワイバーン魔法参考5.38億(目押し8)たたき台</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:98.5%"></div></div><span class="figure">5.38億</span></div>
+      <div class="sub"><span class="date">2026-07-23T09:44:28Z</span><a class="url" href="https://www.youtube.com/watch?v=rBcGoLU07a8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=rBcGoLU07a8</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=lOpxWPpPF1U" target="_blank" rel="noopener">ワイバーン倒せません；； | #uma_umaho_ (#Twitch #VRChatter #DarkandDarker #dad)</a>
+      <div class="sub"><span class="date">2026-07-23T09:19:22Z</span><a class="url" href="https://www.youtube.com/watch?v=lOpxWPpPF1U" target="_blank" rel="noopener">https://www.youtube.com/watch?v=lOpxWPpPF1U</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=XquSUSe9JBw" target="_blank" rel="noopener">【ARK ASA】ポイズンワイバーン！！！ #ARKasa #arkasa【Rei/Capsule】</a>
+      <div class="sub"><span class="date">2026-07-23T07:13:45Z</span><a class="url" href="https://www.youtube.com/watch?v=XquSUSe9JBw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=XquSUSe9JBw</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=fH_-2Ss08g0" target="_blank" rel="noopener">【プリコネR】4段階目 ワイバーン 8659万 22s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:15.9%"></div></div><span class="figure">8659万</span></div>
+      <div class="sub"><span class="date">2026-07-23T04:44:59Z</span><span class="carry">22s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=fH_-2Ss08g0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=fH_-2Ss08g0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Fop6mX-Ogyg" target="_blank" rel="noopener">[ASA] #12  スコーチドアースリボーン編　サンドワイバーンの卵盗み</a>
+      <div class="sub"><span class="date">2026-07-23T04:25:35Z</span><a class="url" href="https://www.youtube.com/watch?v=Fop6mX-Ogyg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Fop6mX-Ogyg</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=Ue75wX7zKgY" target="_blank" rel="noopener">【プリコネR】4段階目 ワイバーン 9234万 23s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:16.9%"></div></div><span class="figure">9234万</span></div>
+      <div class="sub"><span class="date">2026-07-23T04:04:32Z</span><span class="carry">23s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=Ue75wX7zKgY" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Ue75wX7zKgY</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=We9QcU8U0e8" target="_blank" rel="noopener">new マグマワイバーンはじめました</a>
+      <div class="sub"><span class="date">2026-07-22T21:15:24Z</span><a class="url" href="https://www.youtube.com/watch?v=We9QcU8U0e8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=We9QcU8U0e8</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=x5CswLtsHBo" target="_blank" rel="noopener">【初見】 耐久！★高レベル＆オス★のライトニングワイバーンテイムするまで終われまｯ!? 【新人Vtuber】【ARK: Survival Ascended】</a>
+      <div class="sub"><span class="date">2026-07-22T17:26:39Z</span><a class="url" href="https://www.youtube.com/watch?v=x5CswLtsHBo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=x5CswLtsHBo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=O8-IS4Q9ogc" target="_blank" rel="noopener">【ARK ASA】ポイズンワイバーン！！！ #ARKasa #arkasa【Rei/Capsule】</a>
+      <div class="sub"><span class="date">2026-07-22T16:32:26Z</span><a class="url" href="https://www.youtube.com/watch?v=O8-IS4Q9ogc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=O8-IS4Q9ogc</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=2qhXpaTn01A" target="_blank" rel="noopener">🐘 Elephant vs Wyvern 🐉 | The Ultimate Battle for Survival! 👑 | Epic Monster Battle</a>
+      <div class="sub"><span class="date">2026-07-22T16:00:12Z</span><a class="url" href="https://www.youtube.com/watch?v=2qhXpaTn01A" target="_blank" rel="noopener">https://www.youtube.com/watch?v=2qhXpaTn01A</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+
+<section id="boss2" style="--c:var(--b2)">
+  <div class="bosshead">
+    <span class="bossno">02</span>
+    <h2 class="bossname">デミ・カリド</h2>
+    <span class="element">水</span>
+    <span class="count"><b>9</b> / 9 件</span>
+  </div>
+  <ol>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=e2tVrJ5ApZM" target="_blank" rel="noopener">【プリコネR】2026.7月クランバトル4段階目編成！今月もサクッと行きたい件</a>
+      <div class="sub"><span class="date">2026-07-25T13:25:49Z</span><a class="url" href="https://www.youtube.com/watch?v=e2tVrJ5ApZM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=e2tVrJ5ApZM</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=ROWNqbTRvuI" target="_blank" rel="noopener">【プリコネR】2026年7月クランバトル3段階目消滅凸　フルオート討伐編成　90秒持ち越し【クラバト】【ワイバーン】【デミ・カリド】【ライデン】【スピリットホーン】【オルレオン】</a>
+      <div class="sub"><span class="date">2026-07-25T11:59:36Z</span><span class="carry">90秒 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=ROWNqbTRvuI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ROWNqbTRvuI</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=rJX-uvPT5yg" target="_blank" rel="noopener">プリコネR 202607デミ・カリド火魔法 4段階目 37900 目押し1</a>
+      <div class="sub"><span class="date">2026-07-25T05:03:19Z</span><a class="url" href="https://www.youtube.com/watch?v=rJX-uvPT5yg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=rJX-uvPT5yg</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=Hiu8VSZTgsI" target="_blank" rel="noopener">【プリコネR】クランバトル　デミ・カリド　３億【水魔】【フルオート】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">3億</span></div>
+      <div class="sub"><span class="date">2026-07-24T00:27:45Z</span><a class="url" href="https://www.youtube.com/watch?v=Hiu8VSZTgsI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Hiu8VSZTgsI</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=itdtqrXJR_8" target="_blank" rel="noopener">【プリコネR】4段階目 デミ・カリド 14071万 38s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:46.9%"></div></div><span class="figure">14071万</span></div>
+      <div class="sub"><span class="date">2026-07-23T11:12:38Z</span><span class="carry">38s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=itdtqrXJR_8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=itdtqrXJR_8</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=UHq4gBK6Ji0" target="_blank" rel="noopener">プリコネ クラバト 2026年7月 2段階目 ワイバーン(1ボス) ＆ デミ・カリド(2ボス)共通 魔法消滅編成(クリイリヤ、アンパイ、水ナナカ、水ハツネ、水キョウカ)</a>
+      <div class="sub"><span class="date">2026-07-23T11:08:30Z</span><a class="url" href="https://www.youtube.com/watch?v=UHq4gBK6Ji0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UHq4gBK6Ji0</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=lE6abR5SVLw" target="_blank" rel="noopener">【プリコネR】4段階 デミ・カリド 12640万 38s</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:42.1%"></div></div><span class="figure">12640万</span></div>
+      <div class="sub"><span class="date">2026-07-23T07:58:16Z</span><span class="carry">38s</span><a class="url" href="https://www.youtube.com/watch?v=lE6abR5SVLw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=lE6abR5SVLw</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=Okku-sfAHSs" target="_blank" rel="noopener">【プリコネR】4段階目 デミ・カリド 5696万 21s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:19.0%"></div></div><span class="figure">5696万</span></div>
+      <div class="sub"><span class="date">2026-07-23T05:42:10Z</span><span class="carry">21s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=Okku-sfAHSs" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Okku-sfAHSs</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=iCrf-ux9Q2A" target="_blank" rel="noopener">【プリコネR】4段階目 デミ・カリド 6615万 23s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:22.1%"></div></div><span class="figure">6615万</span></div>
+      <div class="sub"><span class="date">2026-07-23T05:14:15Z</span><span class="carry">23s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=iCrf-ux9Q2A" target="_blank" rel="noopener">https://www.youtube.com/watch?v=iCrf-ux9Q2A</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+
+<section id="boss3" style="--c:var(--b3)">
+  <div class="bosshead">
+    <span class="bossno">03</span>
+    <h2 class="bossname">ライデン</h2>
+    <span class="element">闇</span>
+    <span class="count"><b>12</b> / 47 件</span>
+  </div>
+  <ol>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=MIm9LEfEPlg" target="_blank" rel="noopener">ライデンファイターズ２ 配信 mk-Ⅱβ #4</a>
+      <div class="sub"><span class="date">2026-07-25T14:15:20Z</span><a class="url" href="https://www.youtube.com/watch?v=MIm9LEfEPlg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=MIm9LEfEPlg</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=l9gT9KQXRMU" target="_blank" rel="noopener">【プリコネ】4段階目ライデン　目押し8箇所5億前後</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">5億</span></div>
+      <div class="sub"><span class="date">2026-07-25T12:32:43Z</span><a class="url" href="https://www.youtube.com/watch?v=l9gT9KQXRMU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=l9gT9KQXRMU</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=sB8LfJyIvpA" target="_blank" rel="noopener">【ポケモンチャンピオンズ】参加型休日ポケチャン対戦会！【個人勢vtuber/ライデン】</a>
+      <div class="sub"><span class="date">2026-07-25T10:56:38Z</span><a class="url" href="https://www.youtube.com/watch?v=sB8LfJyIvpA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=sB8LfJyIvpA</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=3pOkeXdFN2g" target="_blank" rel="noopener">Deel 6:💥Rembrandt dagen feesten💥Leiden 💥Rembrandt van Rijn💥Leiden</a>
+      <div class="sub"><span class="date">2026-07-25T08:00:06Z</span><a class="url" href="https://www.youtube.com/watch?v=3pOkeXdFN2g" target="_blank" rel="noopener">https://www.youtube.com/watch?v=3pOkeXdFN2g</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Qg2LOUcnLkM" target="_blank" rel="noopener">【KOFXV】夜活KOF！【個人勢vtuber/ライデン】</a>
+      <div class="sub"><span class="date">2026-07-25T06:10:32Z</span><a class="url" href="https://www.youtube.com/watch?v=Qg2LOUcnLkM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Qg2LOUcnLkM</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=UdUvrTBO5U8" target="_blank" rel="noopener">【プリコネR】4段階目 ライデン 7558万 22s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:15.1%"></div></div><span class="figure">7558万</span></div>
+      <div class="sub"><span class="date">2026-07-25T04:17:56Z</span><span class="carry">22s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=UdUvrTBO5U8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UdUvrTBO5U8</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=ZFpYd6Ec-AI" target="_blank" rel="noopener">【プリコネR】4段階目 ライデン 15457万 39s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:30.9%"></div></div><span class="figure">15457万</span></div>
+      <div class="sub"><span class="date">2026-07-25T01:53:49Z</span><span class="carry">39s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=ZFpYd6Ec-AI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ZFpYd6Ec-AI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Sx0NbcfcIyM" target="_blank" rel="noopener">kung Lao is doubtful of Raiden .  #mk11 #mortalkombat</a>
+      <div class="sub"><span class="date">2026-07-25T00:39:54Z</span><a class="url" href="https://www.youtube.com/watch?v=Sx0NbcfcIyM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Sx0NbcfcIyM</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=YHJVzwIuzgg" target="_blank" rel="noopener">They jumped my boi raiden #gaming #trending #shorts #mortalkombat</a>
+      <div class="sub"><span class="date">2026-07-24T23:00:27Z</span><a class="url" href="https://www.youtube.com/watch?v=YHJVzwIuzgg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=YHJVzwIuzgg</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=mP-JExdpYxA" target="_blank" rel="noopener">獣電戦隊キョウリュウジャーブレイブ ブレイブライデンキョウリュウジン</a>
+      <div class="sub"><span class="date">2026-07-24T20:14:24Z</span><a class="url" href="https://www.youtube.com/watch?v=mP-JExdpYxA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=mP-JExdpYxA</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=tTxSqQc77fk" target="_blank" rel="noopener">【プリコネR】4段階目 ライデン 13297万 22s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:26.6%"></div></div><span class="figure">13297万</span></div>
+      <div class="sub"><span class="date">2026-07-24T19:29:26Z</span><span class="carry">22s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=tTxSqQc77fk" target="_blank" rel="noopener">https://www.youtube.com/watch?v=tTxSqQc77fk</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=fwKs_Ia0gao" target="_blank" rel="noopener">【プリコネR】4段階目 ライデン 13145万 22s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:26.3%"></div></div><span class="figure">13145万</span></div>
+      <div class="sub"><span class="date">2026-07-24T17:55:10Z</span><span class="carry">22s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=fwKs_Ia0gao" target="_blank" rel="noopener">https://www.youtube.com/watch?v=fwKs_Ia0gao</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=anSTCcxL5IQ" target="_blank" rel="noopener">STATUS SHOCK| Mortal X Kombat - Raiden v Raiden</a>
+      <div class="sub"><span class="date">2026-07-24T15:26:21Z</span><a class="url" href="https://www.youtube.com/watch?v=anSTCcxL5IQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=anSTCcxL5IQ</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=vW-5bLM-0B4" target="_blank" rel="noopener">MK1 Guava Peridot479 (CONAN) VS Montaza Angel (RAIDEN)🥊Mortal Kombat 1🥊4K 60ᶠᵖˢ</a>
+      <div class="sub"><span class="date">2026-07-24T14:00:10Z</span><a class="url" href="https://www.youtube.com/watch?v=vW-5bLM-0B4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=vW-5bLM-0B4</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=MZkOQKyuUxM" target="_blank" rel="noopener">ライデンファイターズとマイクテスト</a>
+      <div class="sub"><span class="date">2026-07-24T12:32:43Z</span><a class="url" href="https://www.youtube.com/watch?v=MZkOQKyuUxM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=MZkOQKyuUxM</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=vXrl2FNGVDU" target="_blank" rel="noopener">RAIDEN VS CASSIE CAGE FIGHT</a>
+      <div class="sub"><span class="date">2026-07-24T12:30:35Z</span><a class="url" href="https://www.youtube.com/watch?v=vXrl2FNGVDU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=vXrl2FNGVDU</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=jrIMJ0_GpgM" target="_blank" rel="noopener">【プリコネR】（追記あり）4段階目ライデン　物理（闇）4億4200万【7月クランバトル】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:88.4%"></div></div><span class="figure">4億4200万</span></div>
+      <div class="sub"><span class="date">2026-07-24T10:24:34Z</span><a class="url" href="https://www.youtube.com/watch?v=jrIMJ0_GpgM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=jrIMJ0_GpgM</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=copcKjqG85g" target="_blank" rel="noopener">カプエス2 不知火舞vsライデン 地獄の5ラウンド制10先で対戦！Mai Shiranui vs Raiden @CAPCOM vs SNK 2 MILLIONAIRE FIGHTING 2001</a>
+      <div class="sub"><span class="date">2026-07-24T09:00:35Z</span><a class="url" href="https://www.youtube.com/watch?v=copcKjqG85g" target="_blank" rel="noopener">https://www.youtube.com/watch?v=copcKjqG85g</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Ps_AtqVFDAo" target="_blank" rel="noopener">Schüco Short #81 - Naturalis, Leiden - INSPIRING DUTCH ARCHITECTURE IN 1 MINUTE</a>
+      <div class="sub"><span class="date">2026-07-24T08:00:06Z</span><a class="url" href="https://www.youtube.com/watch?v=Ps_AtqVFDAo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Ps_AtqVFDAo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=wnEf8lvijWw" target="_blank" rel="noopener">I Found Europe&#39;s Cutest Town... And No One Talks About It! | Leiden - The Best Kept Secret</a>
+      <div class="sub"><span class="date">2026-07-24T06:00:32Z</span><a class="url" href="https://www.youtube.com/watch?v=wnEf8lvijWw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=wnEf8lvijWw</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=W-aolJLUNJA" target="_blank" rel="noopener">C6 Raiden VS Stygian Dire #GenshinImpact</a>
+      <div class="sub"><span class="date">2026-07-24T03:54:11Z</span><a class="url" href="https://www.youtube.com/watch?v=W-aolJLUNJA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=W-aolJLUNJA</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=SPU5rp19Xcs" target="_blank" rel="noopener">Watch This Video So Raiden Will Get Buffed (Unhinged Whale)</a>
+      <div class="sub"><span class="date">2026-07-24T03:34:16Z</span><a class="url" href="https://www.youtube.com/watch?v=SPU5rp19Xcs" target="_blank" rel="noopener">https://www.youtube.com/watch?v=SPU5rp19Xcs</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=p5krGfgbaDE" target="_blank" rel="noopener">【プリコネR】クランバトル　ライデン　３．３億【闇物】【フルオート】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:66.0%"></div></div><span class="figure">3.3億</span></div>
+      <div class="sub"><span class="date">2026-07-24T00:33:29Z</span><a class="url" href="https://www.youtube.com/watch?v=p5krGfgbaDE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=p5krGfgbaDE</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=LeUfKaf72LE" target="_blank" rel="noopener">Kung lao meets Raiden Mortal Kombat X #MortalKombat #MK11 #mk1</a>
+      <div class="sub"><span class="date">2026-07-24T00:00:24Z</span><a class="url" href="https://www.youtube.com/watch?v=LeUfKaf72LE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=LeUfKaf72LE</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=74e2o4pwIoM" target="_blank" rel="noopener">Two Overload Teams!? Mavuika &amp; Raiden DESTROY Spiral Abyss 12 | Genshin Impact</a>
+      <div class="sub"><span class="date">2026-07-23T17:06:17Z</span><a class="url" href="https://www.youtube.com/watch?v=74e2o4pwIoM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=74e2o4pwIoM</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=F6HwocKUR68" target="_blank" rel="noopener">Deel 5:💥Rembrandt dagen feesten💥Leiden 💥Rembrandt van Rijn💥Leiden</a>
+      <div class="sub"><span class="date">2026-07-23T13:00:06Z</span><a class="url" href="https://www.youtube.com/watch?v=F6HwocKUR68" target="_blank" rel="noopener">https://www.youtube.com/watch?v=F6HwocKUR68</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=f7q5JllvS90" target="_blank" rel="noopener">【ポケモンチャンピオンズ】参加型昼活ポケチャン対戦会！【個人勢vtuber/ライデン】</a>
+      <div class="sub"><span class="date">2026-07-23T21:48:21Z</span><a class="url" href="https://www.youtube.com/watch?v=f7q5JllvS90" target="_blank" rel="noopener">https://www.youtube.com/watch?v=f7q5JllvS90</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=flJ0_nydE1g" target="_blank" rel="noopener">Gay Open Relationships: The Honest Truth | Interview with Andrew Reidenbach</a>
+      <div class="sub"><span class="date">2026-07-23T20:45:24Z</span><a class="url" href="https://www.youtube.com/watch?v=flJ0_nydE1g" target="_blank" rel="noopener">https://www.youtube.com/watch?v=flJ0_nydE1g</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=tD7sCqk-pjE" target="_blank" rel="noopener">TOP BROODJESZAAK IN LEIDEN! #broodjes</a>
+      <div class="sub"><span class="date">2026-07-23T17:08:23Z</span><a class="url" href="https://www.youtube.com/watch?v=tD7sCqk-pjE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=tD7sCqk-pjE</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=FQkxgHHQvh0" target="_blank" rel="noopener">TOTAL FREE PULLS IN 6.7 PHASE 2!!! COLUMBINA, RAIDEN + 7.0 BANNERS &amp; ALYOSHA NERF - Genshin Impact</a>
+      <div class="sub"><span class="date">2026-07-23T12:08:46Z</span><a class="url" href="https://www.youtube.com/watch?v=FQkxgHHQvh0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=FQkxgHHQvh0</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=XOIUnNo6q-I" target="_blank" rel="noopener">【プリコネR】4段階目ライデン　物理（闇）4億2400万【7月クランバトル】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:84.8%"></div></div><span class="figure">4億2400万</span></div>
+      <div class="sub"><span class="date">2026-07-23T11:48:51Z</span><a class="url" href="https://www.youtube.com/watch?v=XOIUnNo6q-I" target="_blank" rel="noopener">https://www.youtube.com/watch?v=XOIUnNo6q-I</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=gORd45mJGqo" target="_blank" rel="noopener">プリコネ クラバト 2026年7月 2段階目 ライデン(3ボス) ＆ スピリットホーン(4ボス)共通 物理消滅編成(星6トモ、クリぴょん、ユカキャン、リンジャー、アリノ)</a>
+      <div class="sub"><span class="date">2026-07-23T10:33:07Z</span><a class="url" href="https://www.youtube.com/watch?v=gORd45mJGqo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=gORd45mJGqo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=HAj_Xjao7_c" target="_blank" rel="noopener">Raiden Uses His Fatality On D&#39;Vorah #shorts #mortalkombat</a>
+      <div class="sub"><span class="date">2026-07-23T07:28:53Z</span><a class="url" href="https://www.youtube.com/watch?v=HAj_Xjao7_c" target="_blank" rel="noopener">https://www.youtube.com/watch?v=HAj_Xjao7_c</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=OoAzLxN6Wgk" target="_blank" rel="noopener">【プリコネR】4段階目 ライデン 8941万 21s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:17.9%"></div></div><span class="figure">8941万</span></div>
+      <div class="sub"><span class="date">2026-07-23T07:14:39Z</span><span class="carry">21s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=OoAzLxN6Wgk" target="_blank" rel="noopener">https://www.youtube.com/watch?v=OoAzLxN6Wgk</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=HW7xBphIWe0" target="_blank" rel="noopener">【プリコネR】4段階目 ライデン 11188万 22s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:22.4%"></div></div><span class="figure">11188万</span></div>
+      <div class="sub"><span class="date">2026-07-23T06:24:35Z</span><span class="carry">22s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=HW7xBphIWe0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=HW7xBphIWe0</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=xkhItmUHdec" target="_blank" rel="noopener">ライデン妥協3.5 マス93 コネクトall15</a>
+      <div class="sub"><span class="date">2026-07-23T06:01:06Z</span><a class="url" href="https://www.youtube.com/watch?v=xkhItmUHdec" target="_blank" rel="noopener">https://www.youtube.com/watch?v=xkhItmUHdec</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=QwxeJ8VpigM" target="_blank" rel="noopener">化け物にモテたって仕方ないのにね　#ライデンヌポテト #ゲーム実況 #配信  #サイレントヒル2 #サイレントヒル2リメイク</a>
+      <div class="sub"><span class="date">2026-07-23T05:28:53Z</span><a class="url" href="https://www.youtube.com/watch?v=QwxeJ8VpigM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=QwxeJ8VpigM</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=0-JU_tu3EUQ" target="_blank" rel="noopener">Batman Arkham Knight - Batman (Mark 11 Suit Nth Metal) &amp; Raiden Vs Albert King</a>
+      <div class="sub"><span class="date">2026-07-23T02:19:46Z</span><a class="url" href="https://www.youtube.com/watch?v=0-JU_tu3EUQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=0-JU_tu3EUQ</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=rV0gmm6NU_I" target="_blank" rel="noopener">LIVE! Viewer pulls! for Columbina and Raiden</a>
+      <div class="sub"><span class="date">2026-07-23T01:52:16Z</span><a class="url" href="https://www.youtube.com/watch?v=rV0gmm6NU_I" target="_blank" rel="noopener">https://www.youtube.com/watch?v=rV0gmm6NU_I</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=gXotd-r69HM" target="_blank" rel="noopener">【KOFXV】夜活KOF！【個人勢vtuber/ライデン】</a>
+      <div class="sub"><span class="date">2026-07-22T23:07:25Z</span><a class="url" href="https://www.youtube.com/watch?v=gXotd-r69HM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=gXotd-r69HM</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=TQdac5OOefY" target="_blank" rel="noopener">SPAWN VS RAIDEN FIGHT</a>
+      <div class="sub"><span class="date">2026-07-22T22:30:31Z</span><a class="url" href="https://www.youtube.com/watch?v=TQdac5OOefY" target="_blank" rel="noopener">https://www.youtube.com/watch?v=TQdac5OOefY</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=nmLQGeNSyiI" target="_blank" rel="noopener">【ポケモンチャンピオンズ】参加型昼活ポケチャン対戦会！【個人勢vtuber/ライデン】</a>
+      <div class="sub"><span class="date">2026-07-22T21:40:50Z</span><a class="url" href="https://www.youtube.com/watch?v=nmLQGeNSyiI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=nmLQGeNSyiI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=q28EJQxNrus" target="_blank" rel="noopener">Leiden als theestad: stad door de ogen van een theesommelier</a>
+      <div class="sub"><span class="date">2026-07-22T20:53:20Z</span><a class="url" href="https://www.youtube.com/watch?v=q28EJQxNrus" target="_blank" rel="noopener">https://www.youtube.com/watch?v=q28EJQxNrus</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=WETcdPMnSHM" target="_blank" rel="noopener">Het Ontzet van Leiden (1574)  #theunchartedvoice #geschiedenis #nederlandsegeschiedenis #history</a>
+      <div class="sub"><span class="date">2026-07-22T17:00:35Z</span><a class="url" href="https://www.youtube.com/watch?v=WETcdPMnSHM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=WETcdPMnSHM</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=BFTH1eizEjE" target="_blank" rel="noopener">LIU KANG VS RAIDEN: MK1 DIÁLOGOS</a>
+      <div class="sub"><span class="date">2026-07-22T16:40:02Z</span><a class="url" href="https://www.youtube.com/watch?v=BFTH1eizEjE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=BFTH1eizEjE</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Z1eaH1Wqoj0" target="_blank" rel="noopener">Raiden DOMINATED Outworld&#39;s Tournament ┃ Mortal Kombat 1</a>
+      <div class="sub"><span class="date">2026-07-22T16:00:05Z</span><a class="url" href="https://www.youtube.com/watch?v=Z1eaH1Wqoj0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Z1eaH1Wqoj0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=YKZLbMiK1zo" target="_blank" rel="noopener">Raiden vs Li Mei | Mortal Kombat 1 | 4k 60FPS GAMEPLAY</a>
+      <div class="sub"><span class="date">2026-07-22T15:30:32Z</span><a class="url" href="https://www.youtube.com/watch?v=YKZLbMiK1zo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=YKZLbMiK1zo</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+
+<section id="boss4" style="--c:var(--b4)">
+  <div class="bosshead">
+    <span class="bossno">04</span>
+    <h2 class="bossname">スピリットホーン</h2>
+    <span class="element">風</span>
+    <span class="count"><b>8</b> / 8 件</span>
+  </div>
+  <ol>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=e2tVrJ5ApZM" target="_blank" rel="noopener">【プリコネR】2026.7月クランバトル4段階目編成！今月もサクッと行きたい件</a>
+      <div class="sub"><span class="date">2026-07-25T13:25:49Z</span><a class="url" href="https://www.youtube.com/watch?v=e2tVrJ5ApZM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=e2tVrJ5ApZM</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=10yNHdlPF3g" target="_blank" rel="noopener">【プリンセスコネクトRe:dive】スピリットホーン　目押しなし</a>
+      <div class="sub"><span class="date">2026-07-25T12:20:19Z</span><a class="url" href="https://www.youtube.com/watch?v=10yNHdlPF3g" target="_blank" rel="noopener">https://www.youtube.com/watch?v=10yNHdlPF3g</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=ROWNqbTRvuI" target="_blank" rel="noopener">【プリコネR】2026年7月クランバトル3段階目消滅凸　フルオート討伐編成　90秒持ち越し【クラバト】【ワイバーン】【デミ・カリド】【ライデン】【スピリットホーン】【オルレオン】</a>
+      <div class="sub"><span class="date">2026-07-25T11:59:36Z</span><span class="carry">90秒 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=ROWNqbTRvuI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ROWNqbTRvuI</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=lfk9xaWakfM" target="_blank" rel="noopener">【プリコネR】クランバトル現在の途中経過はこんな感じ！今月も新キャラ活躍！？</a>
+      <div class="sub"><span class="date">2026-07-24T12:09:44Z</span><a class="url" href="https://www.youtube.com/watch?v=lfk9xaWakfM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=lfk9xaWakfM</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=6Zyqw97it7g" target="_blank" rel="noopener">【プリコネR】クランバトル　スピリットホーン　３．３億【風物】【フルオート】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">3.3億</span></div>
+      <div class="sub"><span class="date">2026-07-24T00:40:06Z</span><a class="url" href="https://www.youtube.com/watch?v=6Zyqw97it7g" target="_blank" rel="noopener">https://www.youtube.com/watch?v=6Zyqw97it7g</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=jtq00WGjXsw" target="_blank" rel="noopener">【プリコネR】4段階目 スピリットホーン 5589万 21s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:16.9%"></div></div><span class="figure">5589万</span></div>
+      <div class="sub"><span class="date">2026-07-23T13:03:45Z</span><span class="carry">21s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=jtq00WGjXsw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=jtq00WGjXsw</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=gORd45mJGqo" target="_blank" rel="noopener">プリコネ クラバト 2026年7月 2段階目 ライデン(3ボス) ＆ スピリットホーン(4ボス)共通 物理消滅編成(星6トモ、クリぴょん、ユカキャン、リンジャー、アリノ)</a>
+      <div class="sub"><span class="date">2026-07-23T10:33:07Z</span><a class="url" href="https://www.youtube.com/watch?v=gORd45mJGqo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=gORd45mJGqo</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=v3_qdLoVVf0" target="_blank" rel="noopener">【プリコネR】4段階目 スピリットホーン 9157万 29s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:27.7%"></div></div><span class="figure">9157万</span></div>
+      <div class="sub"><span class="date">2026-07-23T09:39:55Z</span><span class="carry">29s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=v3_qdLoVVf0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=v3_qdLoVVf0</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+
+<section id="boss5" style="--c:var(--b5)">
+  <div class="bosshead">
+    <span class="bossno">05</span>
+    <h2 class="bossname">オルレオン</h2>
+    <span class="element">火</span>
+    <span class="count"><b>12</b> / 12 件</span>
+  </div>
+  <ol>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=-0A7uqdgFZ4" target="_blank" rel="noopener">オルレオン 3.55くらい</a>
+      <div class="sub"><span class="date">2026-07-24T11:48:07Z</span><a class="url" href="https://www.youtube.com/watch?v=-0A7uqdgFZ4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=-0A7uqdgFZ4</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=sn3BDdSK6X8" target="_blank" rel="noopener">【プリコネR】4段階目 オルレオン 14836万 40s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:26.5%"></div></div><span class="figure">14836万</span></div>
+      <div class="sub"><span class="date">2026-07-24T10:29:47Z</span><span class="carry">40s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=sn3BDdSK6X8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=sn3BDdSK6X8</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=j8X7LlabYic" target="_blank" rel="noopener">【プリコネ】4段階目オルレオン　目押し13〜14箇所5.6億前後</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">5.6億</span></div>
+      <div class="sub"><span class="date">2026-07-24T09:59:27Z</span><a class="url" href="https://www.youtube.com/watch?v=j8X7LlabYic" target="_blank" rel="noopener">https://www.youtube.com/watch?v=j8X7LlabYic</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=5JaAxvfA2Pw" target="_blank" rel="noopener">【プリコネR】クランバトル　オルレオン　２．８億【火魔】【フルオート】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:50.0%"></div></div><span class="figure">2.8億</span></div>
+      <div class="sub"><span class="date">2026-07-24T01:06:02Z</span><a class="url" href="https://www.youtube.com/watch?v=5JaAxvfA2Pw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=5JaAxvfA2Pw</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=c5PuE2fsuQU" target="_blank" rel="noopener">【プリコネR】クランバトル　オルレオン　３．１億【火物】【フルオート】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:55.4%"></div></div><span class="figure">3.1億</span></div>
+      <div class="sub"><span class="date">2026-07-24T00:48:56Z</span><a class="url" href="https://www.youtube.com/watch?v=c5PuE2fsuQU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=c5PuE2fsuQU</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=af3SwJIFCgg" target="_blank" rel="noopener">【プリコネR】4段階目 オルレオン 10000万 27s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:17.9%"></div></div><span class="figure">10000万</span></div>
+      <div class="sub"><span class="date">2026-07-23T21:01:59Z</span><span class="carry">27s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=af3SwJIFCgg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=af3SwJIFCgg</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=mCTgox360yw" target="_blank" rel="noopener">【プリンセスコネクトRe:dive】オルレオン　目押しなし</a>
+      <div class="sub"><span class="date">2026-07-23T13:11:46Z</span><a class="url" href="https://www.youtube.com/watch?v=mCTgox360yw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=mCTgox360yw</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=V_MoV23Ac50" target="_blank" rel="noopener">オルレオン  46922万</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:83.8%"></div></div><span class="figure">46922万</span></div>
+      <div class="sub"><span class="date">2026-07-23T10:52:07Z</span><a class="url" href="https://www.youtube.com/watch?v=V_MoV23Ac50" target="_blank" rel="noopener">https://www.youtube.com/watch?v=V_MoV23Ac50</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=vGkWQ6fQ4kw" target="_blank" rel="noopener">4段階目 オルレオン 3.95億 目押し0</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:70.5%"></div></div><span class="figure">3.95億</span></div>
+      <div class="sub"><span class="date">2026-07-23T09:48:42Z</span><a class="url" href="https://www.youtube.com/watch?v=vGkWQ6fQ4kw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=vGkWQ6fQ4kw</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=z1L8hFfRim0" target="_blank" rel="noopener">【プリコネR】4段階目 オルレオン 11530万 34s持ち越し編成【7月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:20.6%"></div></div><span class="figure">11530万</span></div>
+      <div class="sub"><span class="date">2026-07-23T08:33:17Z</span><span class="carry">34s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=z1L8hFfRim0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=z1L8hFfRim0</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=0XGDfrj5d3A" target="_blank" rel="noopener">【プリコネR】4段階 オルレオン 11145万 34s</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:19.9%"></div></div><span class="figure">11145万</span></div>
+      <div class="sub"><span class="date">2026-07-23T07:03:25Z</span><span class="carry">34s</span><a class="url" href="https://www.youtube.com/watch?v=0XGDfrj5d3A" target="_blank" rel="noopener">https://www.youtube.com/watch?v=0XGDfrj5d3A</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=-MXFQvaPdSA" target="_blank" rel="noopener">【プリコネR】4段階 オルレオン 10468万 32s</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:18.7%"></div></div><span class="figure">10468万</span></div>
+      <div class="sub"><span class="date">2026-07-23T07:00:51Z</span><span class="carry">32s</span><a class="url" href="https://www.youtube.com/watch?v=-MXFQvaPdSA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=-MXFQvaPdSA</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+<footer>
+  ダメージバーはタイトル内の数値（万・億表記）を各ボス内の最大値で正規化したものです。数値の記載がない動画にはバーを表示していません。
+</footer>
+
+</div>
+<script>
+  var cb = document.getElementById('pf');
+  function apply(){
+    document.body.classList.toggle('only-priconne', cb.checked);
+    document.querySelectorAll('section').forEach(function(s){
+      var visible = s.querySelectorAll('li:not(.off)').length;
+      s.classList.toggle('blank', visible === 0);
+    });
+  }
+  cb.addEventListener('change', apply);
+  apply();
+</script>
+</body>
+</html>

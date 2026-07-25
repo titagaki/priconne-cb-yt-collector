@@ -2,31 +2,30 @@
 
 実装先: `src/priconne_cb_collector/interface/commands.py`
 
+判断の理由は [`docs/discussion/`](../discussion/README.md) を参照。
+
 ## 1. コマンド一覧
 
 | コマンド | 権限 | 動作 |
 |---|---|---|
-| `/status` | 全員 | 現在のフェーズ（idle/training/battle）、次のフェーズ遷移日時、今期間の収集件数、クォータ残量 |
+| `/status` | 全員 | 収集中か待機中か、収集期間、今期間の収集件数、クォータ残量 |
 | `/bosses` | 全員 | 設定中のボス一覧を表示 |
-| `/start` | 管理者 | **稼働を即時開始する（`training` フェーズへ手動遷移）。`mode: trigger` での主たる起動手段。** 実行前に `bosses.yaml` の内容を Embed で提示し、確認ボタンを押させてから開始する |
-| `/stop` | 管理者 | 稼働を停止し `idle` へ戻す。DB のデータは消さない |
+| `/start` | 管理者 | **収集を即時開始する。`mode: trigger` での主たる起動手段。** 実行前に `bosses.yaml` の内容を Embed で提示し、確認ボタンを押させてから開始する |
+| `/stop` | 管理者 | 収集を停止し待機状態へ戻す。DB のデータは消さない |
 | `/reload` | 管理者 | `bosses.yaml` / `config.yaml` を再読込 |
-| `/collect` | 管理者 | 手動で収集を1回実行（クォータ消費の確認ダイアログを出す）。**稼働期間外は拒否する** |
-| `/period set` | 管理者 | トレモ開始 / 本番開始 / 終了日を手動上書き（manual モードに切替） |
+| `/collect` | 管理者 | 手動で収集を1回実行（クォータ消費の確認ダイアログを出す）。**収集期間外は拒否する** |
+| `/period set` | 管理者 | 収集の開始日 / 終了日を手動上書き（manual モードに切替） |
 | `/recent [boss]` | 全員 | 直近の収集結果を最大10件表示（未投稿含む） |
-| `/suggest_channels` | 管理者 | 収集済み DB を集計し、RSS 未監視でヒット数の多いチャンネルを提案（クォータ消費なし。11-5 で採用決定） |
+| `/suggest_channels` | 管理者 | 収集済み DB を集計し、RSS 未監視でヒット数の多いチャンネルを提案（クォータ消費なし） |
 
-`/collect` を稼働期間外で拒否するのは、`videos.discovered_phase` の定義域が
-`training` / `battle` のみだから（[07](07-persistence.md) §1）。期間外に収集すると
-どちらでもない動画が混ざり、トレモ判定の根拠が濁る。
+`/collect` を収集期間外で拒否するのは、`videos.cb_period` が NOT NULL だから（[07](07-persistence.md) §1）。
 
-## 2. `/start` の設計意図
+## 2. `/start` の確認ステップ
 
-運用者は毎月 `bosses.yaml` を書き換える必要があり、そのタイミングはトレーニングモードでボスが判明した直後になる。この「ボスを設定する」という手作業と「Bot を起動する」を 1 つの操作にまとめることで、**設定漏れのまま稼働してしまう事故を構造的に防ぐ。**
+`/start` は `bosses.yaml` の内容を Embed で提示し、確認ボタンを押させてから開始する。
+このステップは省略しない。
 
-`/start` は `bosses.yaml` の内容確認を必須ステップとして挟むこと。
-
-## 3. `/suggest_channels` の仕様（11-5 で採用決定）
+## 3. `/suggest_channels` の仕様
 
 - `videos` テーブルを集計し、「ボス判定に成功した動画が多い順」にチャンネルを並べる
 - `config.yaml` の `channels` に既に含まれるチャンネルは除外する

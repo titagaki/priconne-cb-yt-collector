@@ -2,6 +2,8 @@
 
 実装先: `src/priconne_cb_collector/adapters/sqlite_store.py`（DB ファイルは `data/bot.db`）
 
+判断の理由は [`docs/discussion/`](../discussion/README.md) を参照。
+
 日時はすべて **ISO8601 UTC で保存し、表示時に JST 変換**する（[02](02-architecture.md)）。ただし `quota_usage.date` のみ JST の日付。
 
 ## 1. スキーマ
@@ -18,7 +20,6 @@ CREATE TABLE videos (
   view_count      INTEGER,
   discovered_via  TEXT NOT NULL,   -- "rss" | "api_search"
   discovered_at   TEXT NOT NULL,
-  discovered_phase TEXT NOT NULL,  -- "training" | "battle"
 
   boss_index      INTEGER,         -- NULL = 判定不能
   boss_indices    TEXT,            -- 複数ヒット時の JSON 配列
@@ -27,12 +28,10 @@ CREATE TABLE videos (
 
   battle_type     TEXT,            -- "normal" | "carryover" | "unknown"
   carryover_sec   INTEGER,
-  boss_phase      INTEGER,         -- 段階（1〜5）。稼働フェーズとは別物なので名前を分けている
   damage          INTEGER,
   is_full_auto    INTEGER,
   is_manual       INTEGER,
-  is_training_footage INTEGER,     -- トレモ動画と判定されたか
-  training_evidence   TEXT,        -- "keyword" | "phase_only" | NULL
+  is_training_footage INTEGER,     -- トレモ動画と判定されたか（キーワード由来のみ）
 
   status          TEXT NOT NULL,   -- "pending" | "posted" | "filtered" | "error"
   filter_reason   TEXT,
@@ -44,14 +43,12 @@ CREATE TABLE videos (
 CREATE INDEX idx_videos_status ON videos(status);
 CREATE INDEX idx_videos_period_boss ON videos(cb_period, boss_index);
 
--- フェーズ遷移通知の重複投稿を防ぐための状態管理
+-- 開始 / 終了通知の重複投稿を防ぐための状態管理
 CREATE TABLE period_state (
   cb_period            TEXT PRIMARY KEY,  -- "2026-07"
-  training_start       TEXT,              -- 確定した稼働開始日時（trigger モードでは /start 実行時刻）
-  battle_start         TEXT,
-  battle_end           TEXT,
-  notified_training    INTEGER DEFAULT 0,
-  notified_battle      INTEGER DEFAULT 0,
+  start_at             TEXT,              -- 確定した収集開始日時（trigger モードでは /start 実行時刻）
+  end_at               TEXT,
+  notified_start       INTEGER DEFAULT 0,
   notified_end         INTEGER DEFAULT 0,
   notified_reminder    INTEGER DEFAULT 0, -- /start 催促を投稿済みか（trigger モード。[04] §3）
   boss_thread_ids      TEXT,              -- {boss_index: thread_id} の JSON
@@ -74,7 +71,7 @@ CREATE TABLE channel_etags (
 
 **重複排除は `video_id` の PRIMARY KEY 制約のみで行う。** `INSERT OR IGNORE` を使い、既存レコードがあれば投稿処理をスキップする。
 
-タイトル類似度による重複判定は行わない（別チャンネルの別編成動画を潰してしまうため）。
+タイトル類似度による重複判定は行わない。
 
 ## 3. `status` の遷移
 

@@ -1,45 +1,38 @@
 schedule:
-  # 稼働期間の判定方法。"offset" | "manual" | "trigger"（既定は trigger。11-1 で決定）
+  # 収集期間の判定方法。"offset" | "manual" | "trigger"（既定は trigger。11-1 で決定）
   mode: "trigger"
 
   # mode: offset の場合 —— 月末日を基準に算出
-  start_offset_days: 5      # 末日 - 5日 が クラバト開始日
-  end_offset_days: 1        # 末日 - 1日 が クラバト終了日（この日を含む）
-  training_days_before: 3   # クラバト開始の何日前からトレーニングモードが始まるか
+  start_offset_days: 8      # 末日 - 8日 が収集開始日（トレモ開始に合わせる）
+  end_offset_days: 1        # 末日 - 1日 が収集終了日（この日を含む）
 
   # mode: manual の場合 —— 明示指定（in-game のアナウンスに合わせる用）
-  manual_training_start: null   # "2026-07-23"
-  manual_battle_start: null     # "2026-07-26"
-  manual_end: null              # "2026-07-30"
+  manual_start: null        # "2026-07-23"
+  manual_end: null          # "2026-07-30"
 
-  # mode: trigger の場合 —— /start コマンドで稼働開始。終了日のみ offset で算出する
+  # mode: trigger の場合 —— /start コマンドで収集開始。終了日のみ offset で算出する
   #   （運用者が bosses.yaml を書き換えるタイミングを起点にする）
-  # offset 計算上のトレモ開始日を過ぎても /start されていない場合に催促を投稿するか
+  # offset 計算上の開始日を過ぎても /start されていない場合に催促を投稿するか
   remind_if_not_started: true
 
-  # 稼働開始の何日前に投稿された動画まで検索対象に含めるか
+  # 収集開始の何日前に投稿された動画まで検索対象に含めるか
   search_lookback_days: 1
 
 polling:
-  # トレーニング期間中の間隔（動画本数が少ないため広め）
-  training_rss_interval_minutes: 20
-  training_api_search_interval_hours: 6
-  # クラバト本番期間中の間隔
-  rss_interval_minutes: 10
+  # 収集期間中の間隔（期間中は一定。トレモ / 本番で分けない）
+  rss_interval_minutes: 30
   api_search_interval_hours: 3
-  # 稼働期間外のチェック間隔（期間に入ったかどうかの確認のみ）
+  # 収集期間外のチェック間隔（期間に入ったかどうかの確認のみ）
   idle_check_interval_minutes: 60
 
 youtube:
   # RSS 監視対象チャンネル（メインの取得経路）
-  # ※ サンプル値。運用者が実際のチャンネル ID を設定すること（docs/spec/11-5）
+  # ※ サンプル値。運用者が実際のチャンネル ID を設定すること
   channels:
     - id: "UCxxxxxxxxxxxxxxxxxxxxxx"
       name: "サンプルチャンネルA"
     - id: "UCyyyyyyyyyyyyyyyyyyyyyy"
       name: "サンプルチャンネルB"
-  # API 検索のベースクエリ。ボス名がこれに連結される
-  search_query_base: "プリコネ クラバト"
   # 1日あたりのクォータ上限（既定 10000 のうち何ユニットまで使うか）
   quota_limit_per_day: 9000
   # 除外条件
@@ -58,7 +51,8 @@ discord:
   post_interval_seconds: 2
 
 classify:
-  # ボス名でマッチしなかった動画に EX表記判定を適用するか（11-2 で折衷案採用）
+  # ボス名でマッチしなかった動画に EX表記判定を適用するか
   enable_ex_notation: true
-  # ボス判定できなかった動画をどうするか: "skip" | "post_as_unknown"
-  on_boss_unknown: "skip"
+  # ボス判定できなかった動画をどうするか: "post_as_unknown" | "skip"
+  #   取りこぼすくらいなら関係ない動画が混ざってよい、という方針のため既定は投稿する側
+  on_boss_unknown: "post_as_unknown"

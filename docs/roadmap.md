@@ -1,7 +1,7 @@
 # ロードマップ / 進捗管理
 
 実装順序は [docs/spec/12-implementation-order.md](spec/12-implementation-order.md) に従う。
-未確定事項（11章）は **2026-07-25 に全5件決定済み**（既定 trigger + 催促 / EX折衷案採用 / 品質フィルタなし / 期間終了後は投げ切る / `/suggest_channels` 実装）。
+設計判断の記録は [docs/discussion/](discussion/README.md)。
 
 ## 進捗
 
@@ -20,22 +20,16 @@
 | 8 | src レイアウトへの再編（domain / services / adapters / interface の4層化）+ ruff 導入 | ✅ 完了 |
 | 9 | `tests/` を実装と同じ層構造に再編 + `PeriodService` の直接テスト追加 | ✅ 完了 |
 | 10 | ドキュメント監査（実装先パスの更新、仕様と実装の食い違い4件の解消） | ✅ 完了 |
+| 11 | 機能削減（2026-07-26）: フェーズ 3値 → 2値、段階抽出の削除、ポーリング間隔の統一 | ✅ 完了 |
 
-実装は一巡し、ユニットテスト 268 件が通っている状態。**Discord / YouTube への実接続は未検証**（トークン・チャンネル ID・実チャンネルの設定が必要）。
+実装は一巡し、ユニットテスト 262 件が通っている状態。**Discord / YouTube への実接続は未検証**（トークン・チャンネル ID・実チャンネルの設定が必要）。
 
-レイヤの依存方向（interface → services → adapters → domain の一方向、domain は外部ライブラリ非依存）は
-`tests/test_layering.py` が AST 解析で機械的に検証している。
+## 機能削減（2026-07-26）
 
-## 仕様と実装の食い違い（2026-07-25 監査 → 解消済み）
+要件に無い機能を削除した。削除対象・理由・DB スキーマへの影響は
+[discussion/削減の記録](discussion/reductions.md) を参照。
 
-いずれも実装側が仕様に届いていなかったもの。**4件とも実装を仕様に合わせて修正済み**（回帰テスト付き）。
-
-| # | 内容 | 対応 |
-|---|---|---|
-| A | `polling.idle_check_interval_minutes` が使われず、tick が全フェーズ一律 60 秒だった | idle 中はループ間隔をこの値へ落とすようにした。`/start`・`/period set` はループを即時再起動するので手動起動は待たされない（[04](spec/04-schedule.md) §3） |
-| B | クォータ消費の日次サマリ INFO ログが無く、API 呼び出しごとのログも INFO だった | 呼び出しごとを DEBUG に下げ、その日の累計を INFO で出すようにした（[10](spec/10-non-functional.md) §2） |
-| C | 稼働期間外の `/collect` が `videos.discovered_phase` に `"idle"` を書き込んでいた | 期間外の `/collect` を拒否するようにした（[09](spec/09-slash-commands.md) §1） |
-| D | 日次投稿上限の到達通知がプロセス起動中に1回だけで、翌日以降は無言になっていた | 通知フラグを JST の日付ごとに持つようにした（[08](spec/08-discord-posting.md) §3） |
+**既存の `data/bot.db` とは互換性がない。**移行スクリプトは用意していないので作り直すこと。
 
 ## 実接続で確認したいこと
 
@@ -47,7 +41,7 @@
 
 ## 運用開始前に必要な手作業
 
-- [ ] `config/config.yaml` の `youtube.channels` に実チャンネル ID を設定（11-5）
+- [ ] `config/config.yaml` の `youtube.channels` に実チャンネル ID を設定（`/suggest_channels` で候補を出せる）
 - [ ] `config/config.yaml` の `discord.channel_id` を実チャンネルに設定
 - [ ] `.env` に `DISCORD_BOT_TOKEN` / `YOUTUBE_API_KEY` を設定
 - [ ] 当月の `config/bosses.yaml` を記入（エイリアスは運用者が編集する）

@@ -41,7 +41,8 @@ def match_boss_names(raw_text: str, bosses: tuple[Boss, ...]) -> BossMatch:
     indices: list[int] = []
     matched: list[str] = []
     for boss in bosses:
-        for alias in boss.aliases:
+        # name is always a candidate: aliases supplement it, they don't replace it.
+        for alias in (boss.name, *boss.aliases):
             if normalize(alias) in norm:
                 indices.append(boss.index)
                 matched.append(alias)

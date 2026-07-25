@@ -34,7 +34,6 @@ def add(store, video, classification=None, **kwargs):
     return store.add_video(
         video,
         classification or make_classification(),
-        discovered_phase=kwargs.pop("discovered_phase", "training"),
         cb_period=kwargs.pop("cb_period", "2026-07"),
         **kwargs,
     )
@@ -74,12 +73,10 @@ def test_classification_fields_round_trip(store):
         boss=BossMatch(indices=[1, 3], match_source="boss_name", is_summary=False),
         battle_type="carryover",
         carryover_sec=35,
-        boss_phase=4,
         damage=2150,
         is_full_auto=True,
         is_manual=None,
         is_training_footage=True,
-        training_evidence="keyword",
     )
     add(store, make_video(), classification)
     row = store.get_video("abc123")
@@ -89,7 +86,7 @@ def test_classification_fields_round_trip(store):
     assert row["damage"] == 2150
     assert row["is_full_auto"] == 1
     assert row["is_manual"] is None
-    assert row["training_evidence"] == "keyword"
+    assert row["is_training_footage"] == 1
 
 
 def test_status_transitions(store):
@@ -107,31 +104,31 @@ def test_status_transitions(store):
     assert store.get_video("v3")["status"] == "error"
 
 
-# ---- フェーズ遷移通知フラグ ----
+# ---- 開始 / 終了 通知フラグ ----
 
 
 def test_notification_flag_prevents_duplicate_announcements(store):
     store.ensure_period(july_period())
-    assert store.mark_notified("2026-07", "training") is True
-    assert store.mark_notified("2026-07", "training") is False  # 再起動しても再投稿しない
-    assert store.is_notified("2026-07", "training") is True
+    assert store.mark_notified("2026-07", "start") is True
+    assert store.mark_notified("2026-07", "start") is False  # 再起動しても再投稿しない
+    assert store.is_notified("2026-07", "start") is True
     # 他の種別は独立
-    assert store.is_notified("2026-07", "battle") is False
-    assert store.mark_notified("2026-07", "battle") is True
+    assert store.is_notified("2026-07", "end") is False
+    assert store.mark_notified("2026-07", "end") is True
 
 
 def test_reminder_flag_is_independent(store):
     store.ensure_period(july_period())
     assert store.mark_notified("2026-07", "reminder") is True
     assert store.mark_notified("2026-07", "reminder") is False
-    assert store.is_notified("2026-07", "training") is False
+    assert store.is_notified("2026-07", "start") is False
 
 
 def test_ensure_period_is_idempotent(store):
     store.ensure_period(july_period())
-    store.mark_notified("2026-07", "training")
+    store.mark_notified("2026-07", "start")
     store.ensure_period(july_period())  # 再起動時の再呼び出しでフラグが消えないこと
-    assert store.is_notified("2026-07", "training") is True
+    assert store.is_notified("2026-07", "start") is True
 
 
 def test_trigger_start_and_stop(store):
@@ -139,7 +136,7 @@ def test_trigger_start_and_stop(store):
     assert store.trigger_started_at("2026-07") is None
     store.set_trigger_start(p)
     started = store.trigger_started_at("2026-07")
-    assert started == p.training_start
+    assert started == p.start
     store.clear_trigger_start("2026-07")
     assert store.trigger_started_at("2026-07") is None
 

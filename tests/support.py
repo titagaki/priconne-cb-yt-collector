@@ -38,11 +38,10 @@ def bosses_config(month: str = CB_PERIOD) -> BossesConfig:
 
 
 def july_period() -> Period:
-    """2026-07 の既定オフセットで算出される期間（トレモ 7/23、本番 7/26〜7/30）。"""
+    """2026-07 の既定オフセットで算出される収集期間（7/23〜7/30）。"""
     return Period(
-        training_start=datetime(2026, 7, 23, tzinfo=JST),
-        battle_start=datetime(2026, 7, 26, tzinfo=JST),
-        battle_end=datetime(2026, 7, 30, 23, 59, 59, tzinfo=JST),
+        start=datetime(2026, 7, 23, tzinfo=JST),
+        end=datetime(2026, 7, 30, 23, 59, 59, tzinfo=JST),
         cb_period=CB_PERIOD,
     )
 
@@ -62,12 +61,10 @@ def store_video(
         ),
         battle_type=fields.pop("battle_type", BATTLE_NORMAL),
         carryover_sec=fields.pop("carryover_sec", None),
-        boss_phase=fields.pop("boss_phase", None),
         damage=fields.pop("damage", None),
         is_full_auto=fields.pop("is_full_auto", None),
         is_manual=fields.pop("is_manual", None),
         is_training_footage=fields.pop("is_training_footage", False),
-        training_evidence=fields.pop("training_evidence", None),
     )
     video = VideoMeta(
         video_id=video_id,
@@ -81,7 +78,6 @@ def store_video(
     store.add_video(
         video,
         classification,
-        discovered_phase=fields.pop("discovered_phase", "battle"),
         cb_period=fields.pop("cb_period", CB_PERIOD),
     )
     return store.get_video(video_id)

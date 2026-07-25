@@ -102,7 +102,7 @@ def load_config(path: str | Path) -> AppConfig:
         )
 
     classify = data.get("classify") or {}
-    on_unknown = classify.get("on_boss_unknown", ON_UNKNOWN_SKIP)
+    on_unknown = classify.get("on_boss_unknown", ON_UNKNOWN_POST)
     if on_unknown not in (ON_UNKNOWN_SKIP, ON_UNKNOWN_POST):
         raise ConfigError(
             "config.yaml: classify.on_boss_unknown must be skip/post_as_unknown, "
@@ -117,27 +117,20 @@ def load_config(path: str | Path) -> AppConfig:
     return AppConfig(
         schedule=ScheduleConfig(
             mode=mode,
-            start_offset_days=int(sched.get("start_offset_days", 5)),
+            start_offset_days=int(sched.get("start_offset_days", 8)),
             end_offset_days=int(sched.get("end_offset_days", 1)),
-            training_days_before=int(sched.get("training_days_before", 3)),
-            manual_training_start=sched.get("manual_training_start"),
-            manual_battle_start=sched.get("manual_battle_start"),
+            manual_start=sched.get("manual_start"),
             manual_end=sched.get("manual_end"),
             remind_if_not_started=bool(sched.get("remind_if_not_started", True)),
             search_lookback_days=int(sched.get("search_lookback_days", 1)),
         ),
         polling=PollingConfig(
-            training_rss_interval_minutes=int(polling.get("training_rss_interval_minutes", 20)),
-            training_api_search_interval_hours=int(
-                polling.get("training_api_search_interval_hours", 6)
-            ),
-            rss_interval_minutes=int(polling.get("rss_interval_minutes", 10)),
+            rss_interval_minutes=int(polling.get("rss_interval_minutes", 30)),
             api_search_interval_hours=int(polling.get("api_search_interval_hours", 3)),
             idle_check_interval_minutes=int(polling.get("idle_check_interval_minutes", 60)),
         ),
         youtube=YoutubeConfig(
             channels=channels,
-            search_query_base=youtube.get("search_query_base", "プリコネ クラバト"),
             quota_limit_per_day=int(youtube.get("quota_limit_per_day", 9000)),
             exclude=ExcludeConfig(
                 min_duration_seconds=int(exclude.get("min_duration_seconds", 60)),

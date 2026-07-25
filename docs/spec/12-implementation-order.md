@@ -8,5 +8,6 @@
 6. Data API 検索 + クォータ管理 → [05](05-collection.md)
 7. スラッシュコマンド → [09](09-slash-commands.md)
 
-着手前に [11. 未確定事項](11-open-questions.md) の確認を済ませること。
+仕様が未確定の論点は、仮実装せず運用者に質問して決める。決定は
+[`docs/discussion/`](../discussion/README.md) に理由ごと記録してから spec へ反映する。
 進捗は `docs/roadmap.md` で管理する。

@@ -1,4 +1,4 @@
-"""interface/bot.py のフェーズ遷移まわりのテスト。Discord へは接続しない。
+"""interface/bot.py の収集開始 / 終了まわりのテスト。Discord へは接続しない。
 
 CollectorBot の poster / collector をダミーに差し替え、_tick_once の副作用
 （通知投稿・収集実行・催促）だけを検証する。
@@ -75,8 +75,8 @@ def bot(tmp_path):
     b.store.close()
 
 
-TRAINING_NOW = datetime(2026, 7, 24, 3, 0, tzinfo=UTC)  # JST 7/24 12:00
-BATTLE_NOW = datetime(2026, 7, 27, 3, 0, tzinfo=UTC)
+IN_PERIOD = datetime(2026, 7, 24, 3, 0, tzinfo=UTC)  # JST 7/24 12:00
+LATER_IN_PERIOD = datetime(2026, 7, 27, 3, 0, tzinfo=UTC)
 AFTER_END = datetime(2026, 7, 31, 3, 0, tzinfo=UTC)
 
 
@@ -89,7 +89,7 @@ async def start_at(bot, when):
 
 
 async def test_idle_until_start(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
     await bot._tick_once()
 
     assert bot.collector.calls == []
@@ -97,8 +97,8 @@ async def test_idle_until_start(bot, monkeypatch):
 
 
 async def test_start_triggers_collection_and_threads(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
 
     await bot._tick_once()
 
@@ -112,8 +112,8 @@ async def test_start_triggers_collection_and_threads(bot, monkeypatch):
 
 async def test_stale_bosses_yaml_blocks_collection(tmp_path, monkeypatch):
     bot = make_bot(tmp_path, bosses_month="2026-06")  # 当月は 2026-07
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
 
     await bot._tick_once()
 
@@ -125,14 +125,14 @@ async def test_stale_bosses_yaml_blocks_collection(tmp_path, monkeypatch):
 
 async def test_collection_resumes_after_bosses_updated(tmp_path, monkeypatch):
     bot = make_bot(tmp_path, bosses_month="2026-06")
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
     await bot._tick_once()
     assert bot.collector.calls == []
 
     # /reload で当月の構成に差し替わった状況
     bot.bosses = bosses_config()
-    bot._last_phase = None
+    bot._was_collecting = None
     await bot._tick_once()
 
     assert bot.collector.calls
@@ -142,10 +142,10 @@ async def test_collection_resumes_after_bosses_updated(tmp_path, monkeypatch):
 # ---- 遷移通知の重複防止（再起動時） ----
 
 
-async def test_training_notice_is_not_repeated_after_restart(tmp_path, monkeypatch):
+async def test_start_notice_is_not_repeated_after_restart(tmp_path, monkeypatch):
     bot = make_bot(tmp_path)
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
     await bot._tick_once()
     assert sum("収集を開始" in n for n in bot.poster.notices) == 1
     bot.store.close()
@@ -159,24 +159,12 @@ async def test_training_notice_is_not_repeated_after_restart(tmp_path, monkeypat
     restarted.store.close()
 
 
-async def test_battle_transition_announced_once(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
-    await bot._tick_once()
-
-    freeze_now(monkeypatch, BATTLE_NOW)
-    await bot._tick_once()
-    await bot._tick_once()
-
-    assert sum("本番が始まりました" in n for n in bot.poster.notices) == 1
-
-
 # ---- 期間終了 ----
 
 
 async def test_period_end_flushes_queue_then_announces(bot, monkeypatch):
-    freeze_now(monkeypatch, BATTLE_NOW)
-    await start_at(bot, BATTLE_NOW)
+    freeze_now(monkeypatch, LATER_IN_PERIOD)
+    await start_at(bot, LATER_IN_PERIOD)
     await bot._tick_once()
     bot.poster.posted_calls.clear()
 
@@ -191,7 +179,7 @@ async def test_period_end_flushes_queue_then_announces(bot, monkeypatch):
 
 
 async def test_reminder_posted_once_when_start_forgotten(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
 
     await bot._tick_once()
     await bot._tick_once()
@@ -201,16 +189,16 @@ async def test_reminder_posted_once_when_start_forgotten(bot, monkeypatch):
     assert "bosses.yaml" in reminders[0]
 
 
-async def test_no_reminder_before_offset_training_start(bot, monkeypatch):
-    early = datetime(2026, 7, 20, 3, 0, tzinfo=UTC)  # トレモ開始(7/23)前
+async def test_no_reminder_before_offset_start(bot, monkeypatch):
+    early = datetime(2026, 7, 20, 3, 0, tzinfo=UTC)  # 収集開始(7/23)前
     freeze_now(monkeypatch, early)
     await bot._tick_once()
     assert not any("まだ収集が始まっていません" in n for n in bot.poster.notices)
 
 
 async def test_no_reminder_once_started(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
     await bot._tick_once()
     assert not any("まだ収集が始まっていません" in n for n in bot.poster.notices)
 
@@ -219,8 +207,8 @@ async def test_no_reminder_once_started(bot, monkeypatch):
 
 
 async def test_stop_returns_to_idle(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
     await bot._tick_once()
     assert bot.collector.calls
 
@@ -234,17 +222,17 @@ async def test_stop_returns_to_idle(bot, monkeypatch):
 
 
 async def test_rss_interval_is_respected(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
     await bot._tick_once()
     assert len(bot.collector.calls) == 1
 
-    # training の RSS 間隔は 20分。1分後の tick では走らない
-    freeze_now(monkeypatch, TRAINING_NOW.replace(minute=1))
+    # RSS 間隔は 30分。1分後の tick では走らない
+    freeze_now(monkeypatch, IN_PERIOD.replace(minute=1))
     await bot._tick_once()
     assert len(bot.collector.calls) == 1
 
-    freeze_now(monkeypatch, TRAINING_NOW.replace(minute=25))
+    freeze_now(monkeypatch, IN_PERIOD.replace(minute=35))
     await bot._tick_once()
     assert len(bot.collector.calls) == 2
 
@@ -254,18 +242,18 @@ async def test_rss_interval_is_respected(bot, monkeypatch):
 
 async def test_tick_slows_down_while_idle(bot, monkeypatch):
     """idle 中は idle_check_interval_minutes 間隔に落とす（docs/spec/04 §3）。"""
-    freeze_now(monkeypatch, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
     await bot._tick_once()
 
     assert bot.tick.seconds == bot.config.polling.idle_check_interval_minutes * 60
 
 
 async def test_tick_returns_to_short_interval_once_running(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
     await bot._tick_once()  # idle でいったん遅くなる
     assert bot.tick.seconds > 60
 
-    await start_at(bot, TRAINING_NOW)  # /start は即座に間隔を戻す
+    await start_at(bot, IN_PERIOD)  # /start は即座に間隔を戻す
     assert bot.tick.seconds == 60
 
     await bot._tick_once()
@@ -273,8 +261,8 @@ async def test_tick_returns_to_short_interval_once_running(bot, monkeypatch):
 
 
 async def test_stop_slows_the_tick_again(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
     await bot._tick_once()
     assert bot.tick.seconds == 60
 
@@ -282,22 +270,22 @@ async def test_stop_slows_the_tick_again(bot, monkeypatch):
     assert bot.tick.seconds == bot.config.polling.idle_check_interval_minutes * 60
 
 
-# ---- 稼働期間外の /collect（roadmap 監査 C） ----
+# ---- 収集期間外の /collect（roadmap 監査 C） ----
 
 
 async def test_manual_collect_is_refused_outside_the_period(bot, monkeypatch):
-    """discovered_phase に idle を書き込まないため、期間外の収集は拒否する。"""
-    freeze_now(monkeypatch, TRAINING_NOW)
+    """cb_period が決まらないため、収集期間外の /collect は拒否する。"""
+    freeze_now(monkeypatch, IN_PERIOD)
 
-    with pytest.raises(RuntimeError, match="稼働期間外"):
+    with pytest.raises(RuntimeError, match="収集期間外"):
         await bot.run_collection()
 
     assert bot.collector.calls == []
 
 
 async def test_manual_collect_runs_inside_the_period(bot, monkeypatch):
-    freeze_now(monkeypatch, TRAINING_NOW)
-    await start_at(bot, TRAINING_NOW)
+    freeze_now(monkeypatch, IN_PERIOD)
+    await start_at(bot, IN_PERIOD)
 
     await bot.run_collection(run_api_search=True)
 

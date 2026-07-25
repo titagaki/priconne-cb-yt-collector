@@ -21,11 +21,9 @@ ON_UNKNOWN_POST = "post_as_unknown"
 @dataclass(frozen=True)
 class ScheduleConfig:
     mode: str = MODE_TRIGGER
-    start_offset_days: int = 5
-    end_offset_days: int = 1
-    training_days_before: int = 3
-    manual_training_start: str | None = None  # "YYYY-MM-DD"
-    manual_battle_start: str | None = None
+    start_offset_days: int = 8  # 末日 - 8日 が収集開始日
+    end_offset_days: int = 1  # 末日 - 1日 が収集終了日（この日を含む）
+    manual_start: str | None = None  # "YYYY-MM-DD"
     manual_end: str | None = None
     remind_if_not_started: bool = True
     search_lookback_days: int = 1
@@ -33,9 +31,10 @@ class ScheduleConfig:
 
 @dataclass(frozen=True)
 class PollingConfig:
-    training_rss_interval_minutes: int = 20
-    training_api_search_interval_hours: int = 6
-    rss_interval_minutes: int = 10
+    """One cadence for the whole collection period: there is no training /
+    battle split (docs/spec/04)."""
+
+    rss_interval_minutes: int = 30
     api_search_interval_hours: int = 3
     idle_check_interval_minutes: int = 60
 
@@ -57,7 +56,6 @@ class ExcludeConfig:
 @dataclass(frozen=True)
 class YoutubeConfig:
     channels: tuple[ChannelRef, ...] = ()
-    search_query_base: str = "プリコネ クラバト"
     quota_limit_per_day: int = 9000
     exclude: ExcludeConfig = field(default_factory=ExcludeConfig)
 
@@ -73,7 +71,7 @@ class DiscordConfig:
 @dataclass(frozen=True)
 class ClassifyConfig:
     enable_ex_notation: bool = True
-    on_boss_unknown: str = ON_UNKNOWN_SKIP
+    on_boss_unknown: str = ON_UNKNOWN_POST
 
 
 @dataclass(frozen=True)

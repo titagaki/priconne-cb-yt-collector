@@ -3,9 +3,11 @@
 実装先: `src/priconne_cb_collector/interface/poster.py`（投稿制御）、
 `src/priconne_cb_collector/interface/embeds.py`（Embed 生成）
 
+判断の理由は [discussion/Discord 投稿](../discussion/posting.md) を参照。
+
 ## 1. レイアウト
 
-`layout: "per_boss_thread"` の場合、**トレーニング期間開始時**（= 稼働開始時）に親チャンネル配下へ 5 本のスレッドを自動作成する。
+`layout: "per_boss_thread"` の場合、**収集開始時**に親チャンネル配下へ 5 本のスレッドを自動作成する。
 
 ```
 #クラバト攻略動画
@@ -17,7 +19,7 @@
 ```
 
 - スレッド ID は `period_state.boss_thread_ids` に保存し、再起動時に再利用する。既存スレッドがあれば作り直さない
-- トレモ動画も本番動画も**同じボススレッドに投稿する**（Embed 上でバッジ表示して区別する）。スレッドを分けると同じボスの情報が二箇所に散るため
+- トレモ動画も本番動画も**同じボススレッドに投稿する**（Embed 上でバッジ表示して区別する）。日次上限通知も同じスレッドへ出す
 - まとめ動画（`is_summary = true`）と、ボス判定できなかった動画は**親チャンネルへ投稿する**（専用スレッドは作らない。[06](06-classification.md)）
 
 `layout: "single"` の場合は全件を `channel_id` へ投稿する。
@@ -31,20 +33,18 @@
 フィールド:
   ボス      : 4ボス スピリットホーン
   種別      : 持ち越し (35秒)      ← normal の場合「通常」、unknown は「不明」
-  段階      : 4段階                 ← 取得できた場合のみ表示
   ダメージ  : 2,150万               ← 取得できた場合のみ表示
 フッター: {チャンネル名} ・ {投稿日時 JST} ・ フルオート または 手動
 色: ボスごとに固定色（index で決め打ち）。まとめ動画と判定不能はそれぞれ別色
 ```
 
-**動画の説明文を Embed に転載しないこと。** タイトルとリンクのみとする。
+**動画の説明文を Embed に転載しないこと。** タイトルとリンクのみとする。判定には説明文を使うが、転載はしない。
 
 付記ルール（フッターまたはタイトル先頭のバッジ）:
 
 | 条件 | 表示 |
 |---|---|
-| `training_evidence == "keyword"` | `🏋️ トレモ` |
-| `training_evidence == "phase_only"` | `🏋️ トレモ期間` ← 推定であることがわかる表現にする |
+| `is_training_footage` | `🏋️ トレモ` |
 | `match_source == "ex_notation"` | `※EX表記から推定` |
 
 ## 3. 投稿制御
@@ -52,7 +52,7 @@
 - 投稿は非同期キューで直列化し、`post_interval_seconds` 間隔を空ける
 - 429 を受けたら `Retry-After` に従って待機して再送する（**同一動画につき最大3回**）。
   諦めた動画は `pending` のまま残し、次の収集サイクルで再試行する
-- `Retry-After` が付かない場合のみ既定の5秒待つ（`0` は「即再送してよい」として扱う）
-- `max_posts_per_boss_per_day` を超えた分は投稿せず `status = "filtered"`, `filter_reason = "daily_limit"` とする。上限到達時はスレッドにその旨を通知する（**JST の日付ごとに1回**。上限は JST 深夜にリセットされるため、翌日また到達したら再度通知する）
-- **投稿成功時のみ `status = "posted"` に更新する。投稿前に更新しない**（失敗時の取りこぼしを防ぐ）
+- `Retry-After` が付かない場合のみ既定の5秒待つ。**値が `0` の場合は「即再送してよい」**として扱い、既定値を使わない
+- `max_posts_per_boss_per_day` を超えた分は投稿せず `status = "filtered"`, `filter_reason = "daily_limit"` とする。上限到達時はスレッドにその旨を通知する（**JST の日付ごとに1回**）
+- **投稿成功時のみ `status = "posted"` に更新する。投稿前に更新しない**
 - Discord への接続断は discord.py の再接続に任せる。投稿キューは保持する（[10](10-non-functional.md)）

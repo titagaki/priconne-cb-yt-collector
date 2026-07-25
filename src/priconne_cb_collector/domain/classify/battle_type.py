@@ -13,13 +13,22 @@ from priconne_cb_collector.domain.models import (
 )
 
 # Carryover patterns. "持ち" alone is deliberately excluded (持ち込み/気持ち).
-_CARRYOVER_WORD = re.compile(r"持ち越し|持越し|持越|もちこし|繰り越し|繰越")
-_CARRYOVER_SEC_BEFORE = re.compile(r"(\d{1,2})\s?秒\s?(?:持ち越し|持越し|持越|から|スタート|start)")
-_CARRYOVER_SEC_AFTER = re.compile(r"(?:持ち越し|持越し|持越)\s?(\d{1,2})\s?秒")
+_CARRYOVER_WORD = re.compile(r"持ち越し|持越し|持越|もちこし")
+# Seconds are written far more often as "24s" than "24秒" in real titles
+# (docs/game/video-conventions.md), so both units are accepted.
+_SEC = r"(?:秒|s)"
+_CARRYOVER_SEC_BEFORE = re.compile(
+    rf"(\d{{1,2}})\s?{_SEC}\s?(?:持ち越し|持越し|持越|から|スタート|start)"
+)
+_CARRYOVER_SEC_AFTER = re.compile(rf"(?:持ち越し|持越し|持越)\s?(\d{{1,2}})\s?{_SEC}")
+# A bare "34s" with no carryover word still means carryover: a full-time run is
+# 90 seconds, so any shorter figure is time inherited from the previous 凸.
+# 90 is excluded because bare "90s" reads as full time, not a max carryover.
+_CARRYOVER_SEC_BARE = re.compile(r"(?<![a-z0-9])([1-8]?[0-9])\s?s(?![a-z0-9])")
 
 # Normal patterns. フル needs a lookahead so フルオート/フルオ (full-auto,
 # a separate attribute) is not mistaken for "full time".
-_NORMAL = re.compile(r"通常編成|通常凸|通常|初手|初凸|素凸|1凸目|フルタイム|90秒|フル(?!オ)")
+_NORMAL = re.compile(r"通常編成|通常凸|通常|初手|初凸|素凸|1凸目|フルタイム|90秒|90s|フル(?!オ)")
 
 _MIN_CARRYOVER_SEC = 1
 _MAX_CARRYOVER_SEC = 90
@@ -38,7 +47,11 @@ def classify_battle_type(raw_text: str) -> BattleTypeResult:
 
     carryover_match = _CARRYOVER_WORD.search(norm)
     sec: int | None = None
-    sec_match = _CARRYOVER_SEC_AFTER.search(norm) or _CARRYOVER_SEC_BEFORE.search(norm)
+    sec_match = (
+        _CARRYOVER_SEC_AFTER.search(norm)
+        or _CARRYOVER_SEC_BEFORE.search(norm)
+        or _CARRYOVER_SEC_BARE.search(norm)
+    )
     if sec_match:
         value = int(sec_match.group(1))
         if _MIN_CARRYOVER_SEC <= value <= _MAX_CARRYOVER_SEC:

@@ -22,8 +22,8 @@ from priconne_cb_collector.adapters.youtube_api import (
 )
 from priconne_cb_collector.domain.classify import classify_video
 from priconne_cb_collector.domain.models import BossesConfig, Period, VideoMeta
-from priconne_cb_collector.domain.schedule import JST, phase_at
-from priconne_cb_collector.domain.settings import AppConfig
+from priconne_cb_collector.domain.schedule import JST
+from priconne_cb_collector.domain.settings import ON_UNKNOWN_SKIP, AppConfig
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,6 @@ class Collector:
         run_api_search: bool = False,
     ) -> CollectResult:
         now = now or datetime.now(UTC)
-        phase = phase_at(now, period)
         result = CollectResult()
 
         candidates: dict[str, VideoMeta] = {}
@@ -89,7 +88,7 @@ class Collector:
         fresh = {vid: v for vid, v in candidates.items() if vid not in known}
         result.new = len(fresh)
         if not fresh:
-            logger.info("collect done: fetched=%d new=0 phase=%s", result.fetched, phase)
+            logger.info("collect done: fetched=%d new=0", result.fetched)
             # An API search round can spend quota even when it finds nothing new.
             self._log_daily_quota(now, result)
             return result
@@ -98,11 +97,11 @@ class Collector:
 
         for video in fresh.values():
             try:
-                self._process(video, period, phase, now, result)
+                self._process(video, period, now, result)
             except Exception as exc:
                 result.errors += 1
                 logger.exception("failed to process video: video_id=%s", video.video_id)
-                self._store_error(video, period, phase, str(exc))
+                self._store_error(video, period, str(exc))
 
         logger.info(
             "collect done: fetched=%d new=%d pending=%d filtered=%d errors=%d quota=%d",
@@ -167,12 +166,12 @@ class Collector:
             )
             return [], True
 
-        published_after = period.training_start - timedelta(
-            days=self.config.schedule.search_lookback_days
-        )
+        published_after = period.start - timedelta(days=self.config.schedule.search_lookback_days)
         videos: list[VideoMeta] = []
         for boss in self.bosses.bosses:
-            query = f"{self.config.youtube.search_query_base} {boss.name}"
+            # Boss name alone. Adding "プリコネ"/"クラバト" would drop the many
+            # videos whose titles carry neither (docs/spec/05 §2).
+            query = boss.name
             try:
                 found, units = await self.youtube.search_videos(query, published_after)
             except QuotaExceededError:
@@ -211,18 +210,16 @@ class Collector:
         self,
         video: VideoMeta,
         period: Period,
-        phase: str,
         now: datetime,
         result: CollectResult,
     ) -> None:
-        published_in_period = video.published_at >= period.training_start
+        published_in_period = video.published_at >= period.start
         classification = classify_video(
             video.title,
             video.description,
             self.bosses.bosses,
             enable_ex_notation=self.config.classify.enable_ex_notation,
             published_in_period=published_in_period,
-            discovered_phase=phase,
         )
 
         reason = self._filter_reason(video, classification)
@@ -231,7 +228,6 @@ class Collector:
         inserted = self.store.add_video(
             video,
             classification,
-            discovered_phase=phase,
             cb_period=period.cb_period,
             status=status,
             filter_reason=reason,
@@ -273,18 +269,20 @@ class Collector:
                 return REASON_TOO_LONG
         if any(word in video.title for word in exclude.title_ng_words):
             return REASON_NG_WORD
-        if not classification.boss.indices and self.config.classify.on_boss_unknown == "skip":
+        # Unclassified videos are posted by default: missing one costs more than
+        # an off-topic post (docs/spec/01 §2).
+        skip_unknown = self.config.classify.on_boss_unknown == ON_UNKNOWN_SKIP
+        if skip_unknown and not classification.boss.indices:
             return REASON_BOSS_UNKNOWN
         return None
 
-    def _store_error(self, video: VideoMeta, period: Period, phase: str, message: str) -> None:
+    def _store_error(self, video: VideoMeta, period: Period, message: str) -> None:
         from priconne_cb_collector.domain.models import Classification
 
         try:
             inserted = self.store.add_video(
                 video,
                 Classification(),
-                discovered_phase=phase,
                 cb_period=period.cb_period,
                 status="error",
                 filter_reason=message[:200],

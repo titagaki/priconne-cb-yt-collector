@@ -7,6 +7,7 @@ published_in_period=True / enable_ex_notation=True で分類する。
 import pytest
 
 from priconne_cb_collector.domain.classify import classify_video
+from priconne_cb_collector.domain.models import Boss
 from tests.support import SAMPLE_BOSSES
 
 CASES = [
@@ -24,7 +25,7 @@ CASES = [
     ("タイトルに無し", "説明文にワイバーンの編成解説あり", [1], "boss_name", "unknown"),
     ("【プリコネR】第2ボス デミカリド 3段階目", "", [2], "boss_name", "unknown"),
     ("ライデン(雷電) 90秒フル", "", [3], "boss_name", "normal"),
-    ("オルレオン 繰り越し20秒", "", [5], "boss_name", "carryover"),
+    ("オルレオン 20s持ち越し", "", [5], "boss_name", "carryover"),
     ("デミカリド戦 素凸編成【クラバト】", "", [2], "boss_name", "normal"),
     ("スピリットホーン もちこし 60秒から", "", [4], "boss_name", "carryover"),
     # --- 複数ヒット・まとめ動画 ---
@@ -56,7 +57,7 @@ CASES = [
     ("クランバトルおつかれ雑談", "", [], None, "unknown"),
     # --- 通常/持ち越しの表記ゆれ ---
     ("ワイバン 持越し30秒 4段階", "", [1], "boss_name", "carryover"),
-    ("デミカリ 繰越 15秒", "", [2], "boss_name", "carryover"),
+    ("デミカリ 持越 15秒", "", [2], "boss_name", "carryover"),
     ("ライデン 初凸 1.5億", "", [3], "boss_name", "normal"),
     ("スピホン 1凸目 フルオート", "", [4], "boss_name", "normal"),
     ("オルレオン 持ち込み編成紹介", "", [5], "boss_name", "unknown"),  # 「持ち」単体は誤爆させない
@@ -84,3 +85,17 @@ def test_title_table(title, description, indices, source, battle_type):
 
 def test_case_count_meets_spec_minimum():
     assert len(CASES) >= 30
+
+
+def test_name_is_matched_even_when_aliases_omit_it():
+    """aliases は name を置き換えるのではなく補う（docs/spec/06 §2.1）。
+
+    bosses.yaml で name="デミ・カリド" / aliases=["デミカリド"] のように
+    name そのものを aliases に書かない運用があり、実データではこの形で
+    ボス名が一切ヒットしなくなっていた。
+    """
+    bosses = (Boss(2, "デミ・カリド", ("デミカリド",)),)
+    result = classify_video("【プリコネR】4段階目 デミ・カリド 14071万 38s持ち越し編成", "", bosses)
+    assert result.boss.indices == [2]
+    assert result.boss.match_source == "boss_name"
+    assert result.carryover_sec == 38

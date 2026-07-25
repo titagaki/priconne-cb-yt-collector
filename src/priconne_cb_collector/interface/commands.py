@@ -15,18 +15,11 @@ from discord import app_commands
 
 from priconne_cb_collector.adapters.sqlite_store import STATUS_POSTED
 from priconne_cb_collector.adapters.youtube_api import SEARCH_COST
-from priconne_cb_collector.domain.models import PHASE_BATTLE, PHASE_IDLE, PHASE_TRAINING
 from priconne_cb_collector.domain.schedule import JST
 from priconne_cb_collector.domain.settings import MODE_TRIGGER
 from priconne_cb_collector.interface.embeds import NOTICE_COLOR
 
 logger = logging.getLogger(__name__)
-
-PHASE_LABELS = {
-    PHASE_IDLE: "待機中 (idle)",
-    PHASE_TRAINING: "トレーニング期間 (training)",
-    PHASE_BATTLE: "クラバト本番 (battle)",
-}
 
 
 class ConfirmView(discord.ui.View):
@@ -65,27 +58,28 @@ def setup_commands(bot) -> None:
     """Register every slash command against the bot's command tree."""
     tree = bot.tree
 
-    @tree.command(name="status", description="現在のフェーズと収集状況を表示します")
+    @tree.command(name="status", description="収集状態と収集状況を表示します")
     async def status(interaction: discord.Interaction):
         now = datetime.now(UTC)
         period = bot.current_period()
-        phase = bot.current_phase(now)
 
         embed = discord.Embed(title="Bot ステータス", color=NOTICE_COLOR)
-        embed.add_field(name="フェーズ", value=PHASE_LABELS.get(phase, phase), inline=False)
+        embed.add_field(
+            name="状態", value="収集中" if bot.is_collecting(now) else "待機中", inline=False
+        )
         embed.add_field(name="稼働モード", value=bot.config.schedule.mode, inline=True)
         embed.add_field(name="ボス構成", value=bot.bosses.month, inline=True)
 
         if period is None:
             embed.add_field(
-                name="次の遷移",
-                value="`/start` で稼働を開始してください（trigger モード）"
+                name="収集期間",
+                value="`/start` で収集を開始してください（trigger モード）"
                 if bot.config.schedule.mode == MODE_TRIGGER
                 else "期間が未設定です",
                 inline=False,
             )
         else:
-            embed.add_field(name="次の遷移", value=_next_transition(now, period), inline=False)
+            embed.add_field(name="収集期間", value=_period_label(now, period), inline=False)
             counts = bot.store.count_by_boss(period.cb_period)
             lines = []
             for boss in bot.bosses.bosses:
@@ -153,16 +147,16 @@ def setup_commands(bot) -> None:
         period = await bot.start_period(datetime.now(UTC))
         await interaction.followup.send(f"収集を開始しました（対象期間 {period.cb_period}）。")
 
-    @tree.command(name="stop", description="[管理者] 稼働を停止し idle に戻します")
+    @tree.command(name="stop", description="[管理者] 収集を停止し待機状態に戻します")
     @app_commands.default_permissions(administrator=True)
     async def stop(interaction: discord.Interaction):
         stopped = bot.stop_period()
         if stopped:
             await interaction.response.send_message(
-                "稼働を停止しました。収集済みデータは保持されます。"
+                "収集を停止しました。収集済みデータは保持されます。"
             )
         else:
-            await interaction.response.send_message("現在稼働していません。", ephemeral=True)
+            await interaction.response.send_message("現在収集していません。", ephemeral=True)
 
     @tree.command(name="reload", description="[管理者] 設定ファイルを再読込します")
     @app_commands.default_permissions(administrator=True)
@@ -178,9 +172,9 @@ def setup_commands(bot) -> None:
     @app_commands.default_permissions(administrator=True)
     @app_commands.describe(api_search="API 検索も実行する（クォータを消費します）")
     async def collect(interaction: discord.Interaction, api_search: bool = False):
-        if bot.current_phase() == PHASE_IDLE:
+        if not bot.is_collecting():
             await interaction.response.send_message(
-                "稼働期間外です。先に `/start` を実行してください。", ephemeral=True
+                "収集期間外です。先に `/start` を実行してください。", ephemeral=True
             )
             return
 
@@ -223,22 +217,14 @@ def setup_commands(bot) -> None:
         default_permissions=discord.Permissions(administrator=True),
     )
 
-    @period_group.command(
-        name="set", description="トレモ開始 / 本番開始 / 終了日を手動で上書きします"
-    )
+    @period_group.command(name="set", description="収集の開始日 / 終了日を手動で上書きします")
     @app_commands.describe(
-        training_start="トレモ開始日 (YYYY-MM-DD)",
-        battle_start="本番開始日 (YYYY-MM-DD)",
-        end="終了日 (YYYY-MM-DD、この日を含む)",
+        start="収集開始日 (YYYY-MM-DD)",
+        end="収集終了日 (YYYY-MM-DD、この日を含む)",
     )
-    async def period_set(
-        interaction: discord.Interaction,
-        battle_start: str,
-        end: str,
-        training_start: str | None = None,
-    ):
+    async def period_set(interaction: discord.Interaction, start: str, end: str):
         try:
-            period = bot.set_manual_period(training_start, battle_start, end)
+            period = bot.set_manual_period(start, end)
         except Exception as exc:
             await interaction.response.send_message(
                 f"日付の解釈に失敗しました: {exc}", ephemeral=True
@@ -246,9 +232,8 @@ def setup_commands(bot) -> None:
             return
         await interaction.response.send_message(
             "manual モードに切り替えました。\n"
-            f"トレモ開始: {period.training_start.astimezone(JST):%Y-%m-%d %H:%M}\n"
-            f"本番開始: {period.battle_start.astimezone(JST):%Y-%m-%d %H:%M}\n"
-            f"終了: {period.battle_end.astimezone(JST):%Y-%m-%d %H:%M}"
+            f"収集開始: {period.start.astimezone(JST):%Y-%m-%d %H:%M}\n"
+            f"収集終了: {period.end.astimezone(JST):%Y-%m-%d %H:%M}"
         )
 
     tree.add_command(period_group)
@@ -282,11 +267,13 @@ def setup_commands(bot) -> None:
         await interaction.response.send_message(embed=embed)
 
 
-def _next_transition(now: datetime, period) -> str:
-    if now < period.training_start:
-        return f"トレーニング開始: {period.training_start.astimezone(JST):%Y-%m-%d %H:%M}"
-    if now < period.battle_start:
-        return f"本番開始: {period.battle_start.astimezone(JST):%Y-%m-%d %H:%M}"
-    if now <= period.battle_end:
-        return f"終了: {period.battle_end.astimezone(JST):%Y-%m-%d %H:%M}"
-    return "この期間は終了しました"
+def _period_label(now: datetime, period) -> str:
+    window = (
+        f"{period.start.astimezone(JST):%Y-%m-%d %H:%M} 〜 "
+        f"{period.end.astimezone(JST):%Y-%m-%d %H:%M}"
+    )
+    if now < period.start:
+        return f"{window}\n開始待ち"
+    if now <= period.end:
+        return f"{window}\n収集中"
+    return f"{window}\nこの期間は終了しました"

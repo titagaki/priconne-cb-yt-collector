@@ -12,8 +12,6 @@ import discord
 
 from priconne_cb_collector.domain.models import (
     BATTLE_CARRYOVER,
-    EVIDENCE_KEYWORD,
-    EVIDENCE_PHASE_ONLY,
     MATCH_EX_NOTATION,
     BossesConfig,
 )
@@ -55,8 +53,6 @@ def build_video_embed(row, bosses: BossesConfig) -> discord.Embed:
 
     embed.add_field(name="ボス", value=boss_label(row, bosses), inline=True)
     embed.add_field(name="種別", value=battle_type_label(row), inline=True)
-    if row["boss_phase"]:
-        embed.add_field(name="段階", value=f"{row['boss_phase']}段階", inline=True)
     if row["damage"]:
         embed.add_field(name="ダメージ", value=f"{row['damage']:,}万", inline=True)
 
@@ -71,11 +67,8 @@ def _footer_parts(row) -> list[str]:
     elif row["is_manual"]:
         parts.append("手動")
 
-    # The badge must make clear when the training label is only inferred.
-    if row["training_evidence"] == EVIDENCE_KEYWORD:
+    if row["is_training_footage"]:
         parts.append("🏋️ トレモ")
-    elif row["training_evidence"] == EVIDENCE_PHASE_ONLY:
-        parts.append("🏋️ トレモ期間")
     if row["match_source"] == MATCH_EX_NOTATION:
         parts.append("※EX表記から推定")
     return parts

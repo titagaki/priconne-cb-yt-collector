@@ -1,26 +1,8 @@
-"""metadata.py のテスト。トレモ判定の根拠（keyword / phase_only）の区別が要点。"""
+"""metadata.py のテスト。トレモ判定はタイトル/説明文のキーワードのみを根拠にする。"""
 
 import pytest
 
-from priconne_cb_collector.domain.classify.metadata import (
-    EVIDENCE_KEYWORD,
-    EVIDENCE_PHASE_ONLY,
-    extract_metadata,
-)
-
-
-@pytest.mark.parametrize(
-    ("text", "expected"),
-    [
-        ("5段階目 ワイバーン", 5),
-        ("段階3のボス", 3),
-        ("1段階", 1),
-        ("ワイバーン討伐", None),
-        ("6段階目", None),  # 範囲外
-    ],
-)
-def test_boss_phase(text, expected):
-    assert extract_metadata(text).boss_phase == expected
+from priconne_cb_collector.domain.classify.metadata import extract_metadata
 
 
 @pytest.mark.parametrize(
@@ -57,30 +39,24 @@ def test_full_auto_and_manual(text, full_auto, manual):
 
 
 @pytest.mark.parametrize(
-    ("text", "discovered_phase", "is_training", "evidence"),
+    ("text", "is_training"),
     [
-        # キーワード由来（強い根拠）
-        ("トレーニングモードで検証", "battle", True, EVIDENCE_KEYWORD),
-        ("トレモ 5段階目", "battle", True, EVIDENCE_KEYWORD),
-        ("練習モードにて", None, True, EVIDENCE_KEYWORD),
-        ("検証動画", "training", True, EVIDENCE_KEYWORD),  # 期間中でもキーワードを優先
-        # 期間由来のみ（弱い根拠）
-        ("ワイバーン 通常凸", "training", True, EVIDENCE_PHASE_ONLY),
-        # トレモではない
-        ("ワイバーン 通常凸", "battle", False, None),
-        ("ワイバーン 通常凸", None, False, None),
+        ("トレーニングモードで検証", True),
+        ("トレモ 検証", True),
+        ("練習モードにて", True),
+        ("検証動画", True),
+        ("ワイバーン 通常凸", False),
+        ("", False),
     ],
 )
-def test_training_footage_evidence(text, discovered_phase, is_training, evidence):
-    result = extract_metadata(text, discovered_phase=discovered_phase)
-    assert result.is_training_footage is is_training
-    assert result.training_evidence == evidence
+def test_training_footage_is_keyword_only(text, is_training):
+    assert extract_metadata(text).is_training_footage is is_training
 
 
 def test_extraction_failure_does_not_raise():
     """抽出失敗は None にとどめ、判定全体を落とさない（docs/spec/06 §4）。"""
     result = extract_metadata("")
-    assert result.boss_phase is None
     assert result.damage is None
     assert result.is_full_auto is None
-    assert result.training_evidence is None
+    assert result.is_manual is None
+    assert result.is_training_footage is False

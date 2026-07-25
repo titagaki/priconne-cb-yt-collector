@@ -11,8 +11,10 @@ import pytest
 
 from priconne_cb_collector.adapters.youtube_api import QuotaExceededError, YouTubeClient
 from priconne_cb_collector.domain.settings import (
+    ON_UNKNOWN_SKIP,
     AppConfig,
     ChannelRef,
+    ClassifyConfig,
     ExcludeConfig,
     YoutubeConfig,
 )
@@ -90,15 +92,15 @@ def detail(duration="PT5M30S", description="", live=None, views="1000"):
     return item
 
 
-def make_config(exclude=None, quota_limit_per_day=9000):
+def make_config(exclude=None, quota_limit_per_day=9000, classify=None):
     return AppConfig(
         youtube=YoutubeConfig(
             channels=(ChannelRef(id="UC_test", name="テスト"),),
             quota_limit_per_day=quota_limit_per_day,
             # config.yaml と同じ既定値
-            exclude=exclude
-            or ExcludeConfig(title_ng_words=("ガチャ", "雑談", "実況プレイ", "初心者")),
-        )
+            exclude=exclude or ExcludeConfig(title_ng_words=("ガチャ", "雑談", "実況プレイ")),
+        ),
+        classify=classify or ClassifyConfig(),
     )
 
 
@@ -135,7 +137,6 @@ async def test_rss_to_db_happy_path(store):
     assert row["battle_type"] == "normal"
     assert row["damage"] == 2150
     assert row["duration_sec"] == 330
-    assert row["discovered_phase"] == "training"
     assert row["cb_period"] == "2026-07"
 
 
@@ -165,7 +166,6 @@ async def test_description_is_used_for_classification(store):
             REASON_LIVE,
         ),
         ("ワイバーン ガチャ100連", {}, REASON_NG_WORD),
-        ("今月の編成まとめ", {}, REASON_BOSS_UNKNOWN),
     ],
 )
 async def test_excluded_videos_are_saved_but_not_postable(store, title, detail_kwargs, reason):
@@ -178,6 +178,31 @@ async def test_excluded_videos_are_saved_but_not_postable(store, title, detail_k
     row = store.get_video("vid_x")
     assert row["status"] == "filtered"
     assert row["filter_reason"] == reason
+
+
+@pytest.mark.asyncio
+async def test_unclassified_video_is_posted_by_default(store):
+    """取りこぼすくらいなら関係ない動画が混ざってよい（docs/spec/01 §2）。"""
+    feed = make_feed([("vid_u", "今月の編成まとめ", None)])
+    result = await run_collect(store, feed, {"vid_u": detail()})
+
+    row = store.get_video("vid_u")
+    assert row["boss_index"] is None
+    assert row["status"] == "pending"  # 親チャンネルへ投稿される
+    assert result.pending == 1
+    assert result.filtered == 0
+
+
+@pytest.mark.asyncio
+async def test_unclassified_video_is_filtered_when_skip_is_configured(store):
+    feed = make_feed([("vid_u", "今月の編成まとめ", None)])
+    config = make_config(classify=ClassifyConfig(on_boss_unknown=ON_UNKNOWN_SKIP))
+    result = await run_collect(store, feed, {"vid_u": detail()}, config=config)
+
+    row = store.get_video("vid_u")
+    assert row["status"] == "filtered"
+    assert row["filter_reason"] == REASON_BOSS_UNKNOWN
+    assert result.pending == 0
 
 
 @pytest.mark.asyncio
@@ -332,15 +357,16 @@ async def test_quota_exceeded_degrades_to_rss_only(store):
 @pytest.mark.asyncio
 async def test_ex_notation_requires_publication_within_period(store):
     """期間前に投稿された EX表記動画は今月のボスに割り当てない（docs/spec/06 §2.2）。"""
-    old = (PERIOD.training_start - timedelta(days=40)).astimezone(UTC).isoformat()
+    old = (PERIOD.start - timedelta(days=40)).astimezone(UTC).isoformat()
     feed = make_feed([("vid_old", "【プリコネ】クラバト 4ボス 通常凸", old)])
     result = await run_collect(store, feed, {"vid_old": detail()})
 
     row = store.get_video("vid_old")
-    assert row["boss_index"] is None
-    assert row["status"] == "filtered"
-    assert row["filter_reason"] == REASON_BOSS_UNKNOWN
-    assert result.pending == 0
+    assert row["boss_index"] is None  # 「4ボス」を今月の4ボスに割り当てない
+    assert row["match_source"] is None
+    # ボス不明でも既定では投稿する（docs/spec/01 §2）
+    assert row["status"] == "pending"
+    assert result.pending == 1
 
 
 # ---- クォータのログ（roadmap 監査 B） ----

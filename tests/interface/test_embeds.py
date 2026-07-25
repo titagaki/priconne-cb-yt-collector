@@ -19,12 +19,11 @@ def test_never_reproduces_the_description(store):
 
 
 def test_fields_for_carryover(store):
-    row = store_video(store, battle_type="carryover", carryover_sec=35, boss_phase=4, damage=2150)
+    row = store_video(store, battle_type="carryover", carryover_sec=35, damage=2150)
     fields = {f.name: f.value for f in build_video_embed(row, BOSSES).fields}
 
     assert fields["ボス"] == "1ボス ワイバーン"
     assert fields["種別"] == "持ち越し (35秒)"
-    assert fields["段階"] == "4段階"
     assert fields["ダメージ"] == "2,150万"
 
 
@@ -43,14 +42,14 @@ def test_battle_type_labels(store, battle_type, expected):
     assert fields["種別"] == expected
 
 
-@pytest.mark.parametrize(
-    ("evidence", "badge"),
-    [("keyword", "🏋️ トレモ"), ("phase_only", "🏋️ トレモ期間")],
-)
-def test_training_badges_distinguish_evidence(store, evidence, badge):
-    """推定（phase_only）と確証（keyword）を表示上区別する（docs/spec/08 §2）。"""
-    row = store_video(store, is_training_footage=True, training_evidence=evidence)
-    assert badge in build_video_embed(row, BOSSES).footer.text
+def test_training_badge_shown_for_training_footage(store):
+    row = store_video(store, is_training_footage=True)
+    assert "🏋️ トレモ" in build_video_embed(row, BOSSES).footer.text
+
+
+def test_training_badge_absent_otherwise(store):
+    row = store_video(store, is_training_footage=False)
+    assert "トレモ" not in build_video_embed(row, BOSSES).footer.text
 
 
 def test_ex_notation_badge(store):
