@@ -1,43 +1,3 @@
-# 03. 設定ファイル
-
-## 1. `config/bosses.yaml`
-
-運用者が毎月書き換えるファイル。**このファイルの内容が判定ロジックの唯一の正になる。**
-
-```yaml
-# 対象月（YYYY-MM）。この値と実行時の月が一致しない場合は起動時に警告する
-month: "2026-07"
-
-bosses:
-  - index: 1
-    name: "ワイバーン"
-    aliases: ["ワイバーン", "ワイバン", "wyvern"]
-  - index: 2
-    name: "デミカリド"
-    aliases: ["デミカリド", "デミカリ"]
-  - index: 3
-    name: "ライデン"
-    aliases: ["ライデン", "雷電"]
-  - index: 4
-    name: "スピリットホーン"
-    aliases: ["スピリットホーン", "スピホン"]
-  - index: 5
-    name: "オルレオン"
-    aliases: ["オルレオン", "オルレ"]
-```
-
-### 要件
-
-- `index` は 1〜5、重複不可、5件必須。違反時は**起動失敗**させる
-- `aliases` は省略可（省略時は `name` のみを使う）
-- `aliases` に短すぎる文字列（2文字以下）が含まれる場合は起動時に警告を出す。誤マッチの原因になるため
-- ファイルはホットリロード可能にする（`/reload` コマンドで再読込。Bot 再起動を不要にする）
-- **エイリアスは実装者が推測で追加しないこと。** 上記の値はサンプルであり、運用者が編集する
-- `month` は idle → training 遷移時にも検証される（[04](04-schedule.md) 参照）
-
-## 2. `config/config.yaml`
-
-```yaml
 schedule:
   # 稼働期間の判定方法。"offset" | "manual" | "trigger"（既定は trigger。11-1 で決定）
   mode: "trigger"
@@ -72,6 +32,7 @@ polling:
 
 youtube:
   # RSS 監視対象チャンネル（メインの取得経路）
+  # ※ サンプル値。運用者が実際のチャンネル ID を設定すること（docs/spec/11-5）
   channels:
     - id: "UCxxxxxxxxxxxxxxxxxxxxxx"
       name: "サンプルチャンネルA"
@@ -97,20 +58,7 @@ discord:
   post_interval_seconds: 2
 
 classify:
-  # ボス名でマッチしなかった動画に EX表記判定を適用するか
+  # ボス名でマッチしなかった動画に EX表記判定を適用するか（11-2 で折衷案採用）
   enable_ex_notation: true
   # ボス判定できなかった動画をどうするか: "skip" | "post_as_unknown"
   on_boss_unknown: "skip"
-```
-
-`channels` はサンプル値。運用者が実際のチャンネル ID を設定する必要がある（[11-5](11-open-questions.md#11-5-rss-監視チャンネルの初期リスト) 参照）。
-
-## 3. 環境変数（`.env`）
-
-```
-DISCORD_BOT_TOKEN=
-YOUTUBE_API_KEY=
-LOG_LEVEL=INFO
-```
-
-**シークレットは YAML に書かない。** `.env.example` を用意すること。

@@ -53,6 +53,7 @@ CREATE TABLE period_state (
   notified_training    INTEGER DEFAULT 0,
   notified_battle      INTEGER DEFAULT 0,
   notified_end         INTEGER DEFAULT 0,
+  notified_reminder    INTEGER DEFAULT 0, -- /start 催促を投稿済みか（trigger モード。[04] §3）
   boss_thread_ids      TEXT,              -- {boss_index: thread_id} の JSON
   started_manually     INTEGER DEFAULT 0  -- /start で開始されたか
 );

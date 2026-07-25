@@ -51,3 +51,4 @@ mode == "trigger" → training_start = /start コマンドが実行された時�
 - **`battle` 終了時:** 終了通知（ボス別の収集件数サマリ）を投稿し、ポーリング停止
 - **再起動時:** 現在時刻からフェーズを再計算して即座に再開する。フェーズ遷移通知は重複投稿しない（遷移済みフラグを DB の `period_state` に持つ。[07](07-persistence.md)）
 - **`mode: trigger` の場合:** `/start` されるまでは `idle` のまま。日付では自動開始しない
+- **`/start` 催促（11-1 で決定）:** `mode: trigger` かつ `remind_if_not_started: true` の場合、offset 式で算出したトレモ開始日時を過ぎても `/start` されていなければ、idle チェック時に Discord へ催促を投稿する。**1期間につき1回のみ**（`period_state.notified_reminder` で管理。[07](07-persistence.md)）
