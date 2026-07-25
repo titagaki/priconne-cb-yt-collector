@@ -6,16 +6,16 @@ month: "2026-07"
 bosses:
   - index: 1
     name: "ワイバーン"
-    aliases: ["ワイバーン", "ワイバン", "wyvern"]
+    aliases: ["ワイバーン", "wyvern"]
   - index: 2
-    name: "デミカリド"
-    aliases: ["デミカリド", "デミカリ"]
+    name: "デミ・カリド"
+    aliases: ["デミカリド"]
   - index: 3
     name: "ライデン"
     aliases: ["ライデン", "雷電"]
   - index: 4
     name: "スピリットホーン"
-    aliases: ["スピリットホーン", "スピホン"]
+    aliases: ["スピリットホーン"]
   - index: 5
     name: "オルレオン"
-    aliases: ["オルレオン", "オルレ"]
+    aliases: ["オルレオン"]

@@ -47,7 +47,7 @@ youtube:
     min_duration_seconds: 60      # これ未満はショート扱いで除外
     max_duration_seconds: 3600    # 長時間配信アーカイブを除外
     exclude_live: true            # 配信中・配信予定を除外
-    title_ng_words: ["ガチャ", "雑談", "実況プレイ", "初心者"]
+    title_ng_words: ["ガチャ", "雑談", "実況プレイ"]
 
 discord:
   # "single" = 1チャンネルに全部 / "per_boss_thread" = ボスごとのスレッド
