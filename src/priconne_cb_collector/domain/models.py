@@ -47,13 +47,12 @@ class Period:
 
 @dataclass
 class VideoMeta:
-    """A video from RSS or API search, enriched via videos.list."""
+    """A video found by API search, enriched via videos.list."""
 
     video_id: str
     title: str
     channel_id: str
     published_at: datetime  # aware UTC
-    discovered_via: str  # "rss" | "api_search"
     description: str = ""
     channel_title: str = ""
     duration_sec: int | None = None

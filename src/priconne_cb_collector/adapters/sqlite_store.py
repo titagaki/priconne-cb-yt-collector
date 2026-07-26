@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS videos (
   published_at    TEXT NOT NULL,
   duration_sec    INTEGER,
   view_count      INTEGER,
-  discovered_via  TEXT NOT NULL,
   discovered_at   TEXT NOT NULL,
 
   boss_index      INTEGER,
@@ -74,12 +73,6 @@ CREATE TABLE IF NOT EXISTS period_state (
 CREATE TABLE IF NOT EXISTS quota_usage (
   date        TEXT PRIMARY KEY,
   units_used  INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE TABLE IF NOT EXISTS channel_etags (
-  channel_id  TEXT PRIMARY KEY,
-  etag        TEXT,
-  last_fetch  TEXT
 );
 """
 
@@ -128,7 +121,6 @@ class Store:
             _to_utc_iso(video.published_at),
             video.duration_sec,
             video.view_count,
-            video.discovered_via,
             _to_utc_iso(discovered_at or datetime.now(UTC)),
             boss.primary_index,
             json.dumps(boss.indices) if boss.indices else None,
@@ -149,13 +141,13 @@ class Store:
                 """
                 INSERT OR IGNORE INTO videos (
                   video_id, title, description, channel_id, channel_title,
-                  published_at, duration_sec, view_count, discovered_via,
+                  published_at, duration_sec, view_count,
                   discovered_at, boss_index, boss_indices,
                   match_source, is_summary, battle_type, carryover_sec,
                   damage, is_full_auto, is_manual,
                   is_training_footage, status,
                   filter_reason, cb_period
-                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 row,
             )
@@ -255,18 +247,6 @@ class Store:
             )
         return cur.fetchall()
 
-    def channel_hit_counts(self, exclude_channel_ids: set[str], limit: int = 10):
-        """For /suggest_channels: channels with the most boss-classified videos.
-
-        DB aggregation only — costs no YouTube quota (docs/spec/09 §3).
-        """
-        cur = self._conn.execute(
-            "SELECT channel_id, channel_title, COUNT(*) AS hits FROM videos "
-            "WHERE boss_index IS NOT NULL GROUP BY channel_id ORDER BY hits DESC"
-        )
-        rows = [r for r in cur.fetchall() if r["channel_id"] not in exclude_channel_ids]
-        return rows[:limit]
-
     # ---- period_state ----
 
     def ensure_period(self, period: Period, *, is_open: bool = False) -> None:
@@ -360,29 +340,6 @@ class Store:
         )
         row = cur.fetchone()
         return row["units_used"] if row else 0
-
-    # ---- channel etags ----
-
-    def get_etag(self, channel_id: str) -> tuple[str | None, str | None]:
-        cur = self._conn.execute(
-            "SELECT etag, last_fetch FROM channel_etags WHERE channel_id = ?", (channel_id,)
-        )
-        row = cur.fetchone()
-        return (row["etag"], row["last_fetch"]) if row else (None, None)
-
-    def save_etag(self, channel_id: str, etag: str | None, now: datetime | None = None) -> None:
-        with self._tx() as conn:
-            conn.execute(
-                "INSERT INTO channel_etags (channel_id, etag, last_fetch) VALUES (?,?,?) "
-                "ON CONFLICT(channel_id) DO UPDATE SET etag = ?, last_fetch = ?",
-                (
-                    channel_id,
-                    etag,
-                    _to_utc_iso(now or datetime.now(UTC)),
-                    etag,
-                    _to_utc_iso(now or datetime.now(UTC)),
-                ),
-            )
 
 
 def _to_utc_iso(dt: datetime) -> str:

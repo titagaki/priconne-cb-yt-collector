@@ -68,7 +68,6 @@ def store_video(
         channel_id=fields.pop("channel_id", "UC_test"),
         channel_title=fields.pop("channel_title", "テストチャンネル"),
         published_at=fields.pop("published_at", datetime(2026, 7, 26, 5, 0, tzinfo=UTC)),
-        discovered_via="rss",
         description=fields.pop("description", "この説明文は Embed に転載してはいけない"),
     )
     store.add_video(

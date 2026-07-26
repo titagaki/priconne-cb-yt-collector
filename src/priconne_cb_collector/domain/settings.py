@@ -20,14 +20,7 @@ class PollingConfig:
     battle split, and no idle cadence because the loop does not run while
     stopped (docs/spec/04)."""
 
-    rss_interval_minutes: int = 30
-    api_search_interval_hours: int = 3
-
-
-@dataclass(frozen=True)
-class ChannelRef:
-    id: str
-    name: str = ""
+    search_interval_minutes: int = 30
 
 
 @dataclass(frozen=True)
@@ -40,7 +33,6 @@ class ExcludeConfig:
 
 @dataclass(frozen=True)
 class YoutubeConfig:
-    channels: tuple[ChannelRef, ...] = ()
     quota_limit_per_day: int = 9000
     # How far before /start the API search reaches back (search.list publishedAfter)
     search_lookback_days: int = 1

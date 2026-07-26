@@ -18,7 +18,6 @@ CREATE TABLE videos (
   published_at    TEXT NOT NULL,   -- ISO8601 UTC
   duration_sec    INTEGER,
   view_count      INTEGER,
-  discovered_via  TEXT NOT NULL,   -- "rss" | "api_search"
   discovered_at   TEXT NOT NULL,
 
   boss_index      INTEGER,         -- NULL = 判定不能
@@ -56,12 +55,6 @@ CREATE TABLE period_state (
 CREATE TABLE quota_usage (
   date        TEXT PRIMARY KEY,    -- JST の日付
   units_used  INTEGER NOT NULL DEFAULT 0
-);
-
-CREATE TABLE channel_etags (
-  channel_id  TEXT PRIMARY KEY,
-  etag        TEXT,
-  last_fetch  TEXT
 );
 ```
 

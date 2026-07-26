@@ -70,9 +70,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         logger.info(
-            "config ok: layout=%s channels=%d bosses_month=%s",
+            "config ok: layout=%s search_interval=%dmin bosses_month=%s",
             config.discord.layout,
-            len(config.youtube.channels),
+            config.polling.search_interval_minutes,
             bosses.month,
         )
         return 0
@@ -82,8 +82,14 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("DISCORD_BOT_TOKEN is not set (see .env.example)")
         return 1
 
+    api_key = os.getenv("YOUTUBE_API_KEY")
+    if not api_key:
+        # search.list is the only way videos are found now (docs/spec/05 §1).
+        logger.error("YOUTUBE_API_KEY is not set; nothing can be collected (see .env.example)")
+        return 1
+
     store = Store(paths.database)
-    bot = CollectorBot(config, bosses, store, os.getenv("YOUTUBE_API_KEY"), paths)
+    bot = CollectorBot(config, bosses, store, api_key, paths)
     try:
         bot.run(token, log_handler=None)
     finally:

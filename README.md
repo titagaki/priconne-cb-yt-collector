@@ -17,7 +17,7 @@ cp .env.example .env      # DISCORD_BOT_TOKEN / YOUTUBE_API_KEY を記入
 | ファイル | 項目 |
 |---|---|
 | `.env` | `DISCORD_BOT_TOKEN` / `YOUTUBE_API_KEY`（`LOG_LEVEL` は任意、既定 INFO） |
-| `config/config.yaml` | `discord.channel_id`、`youtube.channels`（サンプル値のまま） |
+| `config/config.yaml` | `discord.channel_id`（サンプル値のまま） |
 | `config/bosses.yaml` | 今月のボス構成。**毎月書き換える** |
 
 `bosses.yaml` のエイリアスは判定ロジックの唯一の正です。実装者・Claude が推測で追加してはいけません。
@@ -44,14 +44,18 @@ cp .env.example .env      # DISCORD_BOT_TOKEN / YOUTUBE_API_KEY を記入
 | `/start` | 管理者 | 収集開始（ボス構成の確認ボタンつき） |
 | `/stop` | 管理者 | 収集停止（データは消さない） |
 | `/reload` | 管理者 | `config.yaml` / `bosses.yaml` の再読込 |
-| `/collect [api_search]` | 管理者 | 手動収集（クォータ消費の確認つき） |
-| `/suggest_channels` | 管理者 | RSS 監視候補の提案（クォータ消費なし） |
+| `/collect` | 管理者 | 手動収集（クォータ消費の確認つき） |
 
-## クォータ
+## 取得経路とクォータ
 
-`search.list` は 1 回 100 ユニット、`videos.list` は 50 件まとめて 1 ユニットです。
-ボス5体の検索 1 巡で 500 ユニット消費するため、既定の 3 時間間隔（1日8巡 = 4,000ユニット）が上限の目安です。
-`quota_limit_per_day` を超えそうな場合と `quotaExceeded` を受けた場合は、**停止せず RSS のみに縮退**します。
+取得経路は Data API v3 の検索 1 本です。RSS によるチャンネル監視は行いません。
+
+`search.list` は**結果件数によらず 1 回 100 ユニット固定**なので、`bosses.yaml` の全ボス名を
+1 つの OR クエリにまとめて投げます。1 巡 = 100 ユニット、既定の 30 分間隔で 1 日 4,800 ユニット
+（上限 9,000）です。`videos.list` は 50 件まとめて 1 ユニットなので誤差の範囲です。
+
+`quota_limit_per_day` を超えそうな場合と `quotaExceeded` を受けた場合は検索をスキップします。
+Bot 自体は停止せず、JST の日付が変われば再開します。
 
 ## 構成
 
@@ -61,7 +65,7 @@ cp .env.example .env      # DISCORD_BOT_TOKEN / YOUTUBE_API_KEY を記入
 src/priconne_cb_collector/
 ├── interface/   Discord 配信層（コマンド、Embed、投稿キュー、Bot 本体）
 ├── services/    ユースケース（収集パイプライン、期間ライフサイクル）
-├── adapters/    外部 I/O（SQLite、YouTube RSS / Data API、設定ファイル）
+├── adapters/    外部 I/O（SQLite、YouTube Data API、設定ファイル）
 └── domain/      依存なし。dataclass と純粋関数（判定ロジック、期間計算）
 ```
 

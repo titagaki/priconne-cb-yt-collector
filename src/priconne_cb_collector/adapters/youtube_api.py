@@ -21,7 +21,6 @@ API_BASE = "https://www.googleapis.com/youtube/v3"
 SEARCH_COST = 100
 VIDEOS_LIST_COST = 1
 VIDEOS_LIST_BATCH = 50
-DISCOVERED_VIA = "api_search"
 
 MAX_RETRIES = 3
 INITIAL_BACKOFF_SECONDS = 2.0
@@ -30,7 +29,7 @@ _ISO_DURATION = re.compile(r"^P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$")
 
 
 class QuotaExceededError(Exception):
-    """The API reported quotaExceeded. Never retried; degrade to RSS only."""
+    """The API reported quotaExceeded. Never retried; search stops for the day."""
 
 
 class YouTubeClient:
@@ -41,7 +40,11 @@ class YouTubeClient:
     async def search_videos(
         self, query: str, published_after: datetime, max_results: int = 50
     ) -> tuple[list[VideoMeta], int]:
-        """search.list for new channel discovery. Returns (videos, units used)."""
+        """search.list, the only way videos are found. Returns (videos, units used).
+
+        One call costs 100 units no matter how many results come back, so the
+        caller passes every boss name in a single OR query (docs/spec/05 §1).
+        """
         params = {
             "key": self._api_key,
             "part": "snippet",
@@ -64,7 +67,6 @@ class YouTubeClient:
                         title=snippet["title"],
                         channel_id=snippet["channelId"],
                         published_at=_parse_rfc3339(snippet["publishedAt"]),
-                        discovered_via=DISCOVERED_VIA,
                         description=snippet.get("description", ""),
                         channel_title=snippet.get("channelTitle", ""),
                     )

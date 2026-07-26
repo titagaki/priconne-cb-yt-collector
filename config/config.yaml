@@ -1,17 +1,10 @@
 # 収集の開始 / 終了は `/start` と `/stop` のみ。日付の設定は無い
 polling:
-  # 収集中の間隔（収集中は一定。停止中はループ自体を回さない）
-  rss_interval_minutes: 30
-  api_search_interval_hours: 3
+  # API 検索の間隔（収集中は一定。停止中はループ自体を回さない）
+  #   1巡 = 1クエリ = 100ユニット。30分間隔なら 48巡/日 = 4,800ユニット
+  search_interval_minutes: 30
 
 youtube:
-  # RSS 監視対象チャンネル（メインの取得経路）
-  # ※ サンプル値。運用者が実際のチャンネル ID を設定すること
-  channels:
-    - id: "UCxxxxxxxxxxxxxxxxxxxxxx"
-      name: "サンプルチャンネルA"
-    - id: "UCyyyyyyyyyyyyyyyyyyyyyy"
-      name: "サンプルチャンネルB"
   # 1日あたりのクォータ上限（既定 10000 のうち何ユニットまで使うか）
   quota_limit_per_day: 9000
   # `/start` の何日前に投稿された動画まで API 検索の対象に含めるか

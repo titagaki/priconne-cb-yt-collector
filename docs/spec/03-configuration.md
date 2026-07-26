@@ -43,18 +43,12 @@ bosses:
 
 ```yaml
 polling:
-  # 収集中の間隔（収集中は一定。トレモ / 本番で分けない。[04](04-schedule.md) §1）
-  rss_interval_minutes: 30
-  api_search_interval_hours: 3
+  # API 検索の間隔（収集中は一定。トレモ / 本番で分けない。[04](04-schedule.md) §1）
+  #   1巡 = 1クエリ = 100ユニット。30分間隔なら 48巡/日 = 4,800ユニット
+  search_interval_minutes: 30
   # 待機中はループ自体を回さないため、idle 用の間隔設定は無い
 
 youtube:
-  # RSS 監視対象チャンネル（メインの取得経路）
-  channels:
-    - id: "UCxxxxxxxxxxxxxxxxxxxxxx"
-      name: "サンプルチャンネルA"
-    - id: "UCyyyyyyyyyyyyyyyyyyyyyy"
-      name: "サンプルチャンネルB"
   # 1日あたりのクォータ上限（既定 10000 のうち何ユニットまで使うか）
   quota_limit_per_day: 9000
   # /start の何日前に投稿された動画まで API 検索の対象に含めるか
@@ -81,7 +75,8 @@ classify:
   on_boss_unknown: "post_as_unknown"
 ```
 
-`channels` はサンプル値。**運用者が実際のチャンネル ID を設定する必要がある。**
+**監視チャンネルの設定は無い。**取得経路は API 検索 1 本で、
+クエリは `bosses.yaml` から組み立てる（[05](05-collection.md) §1）。
 
 ## 3. 環境変数（`.env`）
 
@@ -92,3 +87,6 @@ LOG_LEVEL=INFO
 ```
 
 **シークレットは YAML に書かない。** `.env.example` を用意すること。
+
+`DISCORD_BOT_TOKEN` と `YOUTUBE_API_KEY` はどちらも必須。未設定なら起動を中止する
+（API 検索が唯一の取得経路なので、キーが無いと何も収集できない）。

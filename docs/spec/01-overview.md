@@ -20,7 +20,7 @@
 
 ### 3.1 やること
 
-- YouTube からの動画収集（RSS + Data API v3） → [05](05-collection.md)
+- YouTube からの動画収集（Data API v3 検索） → [05](05-collection.md)
 - ボス判定・通常/持ち越し判定 → [06](06-classification.md)
 - 重複排除 → [07](07-persistence.md)
 - Discord への Embed 投稿 → [08](08-discord-posting.md)

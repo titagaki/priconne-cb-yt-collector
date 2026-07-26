@@ -10,9 +10,6 @@ import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 
-import httpx
-
-from priconne_cb_collector.adapters import youtube_rss as rss
 from priconne_cb_collector.adapters.sqlite_store import STATUS_FILTERED, STATUS_PENDING, Store
 from priconne_cb_collector.adapters.youtube_api import (
     SEARCH_COST,
@@ -42,7 +39,7 @@ class CollectResult:
     filtered: int = 0
     errors: int = 0
     quota_used: int = 0
-    api_search_skipped: bool = False
+    search_skipped: bool = False
     filter_reasons: dict[str, int] = field(default_factory=dict)
 
 
@@ -52,34 +49,22 @@ class Collector:
         config: AppConfig,
         bosses: BossesConfig,
         store: Store,
-        http: httpx.AsyncClient,
         youtube: YouTubeClient | None = None,
     ):
         self.config = config
         self.bosses = bosses
         self.store = store
-        self.http = http
         self.youtube = youtube
 
-    async def collect(
-        self,
-        period: Period,
-        *,
-        now: datetime | None = None,
-        run_api_search: bool = False,
-    ) -> CollectResult:
+    async def collect(self, period: Period, *, now: datetime | None = None) -> CollectResult:
         now = now or datetime.now(UTC)
         result = CollectResult()
 
+        searched, skipped = await self._search(period, now, result)
+        result.search_skipped = skipped
         candidates: dict[str, VideoMeta] = {}
-        for video in await self._fetch_rss(now):
+        for video in searched:
             candidates.setdefault(video.video_id, video)
-
-        if run_api_search:
-            searched, skipped = await self._fetch_api_search(period, now, result)
-            result.api_search_skipped = skipped
-            for video in searched:
-                candidates.setdefault(video.video_id, video)
 
         result.fetched = len(candidates)
 
@@ -132,59 +117,50 @@ class Collector:
 
     # ---- fetching ----
 
-    async def _fetch_rss(self, now: datetime) -> list[VideoMeta]:
-        videos: list[VideoMeta] = []
-        for channel in self.config.youtube.channels:
-            try:
-                etag, last_fetch = self.store.get_etag(channel.id)
-                fetched, new_etag, not_modified = await rss.fetch_channel(
-                    self.http, channel, etag, last_fetch
-                )
-                self.store.save_etag(channel.id, new_etag, now)
-                if not not_modified:
-                    videos.extend(fetched)
-            except Exception:
-                logger.exception("rss fetch failed: channel_id=%s", channel.id)
-        return videos
+    def search_query(self) -> str:
+        """Every boss name in one OR query.
 
-    async def _fetch_api_search(
+        search.list costs 100 units per call regardless of the result count, so
+        one combined call costs a fifth of one call per boss and lets the loop
+        run every 30 minutes instead of every 90 (docs/spec/05 §1).
+
+        Boss names only: adding "プリコネ"/"クラバト" would drop the many videos
+        whose titles carry neither (docs/spec/05 §2).
+        """
+        return " OR ".join(boss.name for boss in self.bosses.bosses)
+
+    async def _search(
         self, period: Period, now: datetime, result: CollectResult
     ) -> tuple[list[VideoMeta], bool]:
-        """Run one search round (5 bosses). Degrades to RSS-only on quota limits."""
+        """One search round. Returns (videos, skipped)."""
         if self.youtube is None:
             return [], True
 
-        planned = SEARCH_COST * len(self.bosses.bosses)
         used = self.store.quota_used(now)
         limit = self.config.youtube.quota_limit_per_day
-        if used + planned > limit:
+        if used + SEARCH_COST > limit:
             logger.warning(
-                "api search skipped to stay within quota: used=%d planned=%d limit=%d",
+                "search skipped to stay within quota: used=%d planned=%d limit=%d",
                 used,
-                planned,
+                SEARCH_COST,
                 limit,
             )
             return [], True
 
         published_after = period.start - timedelta(days=self.config.youtube.search_lookback_days)
-        videos: list[VideoMeta] = []
-        for boss in self.bosses.bosses:
-            # Boss name alone. Adding "プリコネ"/"クラバト" would drop the many
-            # videos whose titles carry neither (docs/spec/05 §2).
-            query = boss.name
-            try:
-                found, units = await self.youtube.search_videos(query, published_after)
-            except QuotaExceededError:
-                logger.warning("quotaExceeded; degrading to rss-only for today")
-                self.store.add_quota(limit, now)  # block further searches today
-                return videos, True
-            except Exception:
-                logger.exception("api search failed: query=%r", query)
-                continue
-            self.store.add_quota(units, now)
-            result.quota_used += units
-            videos.extend(found)
-        return videos, False
+        query = self.search_query()
+        try:
+            found, units = await self.youtube.search_videos(query, published_after)
+        except QuotaExceededError:
+            logger.warning("quotaExceeded; no more searches today")
+            self.store.add_quota(limit, now)  # block further searches today
+            return [], True
+        except Exception:
+            logger.exception("search failed: query=%r", query)
+            return [], False
+        self.store.add_quota(units, now)
+        result.quota_used += units
+        return found, False
 
     async def _enrich(self, fresh: dict[str, VideoMeta], result: CollectResult) -> None:
         """videos.list gives description / duration / live state (1 unit per 50)."""
@@ -196,7 +172,7 @@ class Collector:
             logger.warning("quotaExceeded during videos.list; skipping enrichment")
             return
         except Exception:
-            logger.exception("videos.list failed; classifying with rss metadata only")
+            logger.exception("videos.list failed; classifying with search metadata only")
             return
         self.store.add_quota(units)
         result.quota_used += units
@@ -244,10 +220,9 @@ class Collector:
 
         # Spec 10 §2: the matched strings are required for tuning the classifier.
         logger.info(
-            "video classified: video_id=%s via=%s boss=%s source=%s matched=%s "
+            "video classified: video_id=%s boss=%s source=%s matched=%s "
             "battle_type=%s postable=%s reason=%s title=%r",
             video.video_id,
-            video.discovered_via,
             classification.boss.indices,
             classification.boss.match_source,
             classification.boss.matched_strings,

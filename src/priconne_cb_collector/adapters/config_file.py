@@ -19,7 +19,6 @@ from priconne_cb_collector.domain.settings import (
     ON_UNKNOWN_POST,
     ON_UNKNOWN_SKIP,
     AppConfig,
-    ChannelRef,
     ClassifyConfig,
     DiscordConfig,
     ExcludeConfig,
@@ -101,17 +100,12 @@ def load_config(path: str | Path) -> AppConfig:
         )
 
     polling = data.get("polling") or {}
-    channels = tuple(
-        ChannelRef(id=c["id"], name=c.get("name", "")) for c in (youtube.get("channels") or [])
-    )
 
     return AppConfig(
         polling=PollingConfig(
-            rss_interval_minutes=int(polling.get("rss_interval_minutes", 30)),
-            api_search_interval_hours=int(polling.get("api_search_interval_hours", 3)),
+            search_interval_minutes=int(polling.get("search_interval_minutes", 30)),
         ),
         youtube=YoutubeConfig(
-            channels=channels,
             quota_limit_per_day=int(youtube.get("quota_limit_per_day", 9000)),
             search_lookback_days=int(youtube.get("search_lookback_days", 1)),
             exclude=ExcludeConfig(

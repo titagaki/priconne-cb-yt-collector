@@ -60,14 +60,13 @@ class CollectorBot(discord.Client):
         self.http_client = httpx.AsyncClient(headers={"User-Agent": USER_AGENT})
         youtube = YouTubeClient(self.http_client, api_key) if api_key else None
         if youtube is None:
-            logger.warning("YOUTUBE_API_KEY is not set; running with rss only")
+            logger.error("YOUTUBE_API_KEY is not set; nothing can be collected")
 
         self.periods = PeriodService(store)
-        self.collector = Collector(config, bosses, store, self.http_client, youtube)
+        self.collector = Collector(config, bosses, store, youtube)
         self.poster = Poster(self, config, bosses, store)
 
-        self._last_rss: datetime | None = None
-        self._last_api: datetime | None = None
+        self._last_search: datetime | None = None
         self._was_collecting: bool | None = None
         self._threads_ready = False
 
@@ -84,8 +83,7 @@ class CollectorBot(discord.Client):
         period = self.periods.start(now)
         self._was_collecting = None  # let the next tick emit the start announcement
         self._threads_ready = False
-        self._last_rss = None  # collect on the first tick, not one interval later
-        self._last_api = None
+        self._last_search = None  # collect on the first tick, not one interval later
         self._resume_loop()
         return period
 
@@ -117,7 +115,7 @@ class CollectorBot(discord.Client):
     def bosses_embed(self) -> discord.Embed:
         return build_bosses_embed(self.bosses, datetime.now(JST).strftime("%Y-%m"))
 
-    async def run_collection(self, *, run_api_search: bool = False):
+    async def run_collection(self):
         """One collection round on demand (/collect). Posts what it finds.
 
         Refused while not collecting: a video collected then belongs to no
@@ -127,10 +125,8 @@ class CollectorBot(discord.Client):
         period = self.periods.current_period(now)
         if period is None or not self.periods.is_collecting(now):
             raise RuntimeError("収集期間外です")
-        result = await self.collector.collect(period, now=now, run_api_search=run_api_search)
-        self._last_rss = now
-        if run_api_search and not result.api_search_skipped:
-            self._last_api = now
+        result = await self.collector.collect(period, now=now)
+        self._last_search = now
         await self.poster.post_pending(period.cb_period, now)
         return result
 
@@ -198,16 +194,14 @@ class CollectorBot(discord.Client):
         await self.poster.post_pending(period.cb_period, now)
 
     async def _run_due_collections(self, period: Period, now: datetime) -> None:
-        polling = self.config.polling
-        rss_due = self._is_due(self._last_rss, now, polling.rss_interval_minutes * 60)
-        api_due = self._is_due(self._last_api, now, polling.api_search_interval_hours * 3600)
-        if not rss_due and not api_due:
+        interval = self.config.polling.search_interval_minutes * 60
+        if not self._is_due(self._last_search, now, interval):
             return
 
-        result = await self.collector.collect(period, now=now, run_api_search=api_due)
-        self._last_rss = now
-        if api_due and not result.api_search_skipped:
-            self._last_api = now
+        # Recorded even when the search is skipped for quota, so an exhausted
+        # budget retries on the normal cadence instead of on every tick.
+        self._last_search = now
+        await self.collector.collect(period, now=now)
 
     @staticmethod
     def _is_due(last: datetime | None, now: datetime, interval_seconds: float) -> bool:

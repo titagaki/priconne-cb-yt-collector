@@ -8,7 +8,6 @@
 | Discord | discord.py 2.x（スラッシュコマンド対応） |
 | スケジューラ | `discord.ext.tasks` |
 | HTTP | httpx（非同期） |
-| RSS | feedparser |
 | DB | SQLite（標準ライブラリ `sqlite3`。ORM 不要） |
 | 設定 | YAML（PyYAML） |
 | タイムゾーン | **Asia/Tokyo 固定**。DB には UTC で保存し、表示時に JST 変換 |
@@ -21,7 +20,7 @@
 |---|---|---|
 | `interface/` | Discord 配信層。スラッシュコマンド、Embed、投稿キュー、Bot 本体 | services / adapters / domain |
 | `services/` | ユースケース。収集パイプライン、期間ライフサイクル | adapters / domain |
-| `adapters/` | 外部 I/O。SQLite、YouTube RSS / Data API、設定ファイル | domain |
+| `adapters/` | 外部 I/O。SQLite、YouTube Data API、設定ファイル | domain |
 | `domain/` | **依存なし。** dataclass と純粋関数（判定ロジック、期間計算） | 標準ライブラリのみ |
 
 `domain/` は `httpx` / `discord.py` / `sqlite3` のいずれも import しない。
@@ -44,16 +43,15 @@ priconne-cb-yt-collector/
 │   ├── domain/
 │   │   ├── models.py        # Boss / Period / VideoMeta / Classification 等
 │   │   ├── settings.py      # 設定スキーマ（dataclass のみ）
-│   │   ├── schedule.py      # 収集期間の判定（純粋関数）
+│   │   ├── schedule.py      # 収集期間の生成・判定（純粋関数）
 │   │   └── classify/
 │   │       ├── normalize.py    # 正規化
 │   │       ├── boss.py         # ボス判定
 │   │       ├── battle_type.py  # 通常/持ち越し判定
-│   │       └── metadata.py     # 段階・ダメージ・フルオート等の抽出
+│   │       └── metadata.py     # ダメージ・フルオート等の抽出
 │   ├── adapters/
 │   │   ├── config_file.py   # YAML 読み込み・バリデーション
 │   │   ├── sqlite_store.py  # SQLite 永続化
-│   │   ├── youtube_rss.py   # チャンネル RSS 取得
 │   │   └── youtube_api.py   # Data API v3 クライアント（クォータ管理込み）
 │   ├── services/
 │   │   ├── collection.py    # 収集パイプライン（取得→判定→除外→保存）
@@ -90,7 +88,7 @@ tests/
 |---|---|
 | `adapters/config_file.py` | [03. 設定ファイル](03-configuration.md) |
 | `domain/schedule.py`, `services/lifecycle.py` | [04. 収集期間](04-schedule.md) |
-| `adapters/youtube_rss.py`, `adapters/youtube_api.py`, `services/collection.py` | [05. 動画の取得](05-collection.md) |
+| `adapters/youtube_api.py`, `services/collection.py` | [05. 動画の取得](05-collection.md) |
 | `domain/classify/` | [06. 判定ロジック](06-classification.md) |
 | `adapters/sqlite_store.py` | [07. 永続化](07-persistence.md) |
 | `interface/poster.py`, `interface/embeds.py` | [08. Discord 投稿](08-discord-posting.md) |

@@ -45,8 +45,8 @@ class FakeCollector:
         self.config = None
         self.bosses = None
 
-    async def collect(self, period, now=None, run_api_search=False):
-        self.calls.append((period.cb_period, run_api_search))
+    async def collect(self, period, now=None):
+        self.calls.append(period.cb_period)
         return CollectResult(fetched=0, new=0)
 
 
@@ -109,7 +109,7 @@ async def test_collection_continues_into_the_next_month(bot, monkeypatch):
     bot.collector.calls.clear()
     await bot._tick_once()
 
-    assert bot.collector.calls == [(CB_PERIOD, True)]  # 開始月のキーのまま
+    assert bot.collector.calls == [CB_PERIOD]  # 開始月のキーのまま
 
 
 # ---- 前月のボス構成のまま起動しない ----
@@ -227,13 +227,13 @@ async def test_tick_parks_the_loop_if_the_period_vanishes(bot, monkeypatch):
 # ---- ポーリング間隔 ----
 
 
-async def test_rss_interval_is_respected(bot, monkeypatch):
+async def test_search_interval_is_respected(bot, monkeypatch):
     freeze_now(monkeypatch, STARTED)
     await bot.start_period(STARTED)
     await bot._tick_once()
     assert len(bot.collector.calls) == 1
 
-    # RSS 間隔は 30分。1分後の tick では走らない
+    # 検索間隔は 30分。1分後の tick では走らない
     freeze_now(monkeypatch, STARTED.replace(minute=1))
     await bot._tick_once()
     assert len(bot.collector.calls) == 1
@@ -260,7 +260,7 @@ async def test_manual_collect_runs_inside_the_period(bot, monkeypatch):
     freeze_now(monkeypatch, STARTED)
     await bot.start_period(STARTED)
 
-    await bot.run_collection(run_api_search=True)
+    await bot.run_collection()
 
-    assert bot.collector.calls == [(CB_PERIOD, True)]
+    assert bot.collector.calls == [CB_PERIOD]
     assert bot.poster.posted_calls == [CB_PERIOD]

@@ -23,7 +23,7 @@ ALLOWED = {
 }
 
 # domain が触れてはいけない外部ライブラリ
-FORBIDDEN_IN_DOMAIN = {"httpx", "discord", "sqlite3", "feedparser", "yaml", "dotenv"}
+FORBIDDEN_IN_DOMAIN = {"httpx", "discord", "sqlite3", "yaml", "dotenv"}
 
 
 def iter_modules():

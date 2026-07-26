@@ -162,26 +162,19 @@ def setup_commands(bot) -> None:
 
     @tree.command(name="collect", description="[管理者] 手動で収集を1回実行します")
     @app_commands.default_permissions(administrator=True)
-    @app_commands.describe(api_search="API 検索も実行する（クォータを消費します）")
-    async def collect(interaction: discord.Interaction, api_search: bool = False):
+    async def collect(interaction: discord.Interaction):
         if not bot.is_collecting():
             await interaction.response.send_message(
                 "収集期間外です。先に `/start` を実行してください。", ephemeral=True
             )
             return
 
-        planned = SEARCH_COST * len(bot.bosses.bosses) if api_search else 0
         used = bot.store.quota_used()
         view = ConfirmView(interaction.user.id)
         embed = discord.Embed(title="手動収集の確認", color=0xF1C40F)
         embed.add_field(
-            name="RSS 巡回",
-            value=f"{len(bot.config.youtube.channels)}チャンネル（0ユニット）",
-            inline=False,
-        )
-        embed.add_field(
             name="API 検索",
-            value=f"実行する（約{planned}ユニット）" if api_search else "実行しない",
+            value=f"1クエリ（{SEARCH_COST}ユニット）\n`{bot.collector.search_query()}`",
             inline=False,
         )
         embed.add_field(
@@ -196,40 +189,12 @@ def setup_commands(bot) -> None:
             await interaction.followup.send("収集をキャンセルしました。", ephemeral=True)
             return
 
-        result = await bot.run_collection(run_api_search=api_search)
+        result = await bot.run_collection()
         await interaction.followup.send(
             f"収集完了: 取得 {result.fetched}件 / 新規 {result.new}件 / "
             f"投稿待ち {result.pending}件 / 除外 {result.filtered}件 / "
             f"エラー {result.errors}件 / クォータ消費 {result.quota_used}ユニット"
         )
-
-    @tree.command(
-        name="suggest_channels",
-        description="[管理者] RSS 監視候補のチャンネルを提案します（クォータ消費なし）",
-    )
-    @app_commands.default_permissions(administrator=True)
-    async def suggest_channels(interaction: discord.Interaction):
-        monitored = {c.id for c in bot.config.youtube.channels}
-        rows = bot.store.channel_hit_counts(monitored, limit=10)
-        if not rows:
-            await interaction.response.send_message(
-                "提案できるチャンネルがありません。収集データが溜まってから実行してください。",
-                ephemeral=True,
-            )
-            return
-
-        lines = [
-            f"{i}. **{row['channel_title'] or '(名称不明)'}** — {row['hits']}件\n"
-            f"`{row['channel_id']}`"
-            for i, row in enumerate(rows, start=1)
-        ]
-        embed = discord.Embed(
-            title="RSS 監視候補",
-            description="\n".join(lines),
-            color=NOTICE_COLOR,
-        )
-        embed.set_footer(text="config.yaml の youtube.channels に追記して /reload してください")
-        await interaction.response.send_message(embed=embed)
 
 
 def _period_label(now: datetime, period) -> str:

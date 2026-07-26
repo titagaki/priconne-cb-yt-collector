@@ -15,7 +15,6 @@ def make_video(video_id="abc123", **kwargs):
         channel_id="UC_test",
         channel_title="テストチャンネル",
         published_at=datetime(2026, 7, 24, 3, 0, tzinfo=UTC),
-        discovered_via="rss",
         description="説明文",
         duration_sec=300,
     )
@@ -209,7 +208,7 @@ def test_count_posted_today_resets_next_jst_day(store):
     assert store.count_posted_today(1, tomorrow) == 0
 
 
-# ---- 集計・ETag ----
+# ---- 集計 ----
 
 
 def test_count_by_boss(store):
@@ -221,27 +220,6 @@ def test_count_by_boss(store):
     assert counts[1] == 2
     assert counts[2] == 1
     assert counts[None] == 1
-
-
-def test_channel_hit_counts_excludes_monitored_channels(store):
-    add(store, make_video("a", channel_id="UC_known"))
-    add(store, make_video("b", channel_id="UC_new"))
-    add(store, make_video("c", channel_id="UC_new"))
-    add(store, make_video("d", channel_id="UC_noise"), Classification(boss=BossMatch()))
-
-    rows = store.channel_hit_counts(exclude_channel_ids={"UC_known"})
-    assert [r["channel_id"] for r in rows] == ["UC_new"]  # 判定不能のみのチャンネルは出ない
-    assert rows[0]["hits"] == 2
-
-
-def test_etag_round_trip(store):
-    assert store.get_etag("UC_test") == (None, None)
-    store.save_etag("UC_test", 'W/"abc"')
-    etag, last_fetch = store.get_etag("UC_test")
-    assert etag == 'W/"abc"'
-    assert last_fetch is not None
-    store.save_etag("UC_test", 'W/"def"')
-    assert store.get_etag("UC_test")[0] == 'W/"def"'
 
 
 def test_pending_videos_scoped_to_period(store):

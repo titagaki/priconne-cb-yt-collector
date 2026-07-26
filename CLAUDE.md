@@ -17,7 +17,7 @@
 
 ## Tech Stack
 
-- Python 3.11+ / discord.py 2.x / httpx / feedparser / SQLite（標準 `sqlite3`、ORM 不要）/ PyYAML
+- Python 3.11+ / discord.py 2.x / httpx / SQLite（標準 `sqlite3`、ORM 不要）/ PyYAML
 - タイムゾーンは Asia/Tokyo 固定。DB には UTC で保存し、表示時に JST 変換
 - ディレクトリ構成は `docs/spec/02-architecture.md` に従う
 
