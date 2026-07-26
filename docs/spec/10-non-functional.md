@@ -24,7 +24,7 @@
 | `domain/classify/boss.py` | 名前一致、エイリアス一致、複数ヒット（＝判定不能）、EX表記、名前とEXの衝突、正規化（全角/半角/大小文字） |
 | `domain/classify/battle_type.py` | 持ち越し各表記、秒数抽出、`フル` と `フルオート` の切り分け、判定不能ケース |
 | `domain/classify/damage.py` | ダメージの正規化（億・万の併記、桁区切り、全角） |
-| `adapters/sqlite_store.py` | 重複 INSERT が既存レコードを壊さないこと、開始 / 終了通知フラグが二重投稿を防ぐこと |
+| `adapters/sqlite_store.py` | 重複 INSERT が既存レコードを壊さないこと、`is_open` が再起動をまたいで復元されること |
 
 判定系のテストは、**実際の動画タイトルを模したサンプルを 30 件以上用意した表形式のテストケース**として書くこと。
 

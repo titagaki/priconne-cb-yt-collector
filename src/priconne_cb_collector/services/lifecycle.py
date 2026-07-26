@@ -68,10 +68,3 @@ class PeriodService:
         self.store.close_period(period.cb_period)
         logger.info("period stopped: cb_period=%s", period.cb_period)
         return period
-
-    # ---- notification bookkeeping ----
-
-    def claim_notice(self, cb_period: str, kind: str) -> bool:
-        """Reserve a one-shot notification. False means it was already sent,
-        which is what keeps a restart from re-announcing (docs/spec/04 §3)."""
-        return self.store.mark_notified(cb_period, kind)

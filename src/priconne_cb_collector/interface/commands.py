@@ -137,7 +137,13 @@ def setup_commands(bot) -> None:
             return
 
         period = await bot.start_period(datetime.now(UTC))
-        await interaction.followup.send(f"収集を開始しました（対象期間 {period.cb_period}）。")
+        # The only start announcement: the roster is already in the embed above
+        # (docs/spec/09 §2).
+        await interaction.followup.send(
+            f"**収集を開始しました**（対象期間 {period.cb_period}）\n"
+            f"収集開始: {period.start.astimezone(JST):%m/%d %H:%M}\n"
+            "`/stop` を実行するまで収集を続けます。"
+        )
 
     @tree.command(name="stop", description="[管理者] 収集を停止し待機状態に戻します")
     @app_commands.default_permissions(administrator=True)

@@ -55,7 +55,7 @@ priconne-cb-yt-collector/
 │   │   └── youtube_api.py   # Data API v3 クライアント（クォータ管理込み）
 │   ├── services/
 │   │   ├── collection.py    # 収集パイプライン（取得→判定→除外→保存）
-│   │   └── lifecycle.py     # 期間の解決・遷移・通知フラグ
+│   │   └── lifecycle.py     # 期間の解決・遷移
 │   └── interface/
 │       ├── bot.py           # discord.Client、ポーリングループ、遷移通知
 │       ├── commands.py      # スラッシュコマンド

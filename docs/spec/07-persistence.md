@@ -47,15 +47,14 @@ CREATE TABLE videos (
 CREATE INDEX idx_videos_status ON videos(status);          -- 未投稿分の取り出し
 CREATE INDEX idx_videos_period_boss ON videos(cb_period, boss_index);  -- ボス別の集計・日次上限
 
--- 開始 / 終了通知の重複投稿を防ぐための状態管理。収集期間ごとに1行
+-- 再起動をまたいで収集状態を復元するための記録。収集期間ごとに1行
 CREATE TABLE period_state (
   cb_period            TEXT PRIMARY KEY,  -- "2026-07"（/start した時点の JST の月）
   start_at             TEXT,              -- /start の実行時刻。終了日時は持たない
-  notified_start       INTEGER DEFAULT 0, -- 開始通知を投稿済みか。再起動しても二重に出さないため
-  notified_end         INTEGER DEFAULT 0, -- 終了通知を投稿済みか（同上）
   boss_thread_ids      TEXT,              -- {boss_index: thread_id} の JSON。
                                           --   再起動時にスレッドを作り直さないため
-  is_open              INTEGER DEFAULT 0  -- 収集中か（/start で 1、/stop で 0）
+  is_open              INTEGER DEFAULT 0  -- 収集中か（/start で 1、/stop で 0）。
+                                          --   再起動時はこれだけを見て再開する
 );
 
 -- YouTube API の消費ユニット。上限を超えそうな検索をスキップするために使う

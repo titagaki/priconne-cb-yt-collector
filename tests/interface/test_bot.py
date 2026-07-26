@@ -96,7 +96,8 @@ async def test_start_triggers_collection_and_threads(bot, monkeypatch):
 
     assert bot.collector.calls  # 収集が走った
     assert bot.poster.threads_created == [CB_PERIOD]
-    assert any("収集を開始" in n for n in bot.poster.notices)
+    # 開始を知らせるのは /start の返信だけ。ループは何も投稿しない（docs/spec/04 §3）
+    assert bot.poster.notices == []
 
 
 async def test_collection_continues_into_the_next_month(bot, monkeypatch):
@@ -144,23 +145,23 @@ async def test_collection_resumes_after_bosses_updated(tmp_path, monkeypatch):
     bot.store.close()
 
 
-# ---- 遷移通知の重複防止（再起動時） ----
+# ---- 再起動時は黙って再開する ----
 
 
-async def test_start_notice_is_not_repeated_after_restart(tmp_path, monkeypatch):
+async def test_restart_resumes_collection_without_announcing(tmp_path, monkeypatch):
     bot = make_bot(tmp_path)
     freeze_now(monkeypatch, STARTED)
     await bot.start_period(STARTED)
     await bot._tick_once()
-    assert sum("収集を開始" in n for n in bot.poster.notices) == 1
     bot.store.close()
 
     # 同じ DB ファイルで起動し直す（収集中の状態が DB から復元される）
     restarted = make_bot(tmp_path)
     await restarted._tick_once()
 
-    assert not any("収集を開始" in n for n in restarted.poster.notices)
+    assert restarted.poster.notices == []  # 通知フラグを持たずに黙る
     assert restarted.collector.calls  # 収集自体は再開する
+    assert restarted.poster.threads_created == [CB_PERIOD]  # スレッドは確認し直す
     restarted.store.close()
 
 

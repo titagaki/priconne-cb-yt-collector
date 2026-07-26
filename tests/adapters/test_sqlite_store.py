@@ -106,31 +106,14 @@ def test_status_transitions(store):
     assert store.get_video("v3")["status"] == "error"
 
 
-# ---- 開始 / 終了 通知フラグ ----
-
-
-def test_notification_flag_prevents_duplicate_announcements(store):
-    store.ensure_period(july_period())
-    assert store.mark_notified("2026-07", "start") is True
-    assert store.mark_notified("2026-07", "start") is False  # 再起動しても再投稿しない
-    assert store.is_notified("2026-07", "start") is True
-    # 他の種別は独立
-    assert store.is_notified("2026-07", "end") is False
-    assert store.mark_notified("2026-07", "end") is True
-
-
-def test_notice_flags_are_independent(store):
-    store.ensure_period(july_period())
-    assert store.mark_notified("2026-07", "end") is True
-    assert store.mark_notified("2026-07", "end") is False
-    assert store.is_notified("2026-07", "start") is False
+# ---- 収集期間の状態 ----
 
 
 def test_ensure_period_is_idempotent(store):
-    store.ensure_period(july_period())
-    store.mark_notified("2026-07", "start")
-    store.ensure_period(july_period())  # 再起動時の再呼び出しでフラグが消えないこと
-    assert store.is_notified("2026-07", "start") is True
+    p = july_period()
+    store.open_period(p)
+    store.ensure_period(p)  # 再起動時の再呼び出しで is_open が落ちないこと
+    assert store.open_period_start("2026-07") == p.start
 
 
 def test_open_and_close_period(store):
@@ -140,20 +123,6 @@ def test_open_and_close_period(store):
     assert store.open_period_start("2026-07") == p.start
     store.close_period("2026-07")
     assert store.open_period_start("2026-07") is None
-
-
-def test_reopening_clears_the_notice_flags(store):
-    """/start し直したら開始通知をもう一度出す（再起動時は出さない）。"""
-    p = july_period()
-    store.open_period(p)
-    store.mark_notified("2026-07", "start")
-    store.mark_notified("2026-07", "end")
-
-    store.close_period("2026-07")
-    store.open_period(p)
-
-    assert store.is_notified("2026-07", "start") is False
-    assert store.is_notified("2026-07", "end") is False
 
 
 def test_boss_threads_round_trip(store):

@@ -71,24 +71,12 @@ def test_restarting_the_same_month_uses_the_new_start_time(store):
     assert service.current_period(LATER).start == LATER
 
 
-# ---- 通知フラグ ----
-
-
-def test_claim_notice_is_one_shot(store):
+def test_starting_again_under_the_same_key_updates_the_start_time(store):
+    """同じ cb_period で /start し直したら、開始時刻は新しい方になる。"""
     service = PeriodService(store)
     service.start(STARTED)
-
-    assert service.claim_notice(CB_PERIOD, "start") is True
-    assert service.claim_notice(CB_PERIOD, "start") is False
-    assert service.claim_notice(CB_PERIOD, "end") is True  # 種別ごとに独立
-
-
-def test_starting_again_re_arms_the_notices(store):
-    """再起動は黙るが、/start し直したら改めて開始通知を出す。"""
-    service = PeriodService(store)
-    service.start(STARTED)
-    assert service.claim_notice(CB_PERIOD, "start") is True
-
     service.stop(STARTED)
+
     service.start(LATER)
-    assert service.claim_notice(CB_PERIOD, "start") is True
+    assert service.current_period(LATER).start == LATER
+    assert service.current_period(LATER).cb_period == CB_PERIOD

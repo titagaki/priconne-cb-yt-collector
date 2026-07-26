@@ -208,12 +208,14 @@ class CollectorBot(discord.Client):
         return last is None or (now - last).total_seconds() >= interval_seconds
 
     async def _begin_period(self, period: Period) -> None:
-        """First tick of an open period: announce it and prepare the threads."""
+        """First tick of an open period: prepare the threads.
+
+        Nothing is announced here. /start already told the channel it started,
+        and a restart resuming a period must stay silent (docs/spec/04 §3).
+        """
         if not self._month_matches(period):
             await self._warn_stale_bosses(period)
             return
-        if self.periods.claim_notice(period.cb_period, "start"):
-            await self._announce_start(period)
         await self._ensure_threads(period)
 
     async def _ensure_threads(self, period: Period) -> None:
@@ -222,27 +224,17 @@ class CollectorBot(discord.Client):
         await self.poster.ensure_boss_threads(period.cb_period)
         self._threads_ready = True
 
-    async def _announce_start(self, period: Period) -> None:
-        embed = self.bosses_embed()
-        embed.title = "収集を開始しました"
-        embed.description = (
-            f"収集開始: {period.start.astimezone(JST):%m/%d %H:%M}\n"
-            "`/stop` を実行するまで収集を続けます。"
-        )
-        await self.poster.send_notice(embed=embed)
-
     async def _finish_period(self, period: Period, now: datetime) -> None:
         """Flush the queue before stopping (11-4 decision: post everything).
 
-        Reached only from /stop, which is the only way a period ends.
+        Reached only from /stop, and only while a period is open: /stop closes
+        the period before getting here, so a second one cannot reach this.
         """
         remaining = len(self.store.pending_videos(period.cb_period))
         if remaining:
             logger.info("flushing %d pending videos before going idle", remaining)
             await self.poster.post_pending(period.cb_period, now)
 
-        if not self.periods.claim_notice(period.cb_period, "end"):
-            return
         counts = self.store.count_by_boss(period.cb_period)
         lines = [
             f"{boss.index}ボス {boss.name}: {counts.get(boss.index, 0)}件"

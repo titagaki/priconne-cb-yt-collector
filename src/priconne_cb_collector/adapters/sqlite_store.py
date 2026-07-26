@@ -21,12 +21,6 @@ STATUS_POSTED = "posted"
 STATUS_FILTERED = "filtered"
 STATUS_ERROR = "error"
 
-# One-shot notification flags, keyed by the name callers pass to mark_notified.
-NOTICE_COLUMNS = {
-    "start": "notified_start",
-    "end": "notified_end",
-}
-
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS videos (
   video_id        TEXT PRIMARY KEY,
@@ -59,8 +53,6 @@ CREATE INDEX IF NOT EXISTS idx_videos_period_boss ON videos(cb_period, boss_inde
 CREATE TABLE IF NOT EXISTS period_state (
   cb_period            TEXT PRIMARY KEY,
   start_at             TEXT,
-  notified_start       INTEGER DEFAULT 0,
-  notified_end         INTEGER DEFAULT 0,
   boss_thread_ids      TEXT,
   is_open              INTEGER DEFAULT 0
 );
@@ -249,16 +241,11 @@ class Store:
         return cur.fetchone()
 
     def open_period(self, period: Period) -> None:
-        """Record a /start: overwrite the start time and mark the period open.
-
-        The notification flags are cleared so that starting again under the same
-        key announces again; only a process restart must stay silent.
-        """
+        """Record a /start: overwrite the start time and mark the period open."""
         self.ensure_period(period, is_open=True)
         with self._tx() as conn:
             conn.execute(
-                "UPDATE period_state SET start_at = ?, is_open = 1, "
-                "notified_start = 0, notified_end = 0 WHERE cb_period = ?",
+                "UPDATE period_state SET start_at = ?, is_open = 1 WHERE cb_period = ?",
                 (_to_utc_iso(period.start), period.cb_period),
             )
 
@@ -276,25 +263,6 @@ class Store:
         if row is None or not row["is_open"] or not row["start_at"]:
             return None
         return _from_utc_iso(row["start_at"])
-
-    def mark_notified(self, cb_period: str, kind: str) -> bool:
-        """Set a notification flag. Returns False if it was already set.
-
-        Callers post only when this returns True, so a restart cannot cause
-        a duplicate transition announcement (docs/spec/04 §3).
-        """
-        column = NOTICE_COLUMNS[kind]
-        with self._tx() as conn:
-            cur = conn.execute(
-                f"UPDATE period_state SET {column} = 1 WHERE cb_period = ? AND {column} = 0",
-                (cb_period,),
-            )
-        return cur.rowcount > 0
-
-    def is_notified(self, cb_period: str, kind: str) -> bool:
-        column = NOTICE_COLUMNS[kind]
-        row = self.get_period_state(cb_period)
-        return bool(row and row[column])
 
     def save_boss_threads(self, cb_period: str, thread_ids: dict[int, int]) -> None:
         with self._tx() as conn:
