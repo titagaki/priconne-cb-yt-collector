@@ -23,13 +23,14 @@
 
 ## Implementation Rules
 
+- **やることは「動画のリストをとってきて投稿する」だけ。**機能を足す前に、それがこの一文に含まれるか確認する。含まれないなら作らない（[削減の記録](docs/discussion/reductions.md)）
+- **層を増やさない。**`src/priconne_cb_collector/` はフラットな1ファイル1役。新しいディレクトリを切る前に相談する
 - **仕様が未確定の論点は仮実装しない。**先に運用者へ質問し、決定を `docs/discussion/` に理由ごと記録してから `docs/spec/` に反映して実装する
 - **`bosses.yaml` のエイリアスを推測で追加しない。**判定の正はこのファイルのみで、編集は運用者が行う
 - **取りこぼすくらいなら、関係ない動画が混ざってよい。**判定に迷う実装は投稿する側へ倒す
 - YouTube API のクォータを消費する変更（`search.list` の追加・間隔短縮など）は消費量の見積もりを添えて提案する
-- 1件の動画の処理失敗が収集ジョブ全体を落とさないようにする（個別 try/except + `status="error"` 記録）
-- 判定ロジック（`domain/classify/`）は YouTube / Discord に依存しない純粋関数として書き、表形式のテストケースを添える
-- 実装順序は `docs/spec/12-implementation-order.md` に従う（classify を先に固める）
+- 1件の動画の処理失敗が収集ジョブ全体を落とさないようにする（個別 try/except + ログ。**失敗した動画は記録しない**ので次の巡回で再試行される）
+- `classify.py` は YouTube / Discord に依存しない純粋関数として書き、表形式のテストケースを添える
 
 ## Documentation
 

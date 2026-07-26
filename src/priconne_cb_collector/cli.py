@@ -1,4 +1,4 @@
-"""Console entry point: load configuration, wire dependencies, run the bot."""
+"""起動: 設定を読んで Bot を動かす。"""
 
 from __future__ import annotations
 
@@ -10,11 +10,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from priconne_cb_collector.adapters.config_file import load_bosses, load_config
-from priconne_cb_collector.adapters.sqlite_store import Store
-from priconne_cb_collector.domain.schedule import JST
-from priconne_cb_collector.interface.bot import CollectorBot, Paths
+from priconne_cb_collector.bot import CollectorBot, Paths
+from priconne_cb_collector.config import load_bosses, load_config
 from priconne_cb_collector.logging_setup import setup_logging
+from priconne_cb_collector.store import JST, Store
 
 logger = logging.getLogger(__name__)
 
@@ -70,10 +69,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         logger.info(
-            "config ok: layout=%s search_interval=%dmin bosses_month=%s",
-            config.discord.layout,
-            config.polling.search_interval_minutes,
+            "config ok: search_interval=%dmin bosses_month=%s boss_channels=%d",
+            config.search_interval_minutes,
             bosses.month,
+            len(config.boss_channels),
         )
         return 0
 
@@ -84,7 +83,6 @@ def main(argv: list[str] | None = None) -> int:
 
     api_key = os.getenv("YOUTUBE_API_KEY")
     if not api_key:
-        # search.list is the only way videos are found now (docs/spec/05 §1).
         logger.error("YOUTUBE_API_KEY is not set; nothing can be collected (see .env.example)")
         return 1
 

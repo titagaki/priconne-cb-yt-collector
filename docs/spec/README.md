@@ -13,19 +13,15 @@
 | # | 文書 | 内容 |
 |---|---|---|
 | 01 | [概要・スコープ・用語](01-overview.md) | 目的、基本方針、やること/やらないこと、用語定義 |
-| 02 | [技術構成](02-architecture.md) | 言語・ライブラリ選定、ディレクトリ構成 |
-| 03 | [設定ファイル](03-configuration.md) | `bosses.yaml` / `config.yaml` / `.env` |
-| 04 | [収集期間](04-schedule.md) | 収集する / しないの2状態とその遷移 |
-| 05 | [動画の取得](05-collection.md) | Data API v3 検索、videos.list による補完、クォータ管理 |
-| 06 | [判定ロジック](06-classification.md) | 正規化、ボス判定、通常/持ち越し判定、除外フィルタ |
-| 07 | [永続化](07-persistence.md) | SQLite スキーマ、重複排除 |
-| 08 | [Discord 投稿](08-discord-posting.md) | レイアウト、Embed 形式、投稿制御 |
-| 09 | [スラッシュコマンド](09-slash-commands.md) | コマンド一覧と権限 |
-| 10 | [非機能要件](10-non-functional.md) | エラーハンドリング、ログ、テスト |
-| 12 | [実装順序](12-implementation-order.md) | 推奨する着手順 |
+| 02 | [技術構成](02-architecture.md) | ライブラリ、ファイル構成、DB スキーマ、ログ、テスト |
+| 03 | [収集期間とコマンド](03-schedule.md) | `/start` 〜 `/stop` の2状態、スラッシュコマンド |
+| 04 | [取得と投稿](04-collection.md) | API 検索、投稿先の決定、NG ワード、投稿制御 |
+| 05 | [設定ファイル](05-configuration.md) | `bosses.yaml` / `config.yaml` / `.env` |
 
 ## 実装者への注意
 
-- 仕様が未確定の論点は**仮実装せず、運用者に質問して決める。** 決定は [`docs/discussion/`](../discussion/README.md) に理由ごと記録してから、この配下へ反映する。
-- 判定ロジックの唯一の正は `config/bosses.yaml` の内容。実装者がエイリアスを推測で追加しない。
-- **取りこぼすくらいなら、関係ない動画が混ざってよい。**判断に迷ったら投稿する側へ倒す。
+- **やることは「動画のリストをとってきて投稿する」だけ。**機能を足す前に、それが
+  この一文に含まれるか確認する（[削減の記録](../discussion/reductions.md)）
+- 仕様が未確定の論点は**仮実装せず、運用者に質問して決める。** 決定は [`docs/discussion/`](../discussion/README.md) に理由ごと記録してから、この配下へ反映する
+- ボス判定の唯一の正は `config/bosses.yaml` の内容。実装者がエイリアスを推測で追加しない
+- **取りこぼすくらいなら、関係ない動画が混ざってよい。**判断に迷ったら投稿する側へ倒す

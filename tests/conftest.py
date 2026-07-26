@@ -1,8 +1,8 @@
-"""全レイヤ共通のフィクスチャ。定数とテストダブルは tests/support.py にある。"""
+"""共通フィクスチャ。定数とテストダブルは tests/support.py にある。"""
 
 import pytest
 
-from priconne_cb_collector.adapters.sqlite_store import Store
+from priconne_cb_collector.store import Store
 from tests.support import SAMPLE_BOSSES, bosses_config
 
 

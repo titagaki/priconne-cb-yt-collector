@@ -1,6 +1,6 @@
 # 攻略動画の表記慣習
 
-YouTube のクラバト攻略動画で、投稿者が慣習的に使う表記。判定ロジック（[06](../spec/06-classification.md)）が
+YouTube のクラバト攻略動画で、投稿者が慣習的に使う表記。ボス判定（[04](../spec/04-collection.md)）が
 拾おうとしている対象がこれにあたる。
 
 実例は [`docs/reference/priconne_cb_2026-07_full.html`](../reference/priconne_cb_2026-07_full.html)

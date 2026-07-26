@@ -1,7 +1,4 @@
-"""テスト共通の定数とテストダブル。
-
-各レイヤのテストから import する。フィクスチャは conftest.py 側に置く。
-"""
+"""テスト共通の定数とテストダブル。フィクスチャは conftest.py 側に置く。"""
 
 from __future__ import annotations
 
@@ -9,19 +6,13 @@ from datetime import UTC, datetime
 
 import discord
 
-from priconne_cb_collector.domain.models import (
-    BATTLE_NORMAL,
-    MATCH_BOSS_NAME,
-    Boss,
-    BossesConfig,
-    BossMatch,
-    Classification,
-    Period,
-    VideoMeta,
-)
-from priconne_cb_collector.domain.schedule import JST
+from priconne_cb_collector.config import Boss, BossesConfig, Config
+from priconne_cb_collector.youtube import Video
 
-# docs/spec/03 のサンプル構成と同じ（テスト専用。bosses.yaml の正は運用者が管理）
+CB_PERIOD = "2026-07"
+STARTED = datetime(2026, 7, 23, 3, 0, tzinfo=UTC)
+
+# docs/spec/05 のサンプル構成と同じ（テスト専用。bosses.yaml の正は運用者が管理）
 SAMPLE_BOSSES = (
     Boss(1, "ワイバーン", ("ワイバーン", "ワイバン", "wyvern")),
     Boss(2, "デミカリド", ("デミカリド", "デミカリ")),
@@ -30,70 +21,49 @@ SAMPLE_BOSSES = (
     Boss(5, "オルレオン", ("オルレオン", "オルレ")),
 )
 
-CB_PERIOD = "2026-07"
+FALLBACK_CHANNEL = 900
+BOSS_CHANNELS = {1: 101, 2: 102, 3: 103, 4: 104, 5: 105}
 
 
 def bosses_config(month: str = CB_PERIOD) -> BossesConfig:
     return BossesConfig(month=month, bosses=SAMPLE_BOSSES)
 
 
-def july_period() -> Period:
-    """2026-07 の収集期間。7/23 に /start された想定（終了日は無い）。"""
-    return Period(start=datetime(2026, 7, 23, tzinfo=JST), cb_period=CB_PERIOD)
-
-
-def store_video(
-    store,
-    video_id: str = "vid1",
-    title: str = "【プリコネ】ワイバーン 通常凸",
-    **fields,
-):
-    """判定済みの動画を1件保存し、その行を返す。Embed / 投稿のテスト用。"""
-    classification = Classification(
-        boss=BossMatch(
-            indices=fields.pop("indices", [1]),
-            match_source=fields.pop("match_source", MATCH_BOSS_NAME),
-        ),
-        battle_type=fields.pop("battle_type", BATTLE_NORMAL),
-        carryover_sec=fields.pop("carryover_sec", None),
-        damage=fields.pop("damage", None),
+def make_config(**overrides) -> Config:
+    defaults = dict(
+        search_interval_minutes=30,
+        search_lookback_days=1,
+        title_ng_words=("ガチャ", "雑談"),
+        post_interval_seconds=0,  # テストで待たない
+        boss_channels=dict(BOSS_CHANNELS),
+        fallback_channel_id=FALLBACK_CHANNEL,
     )
-    video = VideoMeta(
+    defaults.update(overrides)
+    return Config(**defaults)
+
+
+def make_video(video_id: str = "vid1", title: str = "【プリコネ】ワイバーン 通常凸") -> Video:
+    return Video(
         video_id=video_id,
         title=title,
-        channel_id=fields.pop("channel_id", "UC_test"),
-        channel_title=fields.pop("channel_title", "テストチャンネル"),
-        published_at=fields.pop("published_at", datetime(2026, 7, 26, 5, 0, tzinfo=UTC)),
-        description=fields.pop("description", "この説明文は Embed に転載してはいけない"),
+        published_at=datetime(2026, 7, 26, 5, 0, tzinfo=UTC),
+        channel_title="テストチャンネル",
     )
-    store.add_video(
-        video,
-        classification,
-        cb_period=fields.pop("cb_period", CB_PERIOD),
-    )
-    return store.get_video(video_id)
 
 
-# 時刻を読むモジュール。now() を固定したいテストはここを差し替える
-TIME_READING_MODULES = (
-    "priconne_cb_collector.interface.bot",
-    "priconne_cb_collector.services.lifecycle",
-)
+class FakeYouTube:
+    """search() の戻り値を差し替えるだけのクライアント。"""
 
+    def __init__(self, videos: list[Video] | None = None, error: Exception | None = None):
+        self.videos = videos or []
+        self.error = error
+        self.queries: list[str] = []
 
-def freeze_now(monkeypatch, frozen: datetime, *modules: str) -> None:
-    """指定モジュールの datetime.now() を固定する。"""
-
-    class Frozen(datetime):
-        @classmethod
-        def now(cls, tz=None):
-            return frozen.astimezone(tz) if tz else frozen.replace(tzinfo=None)
-
-    for module in modules or TIME_READING_MODULES:
-        monkeypatch.setattr(f"{module}.datetime", Frozen)
-
-
-# ---- Discord のテストダブル ----
+    async def search(self, query, published_after, max_results=50):
+        self.queries.append(query)
+        if self.error is not None:
+            raise self.error
+        return list(self.videos)
 
 
 class FakeMessage:
@@ -104,48 +74,18 @@ class FakeMessage:
 class FakeChannel:
     """send() を記録するだけのチャンネル。"""
 
-    def __init__(self, channel_id: int = 100, fail_with: Exception | None = None):
+    def __init__(self, channel_id: int, fail_with: Exception | None = None):
         self.id = channel_id
-        self.sent: list[tuple[str | None, object]] = []
+        self.sent: list[str] = []
         self.fail_with = fail_with
         self._next_id = 1000
 
-    async def send(self, content=None, embed=None):
+    async def send(self, content=None):
         if self.fail_with is not None:
             raise self.fail_with
         self._next_id += 1
-        self.sent.append((content, embed))
+        self.sent.append(content)
         return FakeMessage(self._next_id)
-
-    @property
-    def notices(self) -> list[str]:
-        return [content for content, _ in self.sent if content]
-
-
-class FakeThreadChannel(FakeChannel):
-    """スレッド作成を記録するチャンネル。"""
-
-    def __init__(self, channel_id: int = 100):
-        super().__init__(channel_id)
-        self.created: list[str] = []
-
-    async def create_thread(self, name, type=None):
-        self._next_id += 1
-        self.created.append(name)
-        return FakeMessage(self._next_id)
-
-
-class FakeBot:
-    """Poster が要求する get_channel / fetch_channel だけを持つ最小の Bot。"""
-
-    def __init__(self, channel: FakeChannel):
-        self.channel = channel
-
-    def get_channel(self, channel_id):
-        return self.channel
-
-    async def fetch_channel(self, channel_id):
-        return self.channel
 
 
 class _FakeResponse:

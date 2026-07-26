@@ -1,32 +1,23 @@
 # 収集の開始 / 終了は `/start` と `/stop` のみ。日付の設定は無い
 polling:
   # API 検索の間隔（収集中は一定。停止中はループ自体を回さない）
-  #   1巡 = 1クエリ = 100ユニット。30分間隔なら 48巡/日 = 4,800ユニット
+  #   1巡 = 1クエリ = 100ユニット。30分間隔なら 48巡/日 = 4,800ユニット（上限 10,000）
   search_interval_minutes: 30
 
 youtube:
-  # 1日あたりのクォータ上限（既定 10000 のうち何ユニットまで使うか）
-  quota_limit_per_day: 9000
-  # `/start` の何日前に投稿された動画まで API 検索の対象に含めるか
+  # `/start` の何日前に投稿された動画まで検索対象に含めるか
   search_lookback_days: 1
-  # 除外条件
-  exclude:
-    min_duration_seconds: 60      # これ未満はショート扱いで除外
-    max_duration_seconds: 3600    # 長時間配信アーカイブを除外
-    exclude_live: true            # 配信中・配信予定を除外
-    title_ng_words: ["ガチャ", "雑談", "実況プレイ"]
+  # タイトルにこれらを含む動画は投稿しない
+  title_ng_words: ["ガチャ", "雑談", "実況プレイ"]
 
 discord:
-  # "single" = 1チャンネルに全部 / "per_boss_thread" = ボスごとのスレッド
-  layout: "per_boss_thread"
-  channel_id: 000000000000000000
-  # 1ボスあたり1日に投稿する最大件数（0 = 無制限）
-  max_posts_per_boss_per_day: 15
+  # 投稿先チャンネル。**あらかじめ Discord 側で作成しておくこと**（Bot は作らない）
+  boss_channels:
+    1: 000000000000000000
+    2: 000000000000000000
+    3: 000000000000000000
+    4: 000000000000000000
+    5: 000000000000000000
+  # ボスを1体に特定できなかった動画の投稿先（複数ボス名を含む動画もここ）
+  fallback_channel_id: 000000000000000000
   post_interval_seconds: 2
-
-classify:
-  # ボス名でマッチしなかった動画に EX表記判定を適用するか
-  enable_ex_notation: true
-  # ボス判定できなかった動画をどうするか: "post_as_unknown" | "skip"
-  #   取りこぼすくらいなら関係ない動画が混ざってよい、という方針のため既定は投稿する側
-  on_boss_unknown: "post_as_unknown"

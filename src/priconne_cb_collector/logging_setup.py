@@ -1,4 +1,4 @@
-"""Structured logging: JSON Lines to file, plain text to stderr (docs/spec/10 §2)."""
+"""Structured logging: JSON Lines to file, plain text to stderr (docs/spec/02 §5)."""
 
 from __future__ import annotations
 

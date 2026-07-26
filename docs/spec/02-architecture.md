@@ -1,95 +1,100 @@
 # 02. 技術構成
 
-## 1. 技術スタック
+## 1. 言語・ライブラリ
 
-| 項目 | 指定 |
+| 用途 | 採用 |
 |---|---|
 | 言語 | Python 3.11+ |
-| Discord | discord.py 2.x（スラッシュコマンド対応） |
-| スケジューラ | `discord.ext.tasks` |
+| Discord | discord.py 2.x |
 | HTTP | httpx（非同期） |
-| DB | SQLite（標準ライブラリ `sqlite3`。ORM 不要） |
-| 設定 | YAML（PyYAML） |
-| タイムゾーン | **Asia/Tokyo 固定**。DB には UTC で保存し、表示時に JST 変換 |
+| 永続化 | SQLite（標準 `sqlite3`。ORM は使わない） |
+| 設定 | PyYAML |
+| 環境変数 | python-dotenv |
 
-## 2. レイヤ構成
+タイムゾーンは Asia/Tokyo 固定。**DB には UTC で保存し、表示時に JST 変換する。**
 
-依存は **上から下への一方向のみ**。下位層は上位層を import しない。
+## 2. ファイル構成
 
-| 層 | 責務 | 依存してよいもの |
-|---|---|---|
-| `interface/` | Discord 配信層。スラッシュコマンド、Embed、投稿キュー、Bot 本体 | services / adapters / domain |
-| `services/` | ユースケース。収集パイプライン、期間ライフサイクル | adapters / domain |
-| `adapters/` | 外部 I/O。SQLite、YouTube Data API、設定ファイル | domain |
-| `domain/` | **依存なし。** dataclass と純粋関数（判定ロジック、期間計算） | 標準ライブラリのみ |
-
-`domain/` は `httpx` / `discord.py` / `sqlite3` のいずれも import しない。
-これによりボス判定・期間判定を外部サービスなしでテストできる（[12](12-implementation-order.md) 参照）。
-
-## 3. ディレクトリ構成
-
-src レイアウトの単一パッケージ。`pip install -e .` で `priconne-cb-collector` コマンドが入る。
+**層は分けない。**この規模では 1 ファイル 1 役で足りる。
 
 ```
-priconne-cb-yt-collector/
-├── pyproject.toml           # PEP 621。依存・entry point・ruff / pytest 設定
-├── config/
-│   ├── config.yaml          # 運用設定（Git管理する）
-│   └── bosses.yaml          # 今月のボス構成（毎月書き換える）
-├── src/priconne_cb_collector/
-│   ├── __main__.py          # python -m priconne_cb_collector
-│   ├── cli.py               # エントリポイント。設定読込と依存の組み立て
-│   ├── logging_setup.py     # JSON Lines ログ
-│   ├── domain/
-│   │   ├── models.py        # Boss / Period / VideoMeta / Classification 等
-│   │   ├── settings.py      # 設定スキーマ（dataclass のみ）
-│   │   ├── schedule.py      # 収集期間の生成・判定（純粋関数）
-│   │   └── classify/
-│   │       ├── normalize.py    # 正規化
-│   │       ├── boss.py         # ボス判定
-│   │       ├── battle_type.py  # 通常/持ち越し判定
-│   │       └── damage.py       # ダメージの抽出
-│   ├── adapters/
-│   │   ├── config_file.py   # YAML 読み込み・バリデーション
-│   │   ├── sqlite_store.py  # SQLite 永続化
-│   │   └── youtube_api.py   # Data API v3 クライアント（クォータ管理込み）
-│   ├── services/
-│   │   ├── collection.py    # 収集パイプライン（取得→判定→除外→保存）
-│   │   └── lifecycle.py     # 期間の解決・遷移
-│   └── interface/
-│       ├── bot.py           # discord.Client、ポーリングループ、遷移通知
-│       ├── commands.py      # スラッシュコマンド
-│       ├── embeds.py        # Embed 生成
-│       └── poster.py        # 投稿キュー・スレッド管理
-├── tests/                   # パッケージと同じ階層構造（下記）
-├── data/bot.db
-├── .env.example
-└── README.md
+src/priconne_cb_collector/
+├── __main__.py       # python -m priconne_cb_collector
+├── cli.py            # 起動：設定を読み、Bot を動かす
+├── config.py         # config.yaml / bosses.yaml の読み込みと検証
+├── youtube.py        # Data API v3（search.list のみ）
+├── classify.py       # ボス名マッチと NG ワード判定（純粋関数）
+├── store.py          # SQLite
+├── bot.py            # 常駐ループ、投稿、スラッシュコマンド
+└── logging_setup.py  # JSON Lines ログ
+
+tests/                # 実装と 1:1（test_config / test_classify / test_store / test_bot）
+config/               # config.yaml, bosses.yaml
+data/                 # bot.db
+logs/                 # bot.jsonl
 ```
 
-`tests/` は実装と同じ層に分ける。どの層のテストかがパスから分かるようにするため。
+`classify.py` は YouTube にも Discord にも依存しない純粋関数として書く。
 
+## 3. DB スキーマ
+
+**投稿に成功した動画だけを記録する。**投稿できなかった動画は記録されないので、
+次の巡回で再び見つかり、自然に再試行される。取得中・投稿待ちといった状態は持たない。
+
+```sql
+-- 投稿済みの動画。重複投稿を防ぐのが主目的
+CREATE TABLE posted_videos (
+  video_id   TEXT PRIMARY KEY, -- YouTube の動画 ID。重複排除のキー
+  title      TEXT NOT NULL,    -- 投稿時点のタイトル（ログ・集計用）
+  boss_index INTEGER,          -- 1〜5。NULL = 判定不能（fallback へ投稿した）
+  posted_at  TEXT NOT NULL,    -- 投稿に成功した時刻（ISO8601 UTC）
+  cb_period  TEXT NOT NULL     -- "2026-07" 形式。/stop のサマリと /status の集計用
+);
+
+CREATE INDEX idx_posted_period ON posted_videos(cb_period);
+
+-- 再起動をまたいで収集状態を復元するための記録
+CREATE TABLE period_state (
+  cb_period TEXT PRIMARY KEY,  -- "2026-07"（/start した時点の JST の月）
+  start_at  TEXT,              -- /start の実行時刻（ISO8601 UTC）。終了日時は持たない
+  is_open   INTEGER DEFAULT 0  -- 収集中か（/start で 1、/stop で 0）
+);
 ```
-tests/
-├── conftest.py              # 共通フィクスチャ（store / bosses）
-├── support.py               # 共有定数とテストダブル（SAMPLE_BOSSES、Discord のフェイク等）
-├── test_layering.py         # 横断: 依存方向を AST で検証
-├── domain/                  # 純粋関数のテスト
-│   ├── test_schedule.py
-│   └── classify/{test_titles,test_battle_type,test_metadata}.py
-├── adapters/{test_config_file,test_sqlite_store}.py
-├── services/{test_collection,test_lifecycle}.py
-└── interface/{test_bot,test_embeds,test_poster}.py
-```
 
-## 4. モジュールと仕様章の対応
+**重複排除は `video_id` の PRIMARY KEY 制約のみで行う。** タイトル類似度による判定はしない。
 
-| モジュール | 対応する仕様 |
+収集中かどうかは `is_open` だけで判断する。開いている期間は常に高々1つ。
+
+## 4. エラーハンドリング
+
+- **1件の動画の処理失敗が収集ジョブ全体を落とさないこと。**動画ごとに try/except で囲み、
+  失敗はログに残して次の動画へ進む。**失敗した動画は記録しない**ので次の巡回で再試行される
+- YouTube API は指数バックオフで最大3回リトライする
+- Discord が 429 を返したら `Retry-After` に従って待機し、同一動画につき最大3回まで再送する
+- 設定ファイルが不正なら**起動を中止する**（`ConfigError`）
+
+## 5. ログ
+
+`logs/bot.jsonl` に JSON Lines、標準エラーにプレーンテキストで出す。
+
+必ず INFO で残すもの:
+
+| 場面 | 内容 |
 |---|---|
-| `adapters/config_file.py` | [03. 設定ファイル](03-configuration.md) |
-| `domain/schedule.py`, `services/lifecycle.py` | [04. 収集期間](04-schedule.md) |
-| `adapters/youtube_api.py`, `services/collection.py` | [05. 動画の取得](05-collection.md) |
-| `domain/classify/` | [06. 判定ロジック](06-classification.md) |
-| `adapters/sqlite_store.py` | [07. 永続化](07-persistence.md) |
-| `interface/poster.py`, `interface/embeds.py` | [08. Discord 投稿](08-discord-posting.md) |
-| `interface/commands.py` | [09. スラッシュコマンド](09-slash-commands.md) |
+| 検索 | クエリ、件数、消費ユニット |
+| 投稿 | `video_id`、判定したボス、投稿先チャンネル、タイトル |
+| NG ワード除外 | `video_id`、タイトル |
+| 巡回の終了 | 見つけた件数、投稿した件数 |
+
+**投稿したタイトルはログに残す。**`bosses.yaml` のエイリアスの過不足は、このログを見て調整する。
+
+## 6. テスト
+
+| 対象 | ケース |
+|---|---|
+| `classify.py` | ボス名一致、エイリアス一致、複数ヒット（＝判定不能）、ヒットなし、正規化（全角/半角/大小文字）、NG ワード |
+| `store.py` | 投稿済みだけが記録されること、重複 INSERT が既存を壊さないこと、`is_open` が再起動をまたいで復元されること |
+| `config.py` | 妥当な設定が読めること、不正な設定で `ConfigError` になること |
+| `bot.py` | 投稿先の振り分け、重複投稿しないこと、NG 除外、投稿失敗が記録されず再試行されること、1件の失敗で巡回が止まらないこと |
+
+ボス判定は**実際の動画タイトルを模したサンプルを 15 件以上用意した表形式のテスト**にする。
