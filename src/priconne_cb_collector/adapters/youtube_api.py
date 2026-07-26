@@ -1,4 +1,4 @@
-"""YouTube Data API v3 client with quota accounting (docs/spec/05 §2-4).
+"""YouTube Data API v3 client with quota accounting (docs/spec/05).
 
 Quota costs: search.list = 100 units per call, videos.list = 1 unit per call
 (up to 50 ids). Always batch through videos.list; it is nearly free.

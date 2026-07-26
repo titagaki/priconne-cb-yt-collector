@@ -125,7 +125,7 @@ class Collector:
         run every 30 minutes instead of every 90 (docs/spec/05 §1).
 
         Boss names only: adding "プリコネ"/"クラバト" would drop the many videos
-        whose titles carry neither (docs/spec/05 §2).
+        whose titles carry neither. Aliases are for classification, not search.
         """
         return " OR ".join(boss.name for boss in self.bosses.bosses)
 
