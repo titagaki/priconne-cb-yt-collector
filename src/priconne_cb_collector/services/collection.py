@@ -166,7 +166,7 @@ class Collector:
             )
             return [], True
 
-        published_after = period.start - timedelta(days=self.config.schedule.search_lookback_days)
+        published_after = period.start - timedelta(days=self.config.youtube.search_lookback_days)
         videos: list[VideoMeta] = []
         for boss in self.bosses.bosses:
             # Boss name alone. Adding "プリコネ"/"クラバト" would drop the many

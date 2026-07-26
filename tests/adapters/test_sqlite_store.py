@@ -117,10 +117,10 @@ def test_notification_flag_prevents_duplicate_announcements(store):
     assert store.mark_notified("2026-07", "end") is True
 
 
-def test_reminder_flag_is_independent(store):
+def test_notice_flags_are_independent(store):
     store.ensure_period(july_period())
-    assert store.mark_notified("2026-07", "reminder") is True
-    assert store.mark_notified("2026-07", "reminder") is False
+    assert store.mark_notified("2026-07", "end") is True
+    assert store.mark_notified("2026-07", "end") is False
     assert store.is_notified("2026-07", "start") is False
 
 
@@ -131,14 +131,27 @@ def test_ensure_period_is_idempotent(store):
     assert store.is_notified("2026-07", "start") is True
 
 
-def test_trigger_start_and_stop(store):
+def test_open_and_close_period(store):
     p = july_period()
-    assert store.trigger_started_at("2026-07") is None
-    store.set_trigger_start(p)
-    started = store.trigger_started_at("2026-07")
-    assert started == p.start
-    store.clear_trigger_start("2026-07")
-    assert store.trigger_started_at("2026-07") is None
+    assert store.open_period_start("2026-07") is None
+    store.open_period(p)
+    assert store.open_period_start("2026-07") == p.start
+    store.close_period("2026-07")
+    assert store.open_period_start("2026-07") is None
+
+
+def test_reopening_clears_the_notice_flags(store):
+    """/start し直したら開始通知をもう一度出す（再起動時は出さない）。"""
+    p = july_period()
+    store.open_period(p)
+    store.mark_notified("2026-07", "start")
+    store.mark_notified("2026-07", "end")
+
+    store.close_period("2026-07")
+    store.open_period(p)
+
+    assert store.is_notified("2026-07", "start") is False
+    assert store.is_notified("2026-07", "end") is False
 
 
 def test_boss_threads_round_trip(store):

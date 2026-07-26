@@ -76,18 +76,18 @@ def test_missing_file_fails(tmp_path):
 
 
 def test_load_repo_config():
-    """リポジトリ同梱の config.yaml が読めて、既定が 11-1 の決定どおりであること。"""
+    """リポジトリ同梱の config.yaml が読めること。"""
     cfg = load_config("config/config.yaml")
-    assert cfg.schedule.mode == "trigger"
-    assert cfg.schedule.remind_if_not_started is True
     assert cfg.classify.enable_ex_notation is True
     assert cfg.discord.layout == "per_boss_thread"
     assert cfg.youtube.quota_limit_per_day == 9000
+    assert cfg.youtube.search_lookback_days == 1
     assert "ガチャ" in cfg.youtube.exclude.title_ng_words
 
 
-def test_invalid_mode_fails(tmp_path):
+def test_schedule_settings_are_gone(tmp_path):
+    """収集期間の設定は無い。残っていても無視して読み込めること。"""
     p = tmp_path / "config.yaml"
     p.write_text("schedule:\n  mode: sometimes\n", encoding="utf-8")
-    with pytest.raises(ConfigError, match="schedule.mode"):
-        load_config(p)
+    cfg = load_config(p)
+    assert not hasattr(cfg, "schedule")

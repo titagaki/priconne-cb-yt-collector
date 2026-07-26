@@ -41,7 +41,7 @@
 
 | 用語 | 意味 |
 |---|---|
-| 収集期間 | Bot が YouTube を巡回する期間。開始と終了の2点で表す（[04](04-schedule.md)） |
+| 収集期間 | Bot が YouTube を巡回している間。`/start` に始まり `/stop` に終わる（[04](04-schedule.md)） |
 | `cb_period` | 収集期間の識別子。`"YYYY-MM"` 形式 |
 | EX表記 | ボスを名前ではなく番号で表す記法。判定の入力として扱う（[06](06-classification.md)） |
 | まとめ動画 | 3体以上のボスにヒットした動画（[06](06-classification.md)） |

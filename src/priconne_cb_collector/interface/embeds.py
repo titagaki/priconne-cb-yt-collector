@@ -96,7 +96,7 @@ def jst_label(published_at_utc: str) -> str:
 
 
 def build_bosses_embed(bosses: BossesConfig, current_month: str) -> discord.Embed:
-    """The boss roster, shown by /bosses, /start and /reload."""
+    """The boss roster, shown by /start and /reload."""
     embed = discord.Embed(title="今月のボス構成", color=NOTICE_COLOR)
     embed.add_field(name="対象月", value=bosses.month, inline=False)
     for boss in bosses.bosses:

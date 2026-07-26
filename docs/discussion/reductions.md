@@ -2,6 +2,48 @@
 
 実装が一巡したあと、要件に無い機能を削除した記録。
 
+## 2026-07-26: `schedule.mode` の廃止（収集は `/start` と `/stop` だけ）
+
+運用者の判断による。「モードという概念が煩わしい」という理由で、収集期間を日付から
+決める仕組みを全廃した。理由の詳細は [収集期間](schedule.md#mode-を廃止した理由)。
+
+| 削除したもの | 備考 |
+|---|---|
+| `schedule.mode`（`offset` / `manual` / `trigger`） | 起動は `/start` のみ |
+| `start_offset_days` / `end_offset_days` | 末日基準のオフセット計算そのもの |
+| `manual_start` / `manual_end` と `/period set` | 日付の手動上書き |
+| 終了日（`Period.end`） | `/stop` されるまで終わらない |
+| `remind_if_not_started` と `/start` 催促 | 催促日を算出する根拠（offset 式）が消えた |
+| `polling.idle_check_interval_minutes` | 待機中はループ自体を回さない |
+| `ScheduleConfig` | 中身が空になった。`search_lookback_days` は `youtube` へ移動 |
+
+結果として `config.yaml` から `schedule:` セクションが丸ごと消えた。
+
+### 挙動が変わった点
+
+- **収集は自動で終わらない。**`/stop` を忘れると翌月まで回り続け、クォータを消費する
+- `/stop` が収集終了通知（ボス別サマリ）を出すようになった。以前は期間終了の遷移が出していた
+- `bosses.yaml` の `month` 検証を、現在の月ではなく `cb_period` と比較するようにした。
+  月末に開始した収集が日付をまたいだ瞬間に止まらないようにするため
+- 同じ月に `/start` し直すと開始通知を再度出す（プロセス再起動のときだけ黙る）
+
+### DB スキーマへの影響
+
+`period_state` から `end_at` と `notified_reminder` を削除し、`started_manually` を
+`is_open` に改名した。開始経路が1つになり「手動で」という限定が意味を失ったため。
+
+**既存の `data/bot.db` とは互換性がない。** 実運用前のため移行スクリプトは用意せず、
+DB ファイルを作り直す前提とした（下記 2026-07-26 の削減と同じ扱い）。
+
+## 2026-07-26: `/bosses` コマンドの削除
+
+運用者の判断による。`/status` が収集期間中に全ボスを「Nボス ボス名: X件」の形で
+（0件のボスも省略せず）並べるため、ボス一覧を見る用途は `/status` で足りる。
+
+ボス構成の Embed（`build_bosses_embed`）自体は残す。`/start` の確認ステップと
+`/reload` の結果表示で使っており、こちらは**エイリアスと `month` 不一致の警告**まで出す。
+`/status` はボス名と件数しか出さないので、エイリアスを確認したいときは `/reload` を使う。
+
 ## 2026-07-26: フェーズの2値化と段階の削除
 
 運用者の判断による。実装 3,025行 / テスト 2,186行の状態からの削減。
@@ -45,8 +87,7 @@ DB ファイルを作り直す前提とした。
 以下は候補として挙げたが、採否を決めていない。
 
 - API 検索（経路B）+ クォータ管理 + `/suggest_channels`（RSS のみに絞る案）
-- `offset` / `manual` モードと `/period set`（`trigger` 固定にする案）
 - 設定フラグの固定値化（`layout` の `single`、`enable_ex_notation`、`on_boss_unknown`）
-- `/recent` / `/bosses` / `/collect` / `/stop` / `/reload` の整理
+- `/recent` / `/collect` / `/stop` / `/reload` の整理
 - `videos.view_count`（取得・保存しているが未使用）
 - まとめ動画の `is_summary` 別扱い

@@ -31,22 +31,20 @@ cp .env.example .env      # DISCORD_BOT_TOKEN / YOUTUBE_API_KEY を記入
 
 `--config-dir` / `--db` / `--log-dir` で配置を変更できます（環境変数 `PRICONNE_CONFIG_DIR` / `PRICONNE_DB_PATH` / `PRICONNE_LOG_DIR` でも可）。
 
-既定は `trigger` モードです。日付では自動起動せず、Discord で `/start` を実行した時点から収集が始まります。
+日付の設定はありません。Discord で `/start` を実行した時点から収集が始まり、`/stop` するまで続きます。
 これは「`bosses.yaml` を今月の構成に書き換える」作業と起動を1操作にまとめ、前月のボス名で収集し続ける事故を防ぐためです。
-offset 計算上の収集開始日を過ぎても `/start` されていない場合は、Discord へ催促を1回だけ投稿します。
+**自動では終わらないので、クラバトが終わったら `/stop` してください。**
 
 ## スラッシュコマンド
 
 | コマンド | 権限 | 動作 |
 |---|---|---|
-| `/status` | 全員 | 収集中か待機中か、収集期間、収集件数、クォータ残量 |
-| `/bosses` | 全員 | 設定中のボス一覧 |
+| `/status` | 全員 | 収集中か待機中か、収集開始からの経過、収集件数、クォータ残量 |
 | `/recent [boss]` | 全員 | 直近の収集結果を最大10件 |
 | `/start` | 管理者 | 収集開始（ボス構成の確認ボタンつき） |
 | `/stop` | 管理者 | 収集停止（データは消さない） |
 | `/reload` | 管理者 | `config.yaml` / `bosses.yaml` の再読込 |
 | `/collect [api_search]` | 管理者 | 手動収集（クォータ消費の確認つき） |
-| `/period set` | 管理者 | 期間を手動上書き（manual モードへ切替） |
 | `/suggest_channels` | 管理者 | RSS 監視候補の提案（クォータ消費なし） |
 
 ## クォータ

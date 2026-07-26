@@ -16,9 +16,6 @@ from priconne_cb_collector.domain.models import Boss, BossesConfig
 from priconne_cb_collector.domain.settings import (
     LAYOUT_PER_BOSS_THREAD,
     LAYOUT_SINGLE,
-    MODE_MANUAL,
-    MODE_OFFSET,
-    MODE_TRIGGER,
     ON_UNKNOWN_POST,
     ON_UNKNOWN_SKIP,
     AppConfig,
@@ -27,7 +24,6 @@ from priconne_cb_collector.domain.settings import (
     DiscordConfig,
     ExcludeConfig,
     PollingConfig,
-    ScheduleConfig,
     YoutubeConfig,
 )
 
@@ -87,11 +83,6 @@ def load_bosses(path: str | Path) -> BossesConfig:
 def load_config(path: str | Path) -> AppConfig:
     data = _read_yaml(path)
 
-    sched = data.get("schedule") or {}
-    mode = sched.get("mode", MODE_TRIGGER)
-    if mode not in (MODE_OFFSET, MODE_MANUAL, MODE_TRIGGER):
-        raise ConfigError(f"config.yaml: schedule.mode must be offset/manual/trigger, got {mode!r}")
-
     youtube = data.get("youtube") or {}
     exclude = youtube.get("exclude") or {}
     discord = data.get("discord") or {}
@@ -115,23 +106,14 @@ def load_config(path: str | Path) -> AppConfig:
     )
 
     return AppConfig(
-        schedule=ScheduleConfig(
-            mode=mode,
-            start_offset_days=int(sched.get("start_offset_days", 8)),
-            end_offset_days=int(sched.get("end_offset_days", 1)),
-            manual_start=sched.get("manual_start"),
-            manual_end=sched.get("manual_end"),
-            remind_if_not_started=bool(sched.get("remind_if_not_started", True)),
-            search_lookback_days=int(sched.get("search_lookback_days", 1)),
-        ),
         polling=PollingConfig(
             rss_interval_minutes=int(polling.get("rss_interval_minutes", 30)),
             api_search_interval_hours=int(polling.get("api_search_interval_hours", 3)),
-            idle_check_interval_minutes=int(polling.get("idle_check_interval_minutes", 60)),
         ),
         youtube=YoutubeConfig(
             channels=channels,
             quota_limit_per_day=int(youtube.get("quota_limit_per_day", 9000)),
+            search_lookback_days=int(youtube.get("search_lookback_days", 1)),
             exclude=ExcludeConfig(
                 min_duration_seconds=int(exclude.get("min_duration_seconds", 60)),
                 max_duration_seconds=int(exclude.get("max_duration_seconds", 3600)),

@@ -16,7 +16,6 @@ from discord import app_commands
 from priconne_cb_collector.adapters.sqlite_store import STATUS_POSTED
 from priconne_cb_collector.adapters.youtube_api import SEARCH_COST
 from priconne_cb_collector.domain.schedule import JST
-from priconne_cb_collector.domain.settings import MODE_TRIGGER
 from priconne_cb_collector.interface.embeds import NOTICE_COLOR
 
 logger = logging.getLogger(__name__)
@@ -67,19 +66,16 @@ def setup_commands(bot) -> None:
         embed.add_field(
             name="状態", value="収集中" if bot.is_collecting(now) else "待機中", inline=False
         )
-        embed.add_field(name="稼働モード", value=bot.config.schedule.mode, inline=True)
         embed.add_field(name="ボス構成", value=bot.bosses.month, inline=True)
 
         if period is None:
             embed.add_field(
-                name="収集期間",
-                value="`/start` で収集を開始してください（trigger モード）"
-                if bot.config.schedule.mode == MODE_TRIGGER
-                else "期間が未設定です",
+                name="収集",
+                value="`/start` で収集を開始してください。",
                 inline=False,
             )
         else:
-            embed.add_field(name="収集期間", value=_period_label(now, period), inline=False)
+            embed.add_field(name="収集開始", value=_period_label(now, period), inline=False)
             counts = bot.store.count_by_boss(period.cb_period)
             lines = []
             for boss in bot.bosses.bosses:
@@ -93,10 +89,6 @@ def setup_commands(bot) -> None:
         limit = bot.config.youtube.quota_limit_per_day
         embed.add_field(name="クォータ", value=f"{used} / {limit} ユニット使用", inline=False)
         await interaction.response.send_message(embed=embed)
-
-    @tree.command(name="bosses", description="設定中のボス一覧を表示します")
-    async def bosses_cmd(interaction: discord.Interaction):
-        await interaction.response.send_message(embed=bot.bosses_embed())
 
     @tree.command(name="recent", description="直近の収集結果を表示します")
     @app_commands.describe(boss="ボス番号 (1-5)。省略時は全ボス")
@@ -150,13 +142,13 @@ def setup_commands(bot) -> None:
     @tree.command(name="stop", description="[管理者] 収集を停止し待機状態に戻します")
     @app_commands.default_permissions(administrator=True)
     async def stop(interaction: discord.Interaction):
-        stopped = bot.stop_period()
-        if stopped:
-            await interaction.response.send_message(
-                "収集を停止しました。収集済みデータは保持されます。"
-            )
-        else:
+        if not bot.is_collecting():
             await interaction.response.send_message("現在収集していません。", ephemeral=True)
+            return
+        # Flushing the queue and posting the summary can outlast the 3s ack window.
+        await interaction.response.defer()
+        await bot.stop_period()
+        await interaction.followup.send("収集を停止しました。収集済みデータは保持されます。")
 
     @tree.command(name="reload", description="[管理者] 設定ファイルを再読込します")
     @app_commands.default_permissions(administrator=True)
@@ -211,33 +203,6 @@ def setup_commands(bot) -> None:
             f"エラー {result.errors}件 / クォータ消費 {result.quota_used}ユニット"
         )
 
-    period_group = app_commands.Group(
-        name="period",
-        description="[管理者] 稼働期間の操作",
-        default_permissions=discord.Permissions(administrator=True),
-    )
-
-    @period_group.command(name="set", description="収集の開始日 / 終了日を手動で上書きします")
-    @app_commands.describe(
-        start="収集開始日 (YYYY-MM-DD)",
-        end="収集終了日 (YYYY-MM-DD、この日を含む)",
-    )
-    async def period_set(interaction: discord.Interaction, start: str, end: str):
-        try:
-            period = bot.set_manual_period(start, end)
-        except Exception as exc:
-            await interaction.response.send_message(
-                f"日付の解釈に失敗しました: {exc}", ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            "manual モードに切り替えました。\n"
-            f"収集開始: {period.start.astimezone(JST):%Y-%m-%d %H:%M}\n"
-            f"収集終了: {period.end.astimezone(JST):%Y-%m-%d %H:%M}"
-        )
-
-    tree.add_command(period_group)
-
     @tree.command(
         name="suggest_channels",
         description="[管理者] RSS 監視候補のチャンネルを提案します（クォータ消費なし）",
@@ -268,12 +233,9 @@ def setup_commands(bot) -> None:
 
 
 def _period_label(now: datetime, period) -> str:
-    window = (
-        f"{period.start.astimezone(JST):%Y-%m-%d %H:%M} 〜 "
-        f"{period.end.astimezone(JST):%Y-%m-%d %H:%M}"
+    elapsed = now - period.start
+    hours = int(elapsed.total_seconds() // 3600)
+    return (
+        f"{period.start.astimezone(JST):%Y-%m-%d %H:%M}（{hours}時間経過）\n"
+        "`/stop` を実行するまで継続します"
     )
-    if now < period.start:
-        return f"{window}\n開始待ち"
-    if now <= period.end:
-        return f"{window}\n収集中"
-    return f"{window}\nこの期間は終了しました"

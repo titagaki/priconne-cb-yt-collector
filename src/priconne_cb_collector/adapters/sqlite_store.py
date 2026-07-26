@@ -25,7 +25,6 @@ STATUS_ERROR = "error"
 NOTICE_COLUMNS = {
     "start": "notified_start",
     "end": "notified_end",
-    "reminder": "notified_reminder",
 }
 
 SCHEMA = """
@@ -66,12 +65,10 @@ CREATE INDEX IF NOT EXISTS idx_videos_period_boss ON videos(cb_period, boss_inde
 CREATE TABLE IF NOT EXISTS period_state (
   cb_period            TEXT PRIMARY KEY,
   start_at             TEXT,
-  end_at               TEXT,
   notified_start       INTEGER DEFAULT 0,
   notified_end         INTEGER DEFAULT 0,
-  notified_reminder    INTEGER DEFAULT 0,
   boss_thread_ids      TEXT,
-  started_manually     INTEGER DEFAULT 0
+  is_open              INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS quota_usage (
@@ -272,48 +269,43 @@ class Store:
 
     # ---- period_state ----
 
-    def ensure_period(self, period: Period, *, started_manually: bool = False) -> None:
+    def ensure_period(self, period: Period, *, is_open: bool = False) -> None:
         with self._tx() as conn:
             conn.execute(
-                "INSERT OR IGNORE INTO period_state "
-                "(cb_period, start_at, end_at, started_manually) VALUES (?,?,?,?)",
-                (
-                    period.cb_period,
-                    _to_utc_iso(period.start),
-                    _to_utc_iso(period.end),
-                    int(started_manually),
-                ),
+                "INSERT OR IGNORE INTO period_state (cb_period, start_at, is_open) VALUES (?,?,?)",
+                (period.cb_period, _to_utc_iso(period.start), int(is_open)),
             )
 
     def get_period_state(self, cb_period: str) -> sqlite3.Row | None:
         cur = self._conn.execute("SELECT * FROM period_state WHERE cb_period = ?", (cb_period,))
         return cur.fetchone()
 
-    def set_trigger_start(self, period: Period) -> None:
-        """Record a /start: overwrite the period window and mark it manual."""
-        self.ensure_period(period, started_manually=True)
+    def open_period(self, period: Period) -> None:
+        """Record a /start: overwrite the start time and mark the period open.
+
+        The notification flags are cleared so that starting again under the same
+        key announces again; only a process restart must stay silent.
+        """
+        self.ensure_period(period, is_open=True)
         with self._tx() as conn:
             conn.execute(
-                "UPDATE period_state SET start_at = ?, end_at = ?, "
-                "started_manually = 1 WHERE cb_period = ?",
-                (
-                    _to_utc_iso(period.start),
-                    _to_utc_iso(period.end),
-                    period.cb_period,
-                ),
+                "UPDATE period_state SET start_at = ?, is_open = 1, "
+                "notified_start = 0, notified_end = 0 WHERE cb_period = ?",
+                (_to_utc_iso(period.start), period.cb_period),
             )
 
-    def clear_trigger_start(self, cb_period: str) -> None:
+    def close_period(self, cb_period: str) -> None:
         """/stop: back to idle without deleting collected data."""
         with self._tx() as conn:
             conn.execute(
-                "UPDATE period_state SET started_manually = 0 WHERE cb_period = ?",
+                "UPDATE period_state SET is_open = 0 WHERE cb_period = ?",
                 (cb_period,),
             )
 
-    def trigger_started_at(self, cb_period: str) -> datetime | None:
+    def open_period_start(self, cb_period: str) -> datetime | None:
+        """When the open period under this key was started, or None if closed."""
         row = self.get_period_state(cb_period)
-        if row is None or not row["started_manually"] or not row["start_at"]:
+        if row is None or not row["is_open"] or not row["start_at"]:
             return None
         return _from_utc_iso(row["start_at"])
 

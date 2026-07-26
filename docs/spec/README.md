@@ -15,7 +15,7 @@
 | 01 | [概要・スコープ・用語](01-overview.md) | 目的、基本方針、やること/やらないこと、用語定義 |
 | 02 | [技術構成](02-architecture.md) | 言語・ライブラリ選定、ディレクトリ構成 |
 | 03 | [設定ファイル](03-configuration.md) | `bosses.yaml` / `config.yaml` / `.env` |
-| 04 | [収集期間の判定](04-schedule.md) | 収集する / しないの2状態とその遷移 |
+| 04 | [収集期間](04-schedule.md) | 収集する / しないの2状態とその遷移 |
 | 05 | [動画の取得](05-collection.md) | チャンネル RSS、Data API v3 検索、クォータ管理 |
 | 06 | [判定ロジック](06-classification.md) | 正規化、ボス判定、通常/持ち越し判定、除外フィルタ |
 | 07 | [永続化](07-persistence.md) | SQLite スキーマ、重複排除 |

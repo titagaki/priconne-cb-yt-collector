@@ -45,14 +45,12 @@ CREATE INDEX idx_videos_period_boss ON videos(cb_period, boss_index);
 
 -- 開始 / 終了通知の重複投稿を防ぐための状態管理
 CREATE TABLE period_state (
-  cb_period            TEXT PRIMARY KEY,  -- "2026-07"
-  start_at             TEXT,              -- 確定した収集開始日時（trigger モードでは /start 実行時刻）
-  end_at               TEXT,
+  cb_period            TEXT PRIMARY KEY,  -- "2026-07"（/start した時点の JST の月）
+  start_at             TEXT,              -- /start の実行時刻。終了日時は持たない
   notified_start       INTEGER DEFAULT 0,
   notified_end         INTEGER DEFAULT 0,
-  notified_reminder    INTEGER DEFAULT 0, -- /start 催促を投稿済みか（trigger モード。[04] §3）
   boss_thread_ids      TEXT,              -- {boss_index: thread_id} の JSON
-  started_manually     INTEGER DEFAULT 0  -- /start で開始されたか
+  is_open              INTEGER DEFAULT 0  -- 収集中か（/start で 1、/stop で 0）
 );
 
 CREATE TABLE quota_usage (

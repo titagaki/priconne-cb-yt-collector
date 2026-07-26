@@ -89,7 +89,7 @@ tests/
 | モジュール | 対応する仕様 |
 |---|---|
 | `adapters/config_file.py` | [03. 設定ファイル](03-configuration.md) |
-| `domain/schedule.py`, `services/lifecycle.py` | [04. 収集期間の判定](04-schedule.md) |
+| `domain/schedule.py`, `services/lifecycle.py` | [04. 収集期間](04-schedule.md) |
 | `adapters/youtube_rss.py`, `adapters/youtube_api.py`, `services/collection.py` | [05. 動画の取得](05-collection.md) |
 | `domain/classify/` | [06. 判定ロジック](06-classification.md) |
 | `adapters/sqlite_store.py` | [07. 永続化](07-persistence.md) |

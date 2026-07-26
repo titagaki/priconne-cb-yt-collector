@@ -70,8 +70,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         logger.info(
-            "config ok: mode=%s layout=%s channels=%d bosses_month=%s",
-            config.schedule.mode,
+            "config ok: layout=%s channels=%d bosses_month=%s",
             config.discord.layout,
             len(config.youtube.channels),
             bosses.month,

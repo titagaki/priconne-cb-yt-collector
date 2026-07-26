@@ -20,7 +20,7 @@
 
 | 対象 | ケース |
 |---|---|
-| `domain/schedule.py`<br>`services/lifecycle.py` | 月末が28/29/30/31日の各パターン、月またぎ、収集する/しないの境界（開始・終了の各前後1秒）、manual モード、trigger モード、再起動時の再計算 |
+| `domain/schedule.py`<br>`services/lifecycle.py` | 収集する/しないの境界（開始の前後1秒）、`cb_period` の決まり方（JST の月・月またぎで変わらないこと）、`/start` → `/stop` の往復、再起動時の復元 |
 | `domain/classify/boss.py` | 名前一致、エイリアス一致、複数ヒット、EX表記、名前とEXの衝突、正規化（全角/半角/大小文字） |
 | `domain/classify/battle_type.py` | 持ち越し各表記、秒数抽出、`フル` と `フルオート` の切り分け、判定不能ケース |
 | `domain/classify/metadata.py` | トレモ判定（キーワード由来と期間由来の区別） |

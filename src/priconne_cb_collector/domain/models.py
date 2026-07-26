@@ -36,12 +36,12 @@ class BossesConfig:
 class Period:
     """Collection period. All datetimes are timezone-aware.
 
-    There is no training/battle split: the bot is either collecting or it is
-    not (docs/spec/04).
+    Opened by /start and closed by /stop; there is no end date and no
+    training/battle split. The bot is either collecting or it is not
+    (docs/spec/04).
     """
 
     start: datetime
-    end: datetime  # inclusive (23:59:59 JST of the last day)
     cb_period: str  # "YYYY-MM"
 
 

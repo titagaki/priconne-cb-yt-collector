@@ -62,7 +62,7 @@ class CollectorBot(discord.Client):
         if youtube is None:
             logger.warning("YOUTUBE_API_KEY is not set; running with rss only")
 
-        self.periods = PeriodService(config, store)
+        self.periods = PeriodService(store)
         self.collector = Collector(config, bosses, store, self.http_client, youtube)
         self.poster = Poster(self, config, bosses, store)
 
@@ -80,28 +80,26 @@ class CollectorBot(discord.Client):
         return self.periods.is_collecting(now)
 
     async def start_period(self, now: datetime) -> Period:
+        """/start: open a period and wake the loop up (docs/spec/04 §2)."""
         period = self.periods.start(now)
-        self._apply_config(self.periods.config)
         self._was_collecting = None  # let the next tick emit the start announcement
         self._threads_ready = False
-        self._retune_tick(self.periods.is_collecting(now), restart=True)
+        self._last_rss = None  # collect on the first tick, not one interval later
+        self._last_api = None
+        self._resume_loop()
         return period
 
-    def stop_period(self) -> bool:
-        if self.periods.stop() is None:
+    async def stop_period(self) -> bool:
+        """/stop: close the period, post the summary, and park the loop."""
+        now = datetime.now(UTC)
+        period = self.periods.stop(now)
+        if period is None:
             return False
         self._was_collecting = False
         self._threads_ready = False
-        self._retune_tick(False)
+        self._park_loop()
+        await self._finish_period(period, now)
         return True
-
-    def set_manual_period(self, start, end) -> Period:
-        period = self.periods.override(start, end)
-        self._apply_config(self.periods.config)
-        self._was_collecting = None
-        self._threads_ready = False
-        self._retune_tick(self.periods.is_collecting(), restart=True)
-        return period
 
     def reload_config(self) -> None:
         self._apply_config(load_config(self.paths.config))
@@ -113,7 +111,6 @@ class CollectorBot(discord.Client):
     def _apply_config(self, config: AppConfig) -> None:
         """Propagate a config change to every component holding a copy."""
         self.config = config
-        self.periods.config = config
         self.collector.config = config
         self.poster.config = config
 
@@ -123,8 +120,8 @@ class CollectorBot(discord.Client):
     async def run_collection(self, *, run_api_search: bool = False):
         """One collection round on demand (/collect). Posts what it finds.
 
-        Refused outside the collection period: a video collected then belongs
-        to no cb_period, which is a NOT NULL column (docs/spec/07 §1).
+        Refused while not collecting: a video collected then belongs to no
+        cb_period, which is a NOT NULL column (docs/spec/07 §1).
         """
         now = datetime.now(UTC)
         period = self.periods.current_period(now)
@@ -144,7 +141,8 @@ class CollectorBot(discord.Client):
 
         setup_commands(self)
         await self.tree.sync()
-        self.tick.start()
+        if self.periods.current_period() is not None:
+            self._resume_loop()  # resume a period that was open before the restart
 
     async def on_ready(self) -> None:
         logger.info("logged in: user=%s", self.user)
@@ -166,43 +164,35 @@ class CollectorBot(discord.Client):
     async def before_tick(self) -> None:
         await self.wait_until_ready()
 
-    def _retune_tick(self, collecting: bool, *, restart: bool = False) -> None:
-        """Poll slowly while not collecting (docs/spec/04 §3).
-
-        restart=True is for manual transitions (/start): the loop may be in the
-        middle of a long idle sleep and must wake up now, not an hour from now.
-        """
-        polling = self.config.polling
-        seconds = TICK_SECONDS if collecting else polling.idle_check_interval_minutes * 60
-        if self.tick.seconds != seconds:
-            self.tick.change_interval(seconds=seconds)
-            logger.info("tick interval changed: collecting=%s seconds=%d", collecting, seconds)
-        if restart and self.tick.is_running():
+    def _resume_loop(self) -> None:
+        """Run the loop again from now. There is no idle cadence: while stopped
+        the loop does not run at all (docs/spec/04 §3)."""
+        if self.tick.is_running():
             self.tick.restart()
+        else:
+            self.tick.start()
+
+    def _park_loop(self) -> None:
+        if self.tick.is_running():
+            self.tick.cancel()
 
     async def _tick_once(self) -> None:
+        """The loop only runs while a period is open, so every tick collects."""
         now = datetime.now(UTC)
         period = self.periods.current_period(now)
-        collecting = self.periods.is_collecting(now)
-        self._retune_tick(collecting)
 
         if period is None:
-            await self._maybe_remind(now)
-            self._was_collecting = collecting
+            self._park_loop()  # /stop already posted the summary
             return
 
         self.store.ensure_period(period)
 
-        if collecting != self._was_collecting:
-            await self._handle_transition(self._was_collecting, collecting, period, now)
-            self._was_collecting = collecting
+        if self._was_collecting is not True:
+            await self._begin_period(period)
+            self._was_collecting = True
 
-        if not collecting:
-            await self._maybe_remind(now)
-            return
-
-        if not self._month_matches():
-            return  # the stale-bosses warning was already posted on transition
+        if not self._month_matches(period):
+            return  # the stale-bosses warning was already posted on the transition
 
         await self._run_due_collections(period, now)
         await self.poster.post_pending(period.cb_period, now)
@@ -223,18 +213,14 @@ class CollectorBot(discord.Client):
     def _is_due(last: datetime | None, now: datetime, interval_seconds: float) -> bool:
         return last is None or (now - last).total_seconds() >= interval_seconds
 
-    async def _handle_transition(
-        self, previously_collecting: bool | None, collecting: bool, period: Period, now: datetime
-    ) -> None:
-        if collecting:
-            if not self._month_matches():
-                await self._warn_stale_bosses()
-                return
-            if self.periods.claim_notice(period.cb_period, "start"):
-                await self._announce_start(period)
-            await self._ensure_threads(period)
-        elif previously_collecting:
-            await self._finish_period(period, now)
+    async def _begin_period(self, period: Period) -> None:
+        """First tick of an open period: announce it and prepare the threads."""
+        if not self._month_matches(period):
+            await self._warn_stale_bosses(period)
+            return
+        if self.periods.claim_notice(period.cb_period, "start"):
+            await self._announce_start(period)
+        await self._ensure_threads(period)
 
     async def _ensure_threads(self, period: Period) -> None:
         if self._threads_ready:
@@ -246,13 +232,16 @@ class CollectorBot(discord.Client):
         embed = self.bosses_embed()
         embed.title = "収集を開始しました"
         embed.description = (
-            f"収集期間: {period.start.astimezone(JST):%m/%d %H:%M} 〜 "
-            f"{period.end.astimezone(JST):%m/%d %H:%M}"
+            f"収集開始: {period.start.astimezone(JST):%m/%d %H:%M}\n"
+            "`/stop` を実行するまで収集を続けます。"
         )
         await self.poster.send_notice(embed=embed)
 
     async def _finish_period(self, period: Period, now: datetime) -> None:
-        """Flush the queue before stopping (11-4 decision: post everything)."""
+        """Flush the queue before stopping (11-4 decision: post everything).
+
+        Reached only from /stop, which is the only way a period ends.
+        """
         remaining = len(self.store.pending_videos(period.cb_period))
         if remaining:
             logger.info("flushing %d pending videos before going idle", remaining)
@@ -266,35 +255,27 @@ class CollectorBot(discord.Client):
             for boss in self.bosses.bosses
         ]
         await self.poster.send_notice(
-            f"**収集期間が終了しました**（合計 {sum(counts.values())}件）\n" + "\n".join(lines)
+            f"**収集を終了しました**（合計 {sum(counts.values())}件）\n" + "\n".join(lines)
         )
         self.poster.reset_daily_limit_notices()
 
-    async def _maybe_remind(self, now: datetime) -> None:
-        """Nudge the operator when /start was forgotten (11-1 decision)."""
-        offset = self.periods.pending_reminder(now)
-        if offset is None:
-            return
-        await self.poster.send_notice(
-            f"**収集期間（{offset.start.astimezone(JST):%m/%d} 開始予定）ですが、"
-            "まだ収集が始まっていません。**\n"
-            "`config/bosses.yaml` を今月のボス構成に更新してから `/start` を実行してください。"
-        )
+    def _month_matches(self, period: Period) -> bool:
+        """Guard against collecting with last month's bosses (docs/spec/04 §3).
 
-    def _month_matches(self) -> bool:
-        """Guard against collecting with last month's bosses (docs/spec/04 §3)."""
-        return self.bosses.month == datetime.now(JST).strftime("%Y-%m")
+        Compared against the period's key, not the wall clock: a run started on
+        the 29th keeps collecting under its own month after midnight on the 1st.
+        """
+        return self.bosses.month == period.cb_period
 
-    async def _warn_stale_bosses(self) -> None:
-        current = datetime.now(JST).strftime("%Y-%m")
+    async def _warn_stale_bosses(self, period: Period) -> None:
         logger.error(
-            "bosses.yaml is stale; staying idle: bosses_month=%s current=%s",
+            "bosses.yaml is stale; staying idle: bosses_month=%s cb_period=%s",
             self.bosses.month,
-            current,
+            period.cb_period,
         )
         await self.poster.send_notice(
             f"⚠️ **ボス構成が未更新です。**`bosses.yaml` の月は `{self.bosses.month}` ですが、"
-            f"現在は `{current}` です。\n"
+            f"収集対象は `{period.cb_period}` です。\n"
             "前月のボス名で収集しないよう、収集を開始せずに待機します。"
             "`config/bosses.yaml` を更新して `/reload` を実行してください。"
         )

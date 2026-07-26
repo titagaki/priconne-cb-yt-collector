@@ -38,12 +38,8 @@ def bosses_config(month: str = CB_PERIOD) -> BossesConfig:
 
 
 def july_period() -> Period:
-    """2026-07 の既定オフセットで算出される収集期間（7/23〜7/30）。"""
-    return Period(
-        start=datetime(2026, 7, 23, tzinfo=JST),
-        end=datetime(2026, 7, 30, 23, 59, 59, tzinfo=JST),
-        cb_period=CB_PERIOD,
-    )
+    """2026-07 の収集期間。7/23 に /start された想定（終了日は無い）。"""
+    return Period(start=datetime(2026, 7, 23, tzinfo=JST), cb_period=CB_PERIOD)
 
 
 def store_video(

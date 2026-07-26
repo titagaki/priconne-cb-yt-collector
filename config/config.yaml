@@ -1,29 +1,8 @@
-schedule:
-  # 収集期間の判定方法。"offset" | "manual" | "trigger"（既定は trigger。11-1 で決定）
-  mode: "trigger"
-
-  # mode: offset の場合 —— 月末日を基準に算出
-  start_offset_days: 8      # 末日 - 8日 が収集開始日（トレモ開始に合わせる）
-  end_offset_days: 1        # 末日 - 1日 が収集終了日（この日を含む）
-
-  # mode: manual の場合 —— 明示指定（in-game のアナウンスに合わせる用）
-  manual_start: null        # "2026-07-23"
-  manual_end: null          # "2026-07-30"
-
-  # mode: trigger の場合 —— /start コマンドで収集開始。終了日のみ offset で算出する
-  #   （運用者が bosses.yaml を書き換えるタイミングを起点にする）
-  # offset 計算上の開始日を過ぎても /start されていない場合に催促を投稿するか
-  remind_if_not_started: true
-
-  # 収集開始の何日前に投稿された動画まで検索対象に含めるか
-  search_lookback_days: 1
-
+# 収集の開始 / 終了は `/start` と `/stop` のみ。日付の設定は無い
 polling:
-  # 収集期間中の間隔（期間中は一定。トレモ / 本番で分けない）
+  # 収集中の間隔（収集中は一定。停止中はループ自体を回さない）
   rss_interval_minutes: 30
   api_search_interval_hours: 3
-  # 収集期間外のチェック間隔（期間に入ったかどうかの確認のみ）
-  idle_check_interval_minutes: 60
 
 youtube:
   # RSS 監視対象チャンネル（メインの取得経路）
@@ -35,6 +14,8 @@ youtube:
       name: "サンプルチャンネルB"
   # 1日あたりのクォータ上限（既定 10000 のうち何ユニットまで使うか）
   quota_limit_per_day: 9000
+  # `/start` の何日前に投稿された動画まで API 検索の対象に含めるか
+  search_lookback_days: 1
   # 除外条件
   exclude:
     min_duration_seconds: 60      # これ未満はショート扱いで除外

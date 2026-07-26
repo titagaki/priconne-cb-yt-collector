@@ -7,10 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-MODE_OFFSET = "offset"
-MODE_MANUAL = "manual"
-MODE_TRIGGER = "trigger"
-
 LAYOUT_SINGLE = "single"
 LAYOUT_PER_BOSS_THREAD = "per_boss_thread"
 
@@ -19,24 +15,13 @@ ON_UNKNOWN_POST = "post_as_unknown"
 
 
 @dataclass(frozen=True)
-class ScheduleConfig:
-    mode: str = MODE_TRIGGER
-    start_offset_days: int = 8  # 末日 - 8日 が収集開始日
-    end_offset_days: int = 1  # 末日 - 1日 が収集終了日（この日を含む）
-    manual_start: str | None = None  # "YYYY-MM-DD"
-    manual_end: str | None = None
-    remind_if_not_started: bool = True
-    search_lookback_days: int = 1
-
-
-@dataclass(frozen=True)
 class PollingConfig:
     """One cadence for the whole collection period: there is no training /
-    battle split (docs/spec/04)."""
+    battle split, and no idle cadence because the loop does not run while
+    stopped (docs/spec/04)."""
 
     rss_interval_minutes: int = 30
     api_search_interval_hours: int = 3
-    idle_check_interval_minutes: int = 60
 
 
 @dataclass(frozen=True)
@@ -57,6 +42,8 @@ class ExcludeConfig:
 class YoutubeConfig:
     channels: tuple[ChannelRef, ...] = ()
     quota_limit_per_day: int = 9000
+    # How far before /start the API search reaches back (search.list publishedAfter)
+    search_lookback_days: int = 1
     exclude: ExcludeConfig = field(default_factory=ExcludeConfig)
 
 
@@ -76,7 +63,6 @@ class ClassifyConfig:
 
 @dataclass(frozen=True)
 class AppConfig:
-    schedule: ScheduleConfig = field(default_factory=ScheduleConfig)
     polling: PollingConfig = field(default_factory=PollingConfig)
     youtube: YoutubeConfig = field(default_factory=YoutubeConfig)
     discord: DiscordConfig = field(default_factory=DiscordConfig)
