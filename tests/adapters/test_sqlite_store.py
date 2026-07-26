@@ -69,23 +69,26 @@ def test_known_video_ids_filters_candidates(store):
 
 def test_classification_fields_round_trip(store):
     classification = Classification(
-        boss=BossMatch(indices=[1, 3], match_source="boss_name", is_summary=False),
+        boss=BossMatch(indices=[3], match_source="boss_name"),
         battle_type="carryover",
         carryover_sec=35,
         damage=2150,
-        is_full_auto=True,
-        is_manual=None,
-        is_training_footage=True,
     )
     add(store, make_video(), classification)
     row = store.get_video("abc123")
-    assert row["boss_index"] == 1
-    assert row["boss_indices"] == "[1, 3]"
+    assert row["boss_index"] == 3
+    assert row["match_source"] == "boss_name"
     assert row["carryover_sec"] == 35
     assert row["damage"] == 2150
-    assert row["is_full_auto"] == 1
-    assert row["is_manual"] is None
-    assert row["is_training_footage"] == 1
+
+
+def test_multiple_boss_hits_are_stored_as_undecided(store):
+    """複数ヒットは判定不能。経路も残さない（docs/spec/06 §2.1、07 §1）。"""
+    classification = Classification(boss=BossMatch(indices=[1, 3], match_source="boss_name"))
+    add(store, make_video(), classification)
+    row = store.get_video("abc123")
+    assert row["boss_index"] is None
+    assert row["match_source"] is None
 
 
 def test_status_transitions(store):

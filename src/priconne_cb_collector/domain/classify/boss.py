@@ -18,8 +18,6 @@ from priconne_cb_collector.domain.models import (
 
 logger = logging.getLogger(__name__)
 
-SUMMARY_HIT_THRESHOLD = 3  # 3+ boss hits means a compilation video
-
 PRICONNE_CONTEXT_WORDS = ("プリコネ", "クラバト", "クランバトル", "priconne")
 
 # EX notation patterns applied to normalized text (N = 1-5).
@@ -49,12 +47,7 @@ def match_boss_names(raw_text: str, bosses: tuple[Boss, ...]) -> BossMatch:
                 break
     if not indices:
         return BossMatch()
-    return BossMatch(
-        indices=indices,
-        match_source=MATCH_BOSS_NAME,
-        matched_strings=matched,
-        is_summary=len(indices) >= SUMMARY_HIT_THRESHOLD,
-    )
+    return BossMatch(indices=indices, match_source=MATCH_BOSS_NAME, matched_strings=matched)
 
 
 def match_ex_notation(raw_text: str) -> tuple[int, str] | None:
@@ -84,8 +77,10 @@ def classify_boss(
 ) -> BossMatch:
     """Full boss decision for one video (docs/spec/06 §2).
 
-    EX notation applies only when the name match failed AND the video has
-    Priconne context words AND was published within the active period.
+    EX notation applies only when the name match found nothing AND the video
+    has Priconne context words AND was published within the active period.
+    Several name hits stay undecided rather than falling back to EX: names are
+    the higher-confidence route (docs/spec/06 §2.2).
     """
     name_match = match_boss_names(raw_text, bosses)
     ex = match_ex_notation(raw_text)

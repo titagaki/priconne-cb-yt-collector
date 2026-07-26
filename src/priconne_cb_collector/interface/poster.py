@@ -133,8 +133,8 @@ class Poster:
         channel = await self._get_channel()
         if self.config.discord.layout != LAYOUT_PER_BOSS_THREAD:
             return channel
-        # Summary videos and unclassified ones go to the parent channel.
-        if row["is_summary"] or not row["boss_index"]:
+        # Undecided videos (no hit, or several) go to the parent channel.
+        if not row["boss_index"]:
             return channel
         thread_ids = self.store.load_boss_threads(cb_period)
         thread_id = thread_ids.get(row["boss_index"])
@@ -156,9 +156,7 @@ class Poster:
         self._limit_notified.add(key)
 
         if boss_index:
-            target = await self._resolve_target(
-                cb_period, {"is_summary": 0, "boss_index": boss_index}
-            )
+            target = await self._resolve_target(cb_period, {"boss_index": boss_index})
         else:
             target = await self._get_channel()
         if target is None:

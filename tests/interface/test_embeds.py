@@ -42,37 +42,26 @@ def test_battle_type_labels(store, battle_type, expected):
     assert fields["種別"] == expected
 
 
-def test_training_badge_shown_for_training_footage(store):
-    row = store_video(store, is_training_footage=True)
-    assert "🏋️ トレモ" in build_video_embed(row, BOSSES).footer.text
-
-
-def test_training_badge_absent_otherwise(store):
-    row = store_video(store, is_training_footage=False)
-    assert "トレモ" not in build_video_embed(row, BOSSES).footer.text
-
-
 def test_ex_notation_badge(store):
     row = store_video(store, match_source="ex_notation")
     assert "※EX表記から推定" in build_video_embed(row, BOSSES).footer.text
 
 
-def test_footer_has_channel_and_jst_time(store):
-    footer = build_video_embed(store_video(store, is_full_auto=True), BOSSES).footer.text
+def test_footer_has_channel_and_jst_time_only(store):
+    """タイトルに書いてある内容はフッターに再掲しない（docs/spec/08 §2）。"""
+    row = store_video(store, title="【プリコネ】ワイバーン フルオート トレモ検証")
+    footer = build_video_embed(row, BOSSES).footer.text
+
     assert "テストチャンネル" in footer
     assert "07/26 14:00" in footer  # UTC 05:00 → JST 14:00
-    assert "フルオート" in footer
+    assert "フルオート" not in footer
+    assert "トレモ" not in footer
 
 
-def test_summary_video_lists_every_boss(store):
-    row = store_video(store, indices=[1, 3, 5], is_summary=True)
-    fields = {f.name: f.value for f in build_video_embed(row, BOSSES).fields}
-    assert fields["ボス"].startswith("まとめ:")
-    assert "3ボス ライデン" in fields["ボス"]
-
-
-def test_unclassified_video_says_so(store):
-    row = store_video(store, indices=[], match_source=None)
+@pytest.mark.parametrize("indices", [[], [1, 3, 5]])
+def test_undecided_video_says_so(store, indices):
+    """ヒット0件も複数ヒットも同じ「判定できず」（docs/spec/06 §2.1）。"""
+    row = store_video(store, indices=indices, match_source=None)
     fields = {f.name: f.value for f in build_video_embed(row, BOSSES).fields}
     assert fields["ボス"] == "判定できず"
 

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from priconne_cb_collector.domain.classify.battle_type import classify_battle_type
 from priconne_cb_collector.domain.classify.boss import classify_boss
-from priconne_cb_collector.domain.classify.metadata import extract_metadata
+from priconne_cb_collector.domain.classify.damage import extract_damage
 from priconne_cb_collector.domain.classify.normalize import build_target_text
 from priconne_cb_collector.domain.models import Boss, Classification
 
@@ -28,13 +28,9 @@ def classify_video(
         published_in_period=published_in_period,
     )
     battle = classify_battle_type(text)
-    meta = extract_metadata(text)
     return Classification(
         boss=boss,
         battle_type=battle.battle_type,
         carryover_sec=battle.carryover_sec,
-        damage=meta.damage,
-        is_full_auto=meta.is_full_auto,
-        is_manual=meta.is_manual,
-        is_training_footage=meta.is_training_footage,
+        damage=extract_damage(text),
     )

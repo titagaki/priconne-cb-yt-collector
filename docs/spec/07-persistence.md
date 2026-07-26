@@ -20,17 +20,14 @@ CREATE TABLE videos (
   view_count      INTEGER,
   discovered_at   TEXT NOT NULL,
 
-  boss_index      INTEGER,         -- NULL = 判定不能
-  boss_indices    TEXT,            -- 複数ヒット時の JSON 配列
-  match_source    TEXT,            -- "boss_name" | "ex_notation"
-  is_summary      INTEGER DEFAULT 0,
+  boss_index      INTEGER,         -- NULL = 判定不能（複数ボスにヒットした場合を含む）
+  match_source    TEXT,            -- boss_index を決めた経路。判定不能なら NULL
+                                   --   "boss_name"   … bosses.yaml の name/aliases に一致
+                                   --   "ex_notation" … 「EX3」等の番号表記からの推定（確度が低い）
 
   battle_type     TEXT,            -- "normal" | "carryover" | "unknown"
   carryover_sec   INTEGER,
-  damage          INTEGER,
-  is_full_auto    INTEGER,
-  is_manual       INTEGER,
-  is_training_footage INTEGER,     -- トレモ動画と判定されたか（キーワード由来のみ）
+  damage          INTEGER,         -- 万単位に正規化
 
   status          TEXT NOT NULL,   -- "pending" | "posted" | "filtered" | "error"
   filter_reason   TEXT,
@@ -57,6 +54,9 @@ CREATE TABLE quota_usage (
   units_used  INTEGER NOT NULL DEFAULT 0
 );
 ```
+
+**判定結果のうち DB に残すのは投稿の見た目と振り分けに使う値だけ。**ヒットしたボスが複数だった
+場合の内訳やマッチした文字列はログにのみ残す（[06](06-classification.md) §2、[10](10-non-functional.md) §2）。
 
 ## 2. 重複排除
 

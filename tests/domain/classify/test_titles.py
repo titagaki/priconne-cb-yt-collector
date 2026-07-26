@@ -28,7 +28,7 @@ CASES = [
     ("オルレオン 20s持ち越し", "", [5], "boss_name", "carryover"),
     ("デミカリド戦 素凸編成【クラバト】", "", [2], "boss_name", "normal"),
     ("スピリットホーン もちこし 60秒から", "", [4], "boss_name", "carryover"),
-    # --- 複数ヒット・まとめ動画 ---
+    # --- 複数ヒット（indices は全件残るが、判定は「不能」になる） ---
     ("ワイバーン&デミカリド比較 通常", "", [1, 2], "boss_name", "normal"),
     (
         "【クラバト】ワイバーン/ライデン/オルレオン 全編成まとめ",
@@ -85,6 +85,36 @@ def test_title_table(title, description, indices, source, battle_type):
 
 def test_case_count_meets_spec_minimum():
     assert len(CASES) >= 30
+
+
+@pytest.mark.parametrize(
+    ("title", "indices", "decided"),
+    [
+        ("【プリコネR】ワイバーン 通常凸", [1], 1),
+        ("ワイバーン&デミカリド比較", [1, 2], None),
+        ("ワイバーン/ライデン/オルレオン まとめ", [1, 3, 5], None),
+        ("【プリコネ】ガチャ200連", [], None),
+    ],
+)
+def test_only_a_single_hit_decides_the_boss(title, indices, decided):
+    """2体以上ヒットしたら判定不能（docs/spec/06 §2.1）。内訳はログ用に残す。"""
+    result = classify_video(title, "", SAMPLE_BOSSES)
+    assert result.boss.indices == indices
+    assert result.boss.decided_index is decided
+    assert result.boss.decided_source == (None if decided is None else "boss_name")
+
+
+def test_multiple_name_hits_do_not_fall_back_to_ex_notation():
+    """ボス名の方が確度が高い（docs/spec/06 §2.2）。"""
+    result = classify_video(
+        "【プリコネ】クラバト ワイバーン デミカリド ex3 比較",
+        "",
+        SAMPLE_BOSSES,
+        enable_ex_notation=True,
+        published_in_period=True,
+    )
+    assert result.boss.indices == [1, 2]
+    assert result.boss.decided_index is None
 
 
 def test_name_is_matched_even_when_aliases_omit_it():

@@ -40,16 +40,11 @@ CREATE TABLE IF NOT EXISTS videos (
   discovered_at   TEXT NOT NULL,
 
   boss_index      INTEGER,
-  boss_indices    TEXT,
   match_source    TEXT,
-  is_summary      INTEGER DEFAULT 0,
 
   battle_type     TEXT,
   carryover_sec   INTEGER,
   damage          INTEGER,
-  is_full_auto    INTEGER,
-  is_manual       INTEGER,
-  is_training_footage INTEGER,
 
   status          TEXT NOT NULL,
   filter_reason   TEXT,
@@ -122,16 +117,11 @@ class Store:
             video.duration_sec,
             video.view_count,
             _to_utc_iso(discovered_at or datetime.now(UTC)),
-            boss.primary_index,
-            json.dumps(boss.indices) if boss.indices else None,
-            boss.match_source,
-            int(boss.is_summary),
+            boss.decided_index,
+            boss.decided_source,
             classification.battle_type,
             classification.carryover_sec,
             classification.damage,
-            _to_int_or_none(classification.is_full_auto),
-            _to_int_or_none(classification.is_manual),
-            int(classification.is_training_footage),
             status,
             filter_reason,
             cb_period,
@@ -142,12 +132,10 @@ class Store:
                 INSERT OR IGNORE INTO videos (
                   video_id, title, description, channel_id, channel_title,
                   published_at, duration_sec, view_count,
-                  discovered_at, boss_index, boss_indices,
-                  match_source, is_summary, battle_type, carryover_sec,
-                  damage, is_full_auto, is_manual,
-                  is_training_footage, status,
+                  discovered_at, boss_index, match_source,
+                  battle_type, carryover_sec, damage, status,
                   filter_reason, cb_period
-                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 row,
             )
@@ -355,7 +343,3 @@ def _from_utc_iso(value: str) -> datetime:
 def _jst_date(now: datetime | None = None) -> str:
     now = now or datetime.now(UTC)
     return now.astimezone(JST).date().isoformat()
-
-
-def _to_int_or_none(value: bool | None) -> int | None:
-    return None if value is None else int(value)

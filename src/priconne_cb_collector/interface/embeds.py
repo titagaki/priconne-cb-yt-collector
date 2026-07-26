@@ -5,7 +5,6 @@ The video description is never reproduced: title, link and derived labels only.
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 
 import discord
@@ -28,7 +27,6 @@ BOSS_COLORS = {
     4: 0x2ECC71,
     5: 0x3498DB,
 }
-SUMMARY_COLOR = 0x9B59B6
 UNKNOWN_COLOR = 0x95A5A6
 NOTICE_COLOR = 0x5865F2
 
@@ -41,9 +39,7 @@ BATTLE_TYPE_LABELS = {
 
 def build_video_embed(row, bosses: BossesConfig) -> discord.Embed:
     """Build the embed for one stored video row."""
-    color = (
-        SUMMARY_COLOR if row["is_summary"] else BOSS_COLORS.get(row["boss_index"], UNKNOWN_COLOR)
-    )
+    color = BOSS_COLORS.get(row["boss_index"], UNKNOWN_COLOR)
     embed = discord.Embed(
         title=row["title"][:256],
         url=VIDEO_URL.format(video_id=row["video_id"]),
@@ -61,23 +57,14 @@ def build_video_embed(row, bosses: BossesConfig) -> discord.Embed:
 
 
 def _footer_parts(row) -> list[str]:
+    """Only what the video title does not already say (docs/spec/08 §2)."""
     parts = [row["channel_title"] or "不明なチャンネル", jst_label(row["published_at"])]
-    if row["is_full_auto"]:
-        parts.append("フルオート")
-    elif row["is_manual"]:
-        parts.append("手動")
-
-    if row["is_training_footage"]:
-        parts.append("🏋️ トレモ")
     if row["match_source"] == MATCH_EX_NOTATION:
         parts.append("※EX表記から推定")
     return parts
 
 
 def boss_label(row, bosses: BossesConfig) -> str:
-    if row["is_summary"] and row["boss_indices"]:
-        names = [f"{i}ボス {bosses.by_index(i).name}" for i in json.loads(row["boss_indices"])]
-        return "まとめ: " + " / ".join(names)
     if row["boss_index"]:
         boss = bosses.by_index(row["boss_index"])
         return f"{boss.index}ボス {boss.name}"

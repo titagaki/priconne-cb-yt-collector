@@ -48,7 +48,7 @@ priconne-cb-yt-collector/
 │   │       ├── normalize.py    # 正規化
 │   │       ├── boss.py         # ボス判定
 │   │       ├── battle_type.py  # 通常/持ち越し判定
-│   │       └── metadata.py     # ダメージ・フルオート等の抽出
+│   │       └── damage.py       # ダメージの抽出
 │   ├── adapters/
 │   │   ├── config_file.py   # YAML 読み込み・バリデーション
 │   │   ├── sqlite_store.py  # SQLite 永続化

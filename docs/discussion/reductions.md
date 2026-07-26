@@ -126,7 +126,7 @@ DB ファイルを作り直す前提とした。
 |---|---|
 | ETag / 304 対応 | 実装コストが小さく、無駄な取得を減らす実利がある（**2026-07-26 に RSS ごと廃止**） |
 | 429 リトライ | レート制限時の取りこぼし耐性。目的に直結する |
-| `damage` / `is_full_auto` / `is_manual` の抽出 | 段階と違い、動画を選ぶ判断材料として機能している |
+| `damage` / `is_full_auto` / `is_manual` の抽出 | 段階と違い、動画を選ぶ判断材料として機能している（**`is_full_auto` / `is_manual` は 2026-07-26 に廃止**） |
 | 待機中のポーリングループ | 止めると `offset`/`manual` の自動開始と `/start` 催促が同時に死ぬ（**2026-07-26 に両方とも廃止され、ループも停止**）。[収集期間](schedule.md#待機中はポーリングループを回さない) |
 
 ### まだ判断していない削減候補
@@ -136,4 +136,31 @@ DB ファイルを作り直す前提とした。
 - 設定フラグの固定値化（`layout` の `single`、`enable_ex_notation`、`on_boss_unknown`）
 - `/recent` / `/collect` / `/stop` / `/reload` の整理
 - `videos.view_count`（取得・保存しているが未使用）
-- まとめ動画の `is_summary` 別扱い
+
+## 2026-07-26: 複数ボスヒットの一本化とバッジ3種の削除
+
+運用者の判断による。判定結果のうち、**投稿先の振り分けにも絞り込みにも使っていなかった列**を削除した。
+
+| 削除したもの | 理由 |
+|---|---|
+| まとめ動画の別扱い（`is_summary` / `boss_indices`） | 複数ヒットは判定不能に一本化。[判定ロジック](classification.md#複数ボスヒットの扱い) |
+| `is_full_auto` / `is_manual` / `is_training_footage` の抽出とバッジ | [判定ロジック](classification.md#フルオート--手動--トレモ) |
+| `MetadataResult` データクラス | 残ったのが `damage` 1項目だけになった。`extract_damage()` 関数に置き換え、`classify/metadata.py` は `classify/damage.py` へ改名 |
+| Embed の「まとめ動画」専用色（`SUMMARY_COLOR`） | まとめ動画という区分自体が消えた。判定不能と同じ色になる |
+
+### DB スキーマへの影響
+
+削除された列: `videos.boss_indices` / `videos.is_summary` / `videos.is_full_auto` /
+`videos.is_manual` / `videos.is_training_footage`
+
+`match_source` は残す。`ex_notation`（番号表記からの推定）であることを Embed に表示し、
+確度が低いことを読み手に伝えるために使っている。ただし**判定不能なら `NULL` を保存する**
+（1体に絞れていないのに経路だけ残っても意味がないため）。
+
+**既存の `data/bot.db` とは互換性がない。** 前回と同様、移行スクリプトは用意せず
+DB ファイルを作り直す前提とした。
+
+### 併せて変更した点
+
+- 複数ヒットした `indices` は **DB からは消えるがログには残す**。判定ロジックの
+  チューニングに必要なため（[10 非機能](../spec/10-non-functional.md) §2）

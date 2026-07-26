@@ -62,14 +62,23 @@ class VideoMeta:
 
 @dataclass
 class BossMatch:
+    """Raw hits from the classifier. All hits are kept here for logging;
+    only a single-boss hit is considered decided (docs/spec/06 §2.1).
+    """
+
     indices: list[int] = field(default_factory=list)
     match_source: str | None = None  # MATCH_BOSS_NAME | MATCH_EX_NOTATION | None
     matched_strings: list[str] = field(default_factory=list)
-    is_summary: bool = False
 
     @property
-    def primary_index(self) -> int | None:
-        return self.indices[0] if self.indices else None
+    def decided_index(self) -> int | None:
+        """The boss to store. Multiple hits mean we cannot tell which one."""
+        return self.indices[0] if len(self.indices) == 1 else None
+
+    @property
+    def decided_source(self) -> str | None:
+        """The route that decided the boss; meaningless when undecided."""
+        return self.match_source if self.decided_index is not None else None
 
 
 @dataclass
@@ -78,6 +87,3 @@ class Classification:
     battle_type: str = BATTLE_UNKNOWN
     carryover_sec: int | None = None
     damage: int | None = None  # normalized to units of 万
-    is_full_auto: bool | None = None
-    is_manual: bool | None = None
-    is_training_footage: bool = False  # keyword evidence only

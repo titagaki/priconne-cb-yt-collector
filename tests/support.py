@@ -53,14 +53,10 @@ def store_video(
         boss=BossMatch(
             indices=fields.pop("indices", [1]),
             match_source=fields.pop("match_source", MATCH_BOSS_NAME),
-            is_summary=fields.pop("is_summary", False),
         ),
         battle_type=fields.pop("battle_type", BATTLE_NORMAL),
         carryover_sec=fields.pop("carryover_sec", None),
         damage=fields.pop("damage", None),
-        is_full_auto=fields.pop("is_full_auto", None),
-        is_manual=fields.pop("is_manual", None),
-        is_training_footage=fields.pop("is_training_footage", False),
     )
     video = VideoMeta(
         video_id=video_id,
