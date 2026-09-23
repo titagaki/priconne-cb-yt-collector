@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>プリコネR クランバトル 2026年8月 — 更新分（08-25 → 08-26）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E0B18; --line:rgba(255,255,255,.10);
+    --text:#EDE9FB; --text-dim:#9A93C4;
+    --b1:#38BDF8; --b2:#818CF8; --b3:#C084FC; --b4:#34D399; --b5:#FB923C;
+    --jp:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    --num:"Saira Condensed","Zen Kaku Gothic New",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 520px at 12% -8%, #2A1F5C 0%, transparent 62%),
+      radial-gradient(800px 400px at 96% 4%, #3A1A47 0%, transparent 58%),
+      var(--ink);
+    color:var(--text); font-family:var(--jp); line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+
+  header{padding:64px 0 28px}
+  .eyebrow{font-family:var(--num);font-size:14px;letter-spacing:.34em;text-transform:uppercase;color:var(--text-dim);margin:0 0 10px}
+  h1{margin:0;font-weight:700;font-size:clamp(30px,5.2vw,52px);letter-spacing:-.01em;line-height:1.18}
+  h1 .month{font-family:var(--num);font-size:1.06em;font-weight:700;
+    background:linear-gradient(92deg,var(--b1),var(--b3) 48%,var(--b5));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .meta{margin:18px 0 0;color:var(--text-dim);font-size:14px;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center}
+  .cmd{font-family:var(--num);font-size:15px;color:var(--text);background:rgba(255,255,255,.055);
+    border:1px solid var(--line);border-radius:6px;padding:2px 10px}
+
+  /* filter */
+  .filter{margin-top:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .switch{display:inline-flex;align-items:center;gap:11px;cursor:pointer;user-select:none;
+    border:1px solid var(--line);border-radius:999px;padding:8px 16px 8px 12px;background:rgba(255,255,255,.04)}
+  .switch input{position:absolute;opacity:0;width:0;height:0}
+  .knob{width:38px;height:21px;border-radius:999px;background:rgba(255,255,255,.14);position:relative;transition:background .2s}
+  .knob::after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;
+    background:var(--text);transition:transform .2s}
+  .switch input:checked + .knob{background:var(--b3)}
+  .switch input:checked + .knob::after{transform:translateX(17px)}
+  .switch input:focus-visible + .knob{outline:2px solid var(--b3);outline-offset:3px}
+  .switch span{font-size:14px}
+  .filter .note{font-size:13px;color:var(--text-dim)}
+
+  nav{position:sticky;top:0;z-index:20;margin:26px 0 0;padding:12px 0;
+    background:rgba(14,11,24,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .navrow{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none}
+  .navrow::-webkit-scrollbar{display:none}
+  .navrow a{flex:0 0 auto;display:flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--text-dim);
+    border:1px solid var(--line);border-radius:999px;padding:7px 15px 7px 11px;font-size:14px;white-space:nowrap;
+    transition:color .18s,border-color .18s,background .18s}
+  .navrow a .n{font-family:var(--num);font-weight:700;font-size:15px;color:var(--c)}
+  .navrow a:hover,.navrow a:focus-visible{color:var(--text);border-color:var(--c);background:rgba(255,255,255,.04)}
+
+  section{padding-top:62px;scroll-margin-top:70px}
+  .bosshead{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .bossno{font-family:var(--num);font-weight:700;font-size:44px;line-height:1;color:var(--c)}
+  .bossname{font-size:26px;font-weight:700;margin:0}
+  .element{font-family:var(--num);font-size:13px;letter-spacing:.2em;color:var(--c);
+    border:1px solid var(--c);border-radius:4px;padding:1px 8px;opacity:.85}
+  .count{margin-left:auto;font-family:var(--num);font-size:15px;color:var(--text-dim);letter-spacing:.06em}
+  .count b{color:var(--c);font-weight:700}
+
+  ol{list-style:none;margin:0;padding:0}
+  li{position:relative;border-bottom:1px solid var(--line);padding:20px 0 18px 18px}
+  li::before{content:"";position:absolute;left:0;top:20px;bottom:18px;width:2px;background:var(--c);
+    opacity:.28;border-radius:2px;transition:opacity .18s}
+  li:hover::before{opacity:1}
+  li.off{opacity:.4}
+  li.off::before{background:var(--text-dim);opacity:.2}
+  li.off:hover{opacity:.75}
+  .title{display:block;color:var(--text);text-decoration:none;font-size:16px;font-weight:500;text-underline-offset:3px}
+  .title:hover,.title:focus-visible{text-decoration:underline;text-decoration-color:var(--c)}
+  .sub{margin-top:9px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;
+    font-family:var(--num);font-size:14px;color:var(--text-dim);letter-spacing:.03em}
+  .date{font-variant-numeric:tabular-nums}
+  .carry{color:var(--text);border:1px solid var(--line);border-radius:4px;padding:0 7px}
+  .url{color:var(--text-dim);text-decoration:none;overflow-wrap:anywhere}
+  .url:hover,.url:focus-visible{color:var(--c);text-decoration:underline}
+
+  .dmg{margin-top:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;max-width:560px}
+  .track{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+  .fill{height:100%;width:var(--w);border-radius:3px;
+    background:linear-gradient(90deg,color-mix(in srgb,var(--c) 45%,transparent),var(--c));
+    transform-origin:left;animation:grow .7s cubic-bezier(.2,.8,.25,1) both}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .figure{font-family:var(--num);font-weight:700;font-size:19px;color:var(--c);line-height:1}
+
+  .empty{display:none;color:var(--text-dim);font-size:14px;padding:22px 0}
+  body.only-priconne li.off{display:none}
+  body.only-priconne section.blank .empty{display:block}
+
+  footer{margin-top:76px;padding-top:22px;border-top:1px solid var(--line);color:var(--text-dim);font-size:13px}
+  a:focus-visible{outline:2px solid var(--c,var(--b3));outline-offset:3px;border-radius:3px}
+
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.fill{animation:none}}
+  @media (max-width:560px){.bossno{font-size:34px}.bossname{font-size:21px}.count{width:100%;margin-left:0}}
+</style>
+</head>
+<body class="only-priconne">
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">priconne-cb-yt-collector</p>
+  <h1>クランバトル 攻略動画 更新分<br><span class="month">2026 / 08</span></h1>
+  <p class="meta">
+    <span class="cmd">search.list q=ボス名 × 5 → video_id で前回分を除外</span>
+    <span>取得日時 2026-08-26</span><span>前回 2026-08-25 との差分</span>
+    <span>新規 80 件 / うちプリコネ関連 25 件</span>
+  </p>
+  <div class="filter">
+    <label class="switch">
+      <input type="checkbox" id="pf" checked>
+      <span class="knob"></span>
+      <span>プリコネ関連のみ表示</span>
+    </label>
+    <span class="note">オフにすると同名の他ゲーム・地名などを含む検索結果も表示します。</span>
+  </div>
+</header>
+
+<nav>
+  <div class="navrow">
+    <a href="#boss1" style="--c:var(--b1)"><span class="n">1</span>マダムエレクトラ</a>
+    <a href="#boss2" style="--c:var(--b2)"><span class="n">2</span>ミストシーカー</a>
+    <a href="#boss3" style="--c:var(--b3)"><span class="n">3</span>バイオドーザー</a>
+    <a href="#boss4" style="--c:var(--b4)"><span class="n">4</span>トライロッカー</a>
+    <a href="#boss5" style="--c:var(--b5)"><span class="n">5</span>メデューサ</a>
+  </div>
+</nav>
+
+<section id="boss1" style="--c:var(--b1)">
+  <div class="bosshead">
+    <span class="bossno">01</span>
+    <h2 class="bossname">マダムエレクトラ</h2>
+    <span class="count"><b>5</b> / 5 件</span>
+  </div>
+  <ol>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=ivgsjSSz6Is" target="_blank" rel="noopener">【プリコネR】8月クランバトル 持ち越し編成まとめ(4段階目)【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-26T12:22:18Z</span><a class="url" href="https://www.youtube.com/watch?v=ivgsjSSz6Is" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ivgsjSSz6Is</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=7p9t6s1SfnE" target="_blank" rel="noopener">【プリコネR】4段階目楽々TL編成紹介！2026年8月版【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-25T22:00:19Z</span><a class="url" href="https://www.youtube.com/watch?v=7p9t6s1SfnE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=7p9t6s1SfnE</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=7Tj7sB4Fo7M" target="_blank" rel="noopener">【プリコネ】4段階目マダムエレクトラ　目押し16～17箇所5.83前後（＋700万?）</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">700万</span></div>
+      <div class="sub"><span class="date">2026-08-25T17:58:02Z</span><a class="url" href="https://www.youtube.com/watch?v=7Tj7sB4Fo7M" target="_blank" rel="noopener">https://www.youtube.com/watch?v=7Tj7sB4Fo7M</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=pgKFQ0xIefc" target="_blank" rel="noopener">【プリコネR】2026.8月クランバトル4段階目編成紹介！今月もサクッと行きたい件</a>
+      <div class="sub"><span class="date">2026-08-25T17:34:35Z</span><a class="url" href="https://www.youtube.com/watch?v=pgKFQ0xIefc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=pgKFQ0xIefc</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=-LSmzlTB7z4" target="_blank" rel="noopener">【プリコネR】2026年8月クランバトル3段階目消滅凸　フルオート討伐編成　90秒持ち越し【クラバト】【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】</a>
+      <div class="sub"><span class="date">2026-08-25T14:27:26Z</span><span class="carry">90s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=-LSmzlTB7z4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=-LSmzlTB7z4</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+<section id="boss2" style="--c:var(--b2)">
+  <div class="bosshead">
+    <span class="bossno">02</span>
+    <h2 class="bossname">ミストシーカー</h2>
+    <span class="count"><b>5</b> / 5 件</span>
+  </div>
+  <ol>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=ivgsjSSz6Is" target="_blank" rel="noopener">【プリコネR】8月クランバトル 持ち越し編成まとめ(4段階目)【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-26T12:22:18Z</span><a class="url" href="https://www.youtube.com/watch?v=ivgsjSSz6Is" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ivgsjSSz6Is</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=0OUfgtNM0Q8" target="_blank" rel="noopener">【プリコネR】8月クラバト 4段階目 簡単セミオート編成とフルオート編成紹介 2026年8月【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-25T21:56:52Z</span><a class="url" href="https://www.youtube.com/watch?v=0OUfgtNM0Q8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=0OUfgtNM0Q8</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=pgKFQ0xIefc" target="_blank" rel="noopener">【プリコネR】2026.8月クランバトル4段階目編成紹介！今月もサクッと行きたい件</a>
+      <div class="sub"><span class="date">2026-08-25T17:34:35Z</span><a class="url" href="https://www.youtube.com/watch?v=pgKFQ0xIefc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=pgKFQ0xIefc</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=-LSmzlTB7z4" target="_blank" rel="noopener">【プリコネR】2026年8月クランバトル3段階目消滅凸　フルオート討伐編成　90秒持ち越し【クラバト】【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】</a>
+      <div class="sub"><span class="date">2026-08-25T14:27:26Z</span><span class="carry">90s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=-LSmzlTB7z4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=-LSmzlTB7z4</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=6cTeVxmVsIE" target="_blank" rel="noopener">プリコネ　4段階目ミストシーカー　4.6億　tp10-5用</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">4.6億</span></div>
+      <div class="sub"><span class="date">2026-08-25T11:10:48Z</span><a class="url" href="https://www.youtube.com/watch?v=6cTeVxmVsIE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=6cTeVxmVsIE</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+<section id="boss3" style="--c:var(--b3)">
+  <div class="bosshead">
+    <span class="bossno">03</span>
+    <h2 class="bossname">バイオドーザー</h2>
+    <span class="count"><b>8</b> / 8 件</span>
+  </div>
+  <ol>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=ivgsjSSz6Is" target="_blank" rel="noopener">【プリコネR】8月クランバトル 持ち越し編成まとめ(4段階目)【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-26T12:22:18Z</span><a class="url" href="https://www.youtube.com/watch?v=ivgsjSSz6Is" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ivgsjSSz6Is</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=akpEpyK5ug0" target="_blank" rel="noopener">【プリコネR】4段階目 バイオドーザー 8931万 22s持ち越し編成【8月クランバトル】【クラバト】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:16.5%"></div></div><span class="figure">8931万</span></div>
+      <div class="sub"><span class="date">2026-08-26T03:52:55Z</span><span class="carry">22s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=akpEpyK5ug0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=akpEpyK5ug0</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=7p9t6s1SfnE" target="_blank" rel="noopener">【プリコネR】4段階目楽々TL編成紹介！2026年8月版【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-25T22:00:19Z</span><a class="url" href="https://www.youtube.com/watch?v=7p9t6s1SfnE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=7p9t6s1SfnE</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=0OUfgtNM0Q8" target="_blank" rel="noopener">【プリコネR】8月クラバト 4段階目 簡単セミオート編成とフルオート編成紹介 2026年8月【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-25T21:56:52Z</span><a class="url" href="https://www.youtube.com/watch?v=0OUfgtNM0Q8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=0OUfgtNM0Q8</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=gyu4YYQWtZI" target="_blank" rel="noopener">【プリコネR】4段階 バイオドーザー 5.42億 目押し5</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">5.42億</span></div>
+      <div class="sub"><span class="date">2026-08-25T17:02:38Z</span><a class="url" href="https://www.youtube.com/watch?v=gyu4YYQWtZI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=gyu4YYQWtZI</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=znOhzOHUg4Y" target="_blank" rel="noopener">【プリコネR】4段階 バイオドーザー 39830万 58s【難易度緩和Ver】</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:73.5%"></div></div><span class="figure">39830万</span></div>
+      <div class="sub"><span class="date">2026-08-25T15:40:47Z</span><span class="carry">58s</span><a class="url" href="https://www.youtube.com/watch?v=znOhzOHUg4Y" target="_blank" rel="noopener">https://www.youtube.com/watch?v=znOhzOHUg4Y</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=ap0dCp22BXI" target="_blank" rel="noopener">【プリコネR】4段階 バイオドーザー 39803万 58s</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:73.4%"></div></div><span class="figure">39803万</span></div>
+      <div class="sub"><span class="date">2026-08-25T14:57:45Z</span><span class="carry">58s</span><a class="url" href="https://www.youtube.com/watch?v=ap0dCp22BXI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ap0dCp22BXI</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=-LSmzlTB7z4" target="_blank" rel="noopener">【プリコネR】2026年8月クランバトル3段階目消滅凸　フルオート討伐編成　90秒持ち越し【クラバト】【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】</a>
+      <div class="sub"><span class="date">2026-08-25T14:27:26Z</span><span class="carry">90s 持ち越し</span><a class="url" href="https://www.youtube.com/watch?v=-LSmzlTB7z4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=-LSmzlTB7z4</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+<section id="boss4" style="--c:var(--b4)">
+  <div class="bosshead">
+    <span class="bossno">04</span>
+    <h2 class="bossname">トライロッカー</h2>
+    <span class="count"><b>3</b> / 3 件</span>
+  </div>
+  <ol>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=ivgsjSSz6Is" target="_blank" rel="noopener">【プリコネR】8月クランバトル 持ち越し編成まとめ(4段階目)【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-26T12:22:18Z</span><a class="url" href="https://www.youtube.com/watch?v=ivgsjSSz6Is" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ivgsjSSz6Is</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=mI_rGlIioQo" target="_blank" rel="noopener">【プリコネR】4段階目トライロッカー 63403万</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">63403万</span></div>
+      <div class="sub"><span class="date">2026-08-26T00:54:11Z</span><a class="url" href="https://www.youtube.com/watch?v=mI_rGlIioQo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=mI_rGlIioQo</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=pgKFQ0xIefc" target="_blank" rel="noopener">【プリコネR】2026.8月クランバトル4段階目編成紹介！今月もサクッと行きたい件</a>
+      <div class="sub"><span class="date">2026-08-25T17:34:35Z</span><a class="url" href="https://www.youtube.com/watch?v=pgKFQ0xIefc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=pgKFQ0xIefc</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+<section id="boss5" style="--c:var(--b5)">
+  <div class="bosshead">
+    <span class="bossno">05</span>
+    <h2 class="bossname">メデューサ</h2>
+    <span class="count"><b>4</b> / 59 件</span>
+  </div>
+  <ol>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Z15FJMqKrCg" target="_blank" rel="noopener">Medusa</a>
+      <div class="sub"><span class="date">2026-08-26T14:00:15Z</span><a class="url" href="https://www.youtube.com/watch?v=Z15FJMqKrCg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Z15FJMqKrCg</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=CMlsIuBlUaI" target="_blank" rel="noopener">🔥 He Finally Met Medusa… But She Was NOTHING Like the Monster He Imagined! #shorts</a>
+      <div class="sub"><span class="date">2026-08-26T13:30:05Z</span><a class="url" href="https://www.youtube.com/watch?v=CMlsIuBlUaI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=CMlsIuBlUaI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=leQZwHtWPdg" target="_blank" rel="noopener">Athena Blamed Medusa For Being Attacked In Her Own Temple 😤</a>
+      <div class="sub"><span class="date">2026-08-26T13:16:37Z</span><a class="url" href="https://www.youtube.com/watch?v=leQZwHtWPdg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=leQZwHtWPdg</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=qQuNIvtCdYI" target="_blank" rel="noopener">Medusa: The Victim Behind The Monster  Discover the tragic truth behind the myth of Medusa, the prie</a>
+      <div class="sub"><span class="date">2026-08-26T12:47:22Z</span><a class="url" href="https://www.youtube.com/watch?v=qQuNIvtCdYI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=qQuNIvtCdYI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=LPUuuXbmiNU" target="_blank" rel="noopener">The Medusa Lie History Hides From You 🏛️</a>
+      <div class="sub"><span class="date">2026-08-26T12:44:23Z</span><a class="url" href="https://www.youtube.com/watch?v=LPUuuXbmiNU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=LPUuuXbmiNU</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=OQq7TA8CEh4" target="_blank" rel="noopener">#medusa  #greekmythology</a>
+      <div class="sub"><span class="date">2026-08-26T12:15:15Z</span><a class="url" href="https://www.youtube.com/watch?v=OQq7TA8CEh4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=OQq7TA8CEh4</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=w5tTZsC7o34" target="_blank" rel="noopener">Medusa Hunts The Warriors In Her Lair! 😱🐍 #ClashOfTheTitans</a>
+      <div class="sub"><span class="date">2026-08-26T11:23:10Z</span><a class="url" href="https://www.youtube.com/watch?v=w5tTZsC7o34" target="_blank" rel="noopener">https://www.youtube.com/watch?v=w5tTZsC7o34</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=1Fgl5GZoj-o" target="_blank" rel="noopener">medusa ve eros tasvirli lahit</a>
+      <div class="sub"><span class="date">2026-08-26T11:07:09Z</span><a class="url" href="https://www.youtube.com/watch?v=1Fgl5GZoj-o" target="_blank" rel="noopener">https://www.youtube.com/watch?v=1Fgl5GZoj-o</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=w8tR7xiCODU" target="_blank" rel="noopener">Who will you choose medusa and dragon or 1000 knights? #history #nostalgia #mythology</a>
+      <div class="sub"><span class="date">2026-08-26T10:58:50Z</span><a class="url" href="https://www.youtube.com/watch?v=w8tR7xiCODU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=w8tR7xiCODU</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=k9SOlUSu2dg" target="_blank" rel="noopener">Medusa’nın Gerçek Hikâyesi: Bir Canavar mıydı?</a>
+      <div class="sub"><span class="date">2026-08-26T10:30:09Z</span><a class="url" href="https://www.youtube.com/watch?v=k9SOlUSu2dg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=k9SOlUSu2dg</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=6-6z7d9ON9s" target="_blank" rel="noopener">Medusa&#x27;s Curse. 🐍🐈‍⬛ Dark Fantasy Cat Mythology #shorts</a>
+      <div class="sub"><span class="date">2026-08-26T10:17:21Z</span><a class="url" href="https://www.youtube.com/watch?v=6-6z7d9ON9s" target="_blank" rel="noopener">https://www.youtube.com/watch?v=6-6z7d9ON9s</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=t04xWSnrh5c" target="_blank" rel="noopener">メデューサ　タコ ハイパーシフテッドフェーズ3〜フェーズ4 #hypershifted #sprunki #スプランキー #incredibox #インクレディボックス</a>
+      <div class="sub"><span class="date">2026-08-26T09:33:37Z</span><a class="url" href="https://www.youtube.com/watch?v=t04xWSnrh5c" target="_blank" rel="noopener">https://www.youtube.com/watch?v=t04xWSnrh5c</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=4ilY1HnUACQ" target="_blank" rel="noopener">#Ancient Giant Medusa Head#Ancient #Medusa #Archaeology</a>
+      <div class="sub"><span class="date">2026-08-26T09:30:32Z</span><a class="url" href="https://www.youtube.com/watch?v=4ilY1HnUACQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=4ilY1HnUACQ</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=eBm0ZKXMNKw" target="_blank" rel="noopener">Medusa Was Never the Villain — She Was the Victim All Along</a>
+      <div class="sub"><span class="date">2026-08-26T08:31:12Z</span><a class="url" href="https://www.youtube.com/watch?v=eBm0ZKXMNKw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=eBm0ZKXMNKw</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=t0nfZ6yDcx0" target="_blank" rel="noopener">Medusa Was Never the Monster — Athena Was</a>
+      <div class="sub"><span class="date">2026-08-26T08:05:25Z</span><a class="url" href="https://www.youtube.com/watch?v=t0nfZ6yDcx0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=t0nfZ6yDcx0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=p6DXKpx7e9E" target="_blank" rel="noopener">I Wasn&#x27;t Supposed to Find Medusa</a>
+      <div class="sub"><span class="date">2026-08-26T08:00:37Z</span><a class="url" href="https://www.youtube.com/watch?v=p6DXKpx7e9E" target="_blank" rel="noopener">https://www.youtube.com/watch?v=p6DXKpx7e9E</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=beIaHhk1hoE" target="_blank" rel="noopener">Part 2 Medusa 🐍 | Perseus vs The Deadly Curse! 😱 #shorts  #viral #trending #youtubeshorts</a>
+      <div class="sub"><span class="date">2026-08-26T07:33:11Z</span><a class="url" href="https://www.youtube.com/watch?v=beIaHhk1hoE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=beIaHhk1hoE</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=ks0zKspVjF4" target="_blank" rel="noopener">La Medusa Inmortal  El Secreto de la Vida Eterna</a>
+      <div class="sub"><span class="date">2026-08-26T04:03:15Z</span><a class="url" href="https://www.youtube.com/watch?v=ks0zKspVjF4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ks0zKspVjF4</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=U1C6UZ9llxg" target="_blank" rel="noopener">The Medusa Assault Story Is Roman, Not Greek</a>
+      <div class="sub"><span class="date">2026-08-26T03:05:47Z</span><a class="url" href="https://www.youtube.com/watch?v=U1C6UZ9llxg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=U1C6UZ9llxg</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=T2cQIYu6vxE" target="_blank" rel="noopener">Medusa Was the Victim the Whole Time 🐍</a>
+      <div class="sub"><span class="date">2026-08-26T03:03:34Z</span><a class="url" href="https://www.youtube.com/watch?v=T2cQIYu6vxE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=T2cQIYu6vxE</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=POrf_7kqhf4" target="_blank" rel="noopener">Medusa was pregnant</a>
+      <div class="sub"><span class="date">2026-08-26T00:15:21Z</span><a class="url" href="https://www.youtube.com/watch?v=POrf_7kqhf4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=POrf_7kqhf4</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=bkanp6DgF24" target="_blank" rel="noopener">La única persona que intentó SALVAR a MEDUSA 🪨  #historia #medusa #shorts #shortvideo #elara #mitos</a>
+      <div class="sub"><span class="date">2026-08-26T00:00:02Z</span><a class="url" href="https://www.youtube.com/watch?v=bkanp6DgF24" target="_blank" rel="noopener">https://www.youtube.com/watch?v=bkanp6DgF24</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=zRXGODQTe_U" target="_blank" rel="noopener">PERSEO  El Héroe que Derrotó a Medusa | Mitología Griega</a>
+      <div class="sub"><span class="date">2026-08-26T00:00:17Z</span><a class="url" href="https://www.youtube.com/watch?v=zRXGODQTe_U" target="_blank" rel="noopener">https://www.youtube.com/watch?v=zRXGODQTe_U</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=ixchNv4EXTk" target="_blank" rel="noopener">Medusa | Dark ASMR  #asmrsounds #medusa #asmrshorts</a>
+      <div class="sub"><span class="date">2026-08-25T23:02:13Z</span><a class="url" href="https://www.youtube.com/watch?v=ixchNv4EXTk" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ixchNv4EXTk</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=129-f7lD2rQ" target="_blank" rel="noopener">【プリコネ】メデューサ物理参考4.63億（4段階目）目押し1</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:100.0%"></div></div><span class="figure">4.63億</span></div>
+      <div class="sub"><span class="date">2026-08-25T17:54:12Z</span><a class="url" href="https://www.youtube.com/watch?v=129-f7lD2rQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=129-f7lD2rQ</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=G-c3F0nms6w" target="_blank" rel="noopener">A verdade chocante sobre a origem de Medusa #mitologia #greciaantiga #shorts</a>
+      <div class="sub"><span class="date">2026-08-25T22:00:39Z</span><a class="url" href="https://www.youtube.com/watch?v=G-c3F0nms6w" target="_blank" rel="noopener">https://www.youtube.com/watch?v=G-c3F0nms6w</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=0OUfgtNM0Q8" target="_blank" rel="noopener">【プリコネR】8月クラバト 4段階目 簡単セミオート編成とフルオート編成紹介 2026年8月【マダムエレクトラ】【ミストシーカー】【バイオドーザー】【トライロッカー】【メデューサ】</a>
+      <div class="sub"><span class="date">2026-08-25T21:56:52Z</span><a class="url" href="https://www.youtube.com/watch?v=0OUfgtNM0Q8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=0OUfgtNM0Q8</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=UKCu4K8r1PE" target="_blank" rel="noopener">Medusa 🪼 #reels #shorts #fyp #music #festival #medusa #moments #travel #videos</a>
+      <div class="sub"><span class="date">2026-08-25T21:42:55Z</span><a class="url" href="https://www.youtube.com/watch?v=UKCu4K8r1PE" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UKCu4K8r1PE</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=PXAkbSeSRvs" target="_blank" rel="noopener">Artist tattooing Medusa portrait</a>
+      <div class="sub"><span class="date">2026-08-25T21:30:30Z</span><a class="url" href="https://www.youtube.com/watch?v=PXAkbSeSRvs" target="_blank" rel="noopener">https://www.youtube.com/watch?v=PXAkbSeSRvs</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Pn2Da2SNhl8" target="_blank" rel="noopener">Medusa But Make It Chocolate #shorts</a>
+      <div class="sub"><span class="date">2026-08-25T21:07:01Z</span><a class="url" href="https://www.youtube.com/watch?v=Pn2Da2SNhl8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Pn2Da2SNhl8</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=D0LHBKFXHi0" target="_blank" rel="noopener">Athena&#x27;s Darkest Act: Medusa&#x27;s Head as Her Weapon #athena #medusa #shorts</a>
+      <div class="sub"><span class="date">2026-08-25T21:00:14Z</span><a class="url" href="https://www.youtube.com/watch?v=D0LHBKFXHi0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=D0LHBKFXHi0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=HMYvykt3Klo" target="_blank" rel="noopener">sabes de la medusa? #curiosidades360 #mundocurioso #suscribete</a>
+      <div class="sub"><span class="date">2026-08-25T20:14:00Z</span><a class="url" href="https://www.youtube.com/watch?v=HMYvykt3Klo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=HMYvykt3Klo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=7IujU-VJjgU" target="_blank" rel="noopener">YOU CAN&#x27;T UNDERESTIMATE MEDUSA&#x27;S DAMAGE!</a>
+      <div class="sub"><span class="date">2026-08-25T20:00:03Z</span><a class="url" href="https://www.youtube.com/watch?v=7IujU-VJjgU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=7IujU-VJjgU</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=Owkp3pqlvyg" target="_blank" rel="noopener">Medusa Wasn&#x27;t the Monster — She Was the Victim</a>
+      <div class="sub"><span class="date">2026-08-25T19:23:19Z</span><a class="url" href="https://www.youtube.com/watch?v=Owkp3pqlvyg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Owkp3pqlvyg</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=yd9SmvOf0zA" target="_blank" rel="noopener">Medusa’s head to Petrify! 🗿 #scifi #shorts #movie #theodyssey</a>
+      <div class="sub"><span class="date">2026-08-25T18:00:07Z</span><a class="url" href="https://www.youtube.com/watch?v=yd9SmvOf0zA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=yd9SmvOf0zA</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=_ay-LfeZCF4" target="_blank" rel="noopener">Medusa Was Never the Monster — She Was the Victim All Along</a>
+      <div class="sub"><span class="date">2026-08-25T17:33:22Z</span><a class="url" href="https://www.youtube.com/watch?v=_ay-LfeZCF4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=_ay-LfeZCF4</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=qrMug3LMjY0" target="_blank" rel="noopener">Medusa Was Never the Monster — She Was the Victim All Along</a>
+      <div class="sub"><span class="date">2026-08-25T17:23:35Z</span><a class="url" href="https://www.youtube.com/watch?v=qrMug3LMjY0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=qrMug3LMjY0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=iihQcC40I5U" target="_blank" rel="noopener">The raft of the Medusa</a>
+      <div class="sub"><span class="date">2026-08-25T16:36:33Z</span><a class="url" href="https://www.youtube.com/watch?v=iihQcC40I5U" target="_blank" rel="noopener">https://www.youtube.com/watch?v=iihQcC40I5U</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=bHV4KfAapTI" target="_blank" rel="noopener">Medusa: From Curse to Feminist Icon #medusa #curse #feminism #greekmythology #shorts</a>
+      <div class="sub"><span class="date">2026-08-25T16:00:00Z</span><a class="url" href="https://www.youtube.com/watch?v=bHV4KfAapTI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=bHV4KfAapTI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=weS5tH-NVz0" target="_blank" rel="noopener">Medusa Was Never The Monster — The Gods Were</a>
+      <div class="sub"><span class="date">2026-08-25T15:13:27Z</span><a class="url" href="https://www.youtube.com/watch?v=weS5tH-NVz0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=weS5tH-NVz0</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=UbihdMoDaS8" target="_blank" rel="noopener">メデューサ　4.14億　tp10-5 おまかん</a>
+      <div class="dmg"><div class="track"><div class="fill" style="--w:89.4%"></div></div><span class="figure">4.14億</span></div>
+      <div class="sub"><span class="date">2026-08-25T13:18:54Z</span><a class="url" href="https://www.youtube.com/watch?v=UbihdMoDaS8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UbihdMoDaS8</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=FpzDXu-xK8k" target="_blank" rel="noopener">Athena&#x27;s Curse: Greek Mythology&#x27;s Divine Justice Explained #medusa #athena #greekmythology #shorts</a>
+      <div class="sub"><span class="date">2026-08-25T12:53:38Z</span><a class="url" href="https://www.youtube.com/watch?v=FpzDXu-xK8k" target="_blank" rel="noopener">https://www.youtube.com/watch?v=FpzDXu-xK8k</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=qDmn2VYVI9s" target="_blank" rel="noopener">What If Medusa Was a Giant Movie Puppet? 😱🐍 | Behind the Scene #shorts #makeascene #behindthescenes</a>
+      <div class="sub"><span class="date">2026-08-25T12:52:42Z</span><a class="url" href="https://www.youtube.com/watch?v=qDmn2VYVI9s" target="_blank" rel="noopener">https://www.youtube.com/watch?v=qDmn2VYVI9s</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=v4MB7w4FWnI" target="_blank" rel="noopener">Your Medusa piercing deserves an update. 👀</a>
+      <div class="sub"><span class="date">2026-08-24T20:35:48Z</span><a class="url" href="https://www.youtube.com/watch?v=v4MB7w4FWnI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=v4MB7w4FWnI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=3EImgFHRMSo" target="_blank" rel="noopener">Medusa Was Never the Monster — She Was the Victim</a>
+      <div class="sub"><span class="date">2026-08-24T20:00:00Z</span><a class="url" href="https://www.youtube.com/watch?v=3EImgFHRMSo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=3EImgFHRMSo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=nZlM-R3-4yc" target="_blank" rel="noopener">オマー ディープ・メデューサファンアニメーションフォートかつがり</a>
+      <div class="sub"><span class="date">2026-08-24T17:00:49Z</span><a class="url" href="https://www.youtube.com/watch?v=nZlM-R3-4yc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=nZlM-R3-4yc</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=FgPRxYfrpLw" target="_blank" rel="noopener">El barco que decide toda la historia de La Medusa.</a>
+      <div class="sub"><span class="date">2026-08-24T17:00:21Z</span><a class="url" href="https://www.youtube.com/watch?v=FgPRxYfrpLw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=FgPRxYfrpLw</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=VZaeMKMZHEo" target="_blank" rel="noopener">Ovid&#x27;s Medusa: The Tragic Truth Behind Snakes #ovid #medusa #metamorphosis #shorts</a>
+      <div class="sub"><span class="date">2026-08-24T16:00:10Z</span><a class="url" href="https://www.youtube.com/watch?v=VZaeMKMZHEo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=VZaeMKMZHEo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=DwzFkEFCF-E" target="_blank" rel="noopener">Medusa&#x27;s Curse: Athena&#x27;s Cruelty or Greek Culture? #medusa #athena #greekmythology #shorts</a>
+      <div class="sub"><span class="date">2026-08-24T12:05:47Z</span><a class="url" href="https://www.youtube.com/watch?v=DwzFkEFCF-E" target="_blank" rel="noopener">https://www.youtube.com/watch?v=DwzFkEFCF-E</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=AhoHCPf6JMo" target="_blank" rel="noopener">오컬트적 메두사 그림의 의미 #장델빌</a>
+      <div class="sub"><span class="date">2026-08-24T09:00:11Z</span><a class="url" href="https://www.youtube.com/watch?v=AhoHCPf6JMo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=AhoHCPf6JMo</a></div>
+    </li>
+    <li>
+      <a class="title" href="https://www.youtube.com/watch?v=Ebw5ErtXvK0" target="_blank" rel="noopener">【プリンセスコネクトRe:dive】メデューサ　目押しなし　火物理#プリコネ#クラバト#メデューサ</a>
+      <div class="sub"><span class="date">2026-08-24T07:27:19Z</span><a class="url" href="https://www.youtube.com/watch?v=Ebw5ErtXvK0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Ebw5ErtXvK0</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=lTsNlMCpGfI" target="_blank" rel="noopener">４０体のファイアワークスギャング vs ４０体のメデューサン バトルキャッツ、スター5000 にゃんこ大戦争 UBERS BOSS BATTLECATS STAR 5000</a>
+      <div class="sub"><span class="date">2026-08-24T00:00:11Z</span><a class="url" href="https://www.youtube.com/watch?v=lTsNlMCpGfI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=lTsNlMCpGfI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=ZgYq6LWp_0c" target="_blank" rel="noopener">Rangda vs Medusa - Part 2</a>
+      <div class="sub"><span class="date">2026-08-24T00:00:32Z</span><a class="url" href="https://www.youtube.com/watch?v=ZgYq6LWp_0c" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ZgYq6LWp_0c</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=OYBBFjn0udI" target="_blank" rel="noopener">Sculpting Medusa using clay #sculpture</a>
+      <div class="sub"><span class="date">2026-08-22T18:42:08Z</span><a class="url" href="https://www.youtube.com/watch?v=OYBBFjn0udI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=OYBBFjn0udI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=C0p14zMtrNw" target="_blank" rel="noopener">Medusa Was the Victim All Along &amp; Nobody Talks About It</a>
+      <div class="sub"><span class="date">2026-08-22T09:06:02Z</span><a class="url" href="https://www.youtube.com/watch?v=C0p14zMtrNw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=C0p14zMtrNw</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=LoFBlHjKPRw" target="_blank" rel="noopener">Why Perseus Really Chose Medusa (Not the Scarier Gorgons)</a>
+      <div class="sub"><span class="date">2026-08-21T22:00:37Z</span><a class="url" href="https://www.youtube.com/watch?v=LoFBlHjKPRw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=LoFBlHjKPRw</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=sEnFXByxElI" target="_blank" rel="noopener">MEDUSAS PANIC ATTACK #panicattack #medusa #greekmythology #contentcreator #dancingwiththestars</a>
+      <div class="sub"><span class="date">2026-08-21T20:11:45Z</span><a class="url" href="https://www.youtube.com/watch?v=sEnFXByxElI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=sEnFXByxElI</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=EHJ-23AXeWo" target="_blank" rel="noopener">🔥 “Medusa Was Never Just a Monster… The Real Story Will Change How You See Her” #medusa</a>
+      <div class="sub"><span class="date">2026-08-21T18:55:02Z</span><a class="url" href="https://www.youtube.com/watch?v=EHJ-23AXeWo" target="_blank" rel="noopener">https://www.youtube.com/watch?v=EHJ-23AXeWo</a></div>
+    </li>
+    <li class="off">
+      <a class="title" href="https://www.youtube.com/watch?v=h--3l_2vkIQ" target="_blank" rel="noopener">WHY Did Caravaggio Paint Medusa on a SHIELD? #art #painting #mythology</a>
+      <div class="sub"><span class="date">2026-08-21T17:49:22Z</span><a class="url" href="https://www.youtube.com/watch?v=h--3l_2vkIQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=h--3l_2vkIQ</a></div>
+    </li>
+  </ol>
+  <p class="empty">この検索結果にプリコネ関連の動画はありません。</p>
+</section>
+<footer>
+  ダメージバーはタイトル内の数値（万・億表記）を各ボス内の最大値で正規化したものです。数値の記載がない動画にはバーを表示していません。<br>
+  件数はボス名ごとの検索結果の延べ数で、複数のボス名を含む動画は複数のセクションに現れます。<br>
+  薄く表示されているのが同名の他ゲーム・作品などの動画です。「メデューサ」の検索結果は入れ替わりが激しく、今回の新規70件のうち55件がこれでした（同時に60件が前回分から消えています）。<br>
+  7月版にあった属性バッジ（水・闇など）は、8月のボスの属性を確認できていないため付けていません。
+</footer>
+
+</div>
+<script>
+  var cb = document.getElementById('pf');
+  function apply(){
+    document.body.classList.toggle('only-priconne', cb.checked);
+    document.querySelectorAll('section').forEach(function(s){
+      var visible = s.querySelectorAll('li:not(.off)').length;
+      s.classList.toggle('blank', visible === 0);
+    });
+  }
+  cb.addEventListener('change', apply);
+  apply();
+</script>
+</body>
+</html>
