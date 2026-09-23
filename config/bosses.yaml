@@ -1,16 +1,17 @@
 # 対象月（YYYY-MM）。この値と実行時の月が一致しない場合は起動時に警告する
 # ※ 毎月、運用者がボス名とエイリアスを書き換えること。
-#    エイリアスを実装者が推測で追加してはならない（CLAUDE.md / docs/spec/03 参照）
-month: "2026-08"
+#    エイリアスを実装者が推測で追加してはならない（AGENTS.md / docs/spec/05-configuration.md 参照）
+# 出典: https://priconne-redive.jp/news/event/37700/
+month: "2026-09"
 
 bosses:
   - index: 1
-    name: "マダムエレクトラ"
+    name: "フロストハウンド"
   - index: 2
-    name: "ミストシーカー"
+    name: "ランドスロース"
   - index: 3
-    name: "バイオドーザー"
+    name: "ジャッカルシーフ"
   - index: 4
-    name: "トライロッカー"
+    name: "ダークガーゴイル"
   - index: 5
-    name: "メデューサ"
+    name: "グラットン"

@@ -2,7 +2,7 @@
 
 プリンセスコネクト!Re:Dive のクランバトル期間中、YouTube に投稿されるボス攻略動画を自動収集し、Discord へ投稿する Bot。
 
-仕様の正は [`docs/spec/`](docs/spec/README.md)（[インデックス](docs/spec/README.md)）。進捗は [`docs/roadmap.md`](docs/roadmap.md)。
+文書全体の入口は [ドキュメント案内](docs/README.md)。仕様の正は [仕様書](docs/spec/README.md)、作業状況は [進捗](docs/roadmap.md)、エージェント共通の指示は [AGENTS.md](AGENTS.md) を参照してください。
 
 ## セットアップ
 
@@ -17,14 +17,14 @@ cp .env.example .env      # DISCORD_BOT_TOKEN / YOUTUBE_API_KEY を記入
 | ファイル | 項目 |
 |---|---|
 | `.env` | `DISCORD_BOT_TOKEN` / `YOUTUBE_API_KEY`（`LOG_LEVEL` は任意、既定 INFO） |
-| `config/config.yaml` | `discord.boss_channels` と `discord.fallback_channel_id`（サンプル値のまま） |
+| `config/config.yaml` | `discord.boss_channels` と `discord.fallback_channel_id`（運用するチャンネルの ID） |
 | `config/bosses.yaml` | 今月のボス構成。**毎月書き換える** |
 
 **投稿先チャンネルは Discord 側であらかじめ作成してください。**Bot はチャンネルもスレッドも作りません。
 ボスごとの5本と、ボスを特定できなかった動画を流す fallback の計6本を用意し、その ID を
 `config.yaml` に書きます。一部のボスを省略した場合、その分は fallback へ流れます。
 
-`bosses.yaml` のエイリアスはボス判定の唯一の正です。実装者・Claude が推測で追加してはいけません。
+`bosses.yaml` のエイリアスはボス判定の唯一の正です。実装者・AI エージェント が推測で追加してはいけません。
 
 ## 起動
 
@@ -98,7 +98,7 @@ src/priconne_cb_collector/
 ## テスト
 
 ```bash
-.venv/bin/python -m pytest        # 54件
+.venv/bin/python -m pytest
 .venv/bin/ruff check .
 .venv/bin/ruff format --check .
 ```

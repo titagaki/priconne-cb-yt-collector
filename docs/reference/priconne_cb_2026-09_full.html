@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>プリコネR クランバトル 2026年9月 — 検索結果（取得分）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0E0B18; --line:rgba(255,255,255,.10);
+    --text:#EDE9FB; --text-dim:#9A93C4;
+    --b1:#38BDF8; --b2:#818CF8; --b3:#C084FC; --b4:#34D399; --b5:#FB923C;
+    --jp:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    --num:"Saira Condensed","Zen Kaku Gothic New",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 520px at 12% -8%, #2A1F5C 0%, transparent 62%),
+      radial-gradient(800px 400px at 96% 4%, #3A1A47 0%, transparent 58%),
+      var(--ink);
+    color:var(--text); font-family:var(--jp); line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 96px}
+
+  header{padding:64px 0 28px}
+  .eyebrow{font-family:var(--num);font-size:14px;letter-spacing:.34em;text-transform:uppercase;color:var(--text-dim);margin:0 0 10px}
+  h1{margin:0;font-weight:700;font-size:clamp(30px,5.2vw,52px);letter-spacing:-.01em;line-height:1.18}
+  h1 .month{font-family:var(--num);font-size:1.06em;font-weight:700;
+    background:linear-gradient(92deg,var(--b1),var(--b3) 48%,var(--b5));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .meta{margin:18px 0 0;color:var(--text-dim);font-size:14px;display:flex;flex-wrap:wrap;gap:8px 22px;align-items:center}
+  .cmd{font-family:var(--num);font-size:15px;color:var(--text);background:rgba(255,255,255,.055);
+    border:1px solid var(--line);border-radius:6px;padding:2px 10px}
+
+  /* filter */
+  .filter{margin-top:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .switch{display:inline-flex;align-items:center;gap:11px;cursor:pointer;user-select:none;
+    border:1px solid var(--line);border-radius:999px;padding:8px 16px 8px 12px;background:rgba(255,255,255,.04)}
+  .switch input{position:absolute;opacity:0;width:0;height:0}
+  .knob{width:38px;height:21px;border-radius:999px;background:rgba(255,255,255,.14);position:relative;transition:background .2s}
+  .knob::after{content:"";position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;
+    background:var(--text);transition:transform .2s}
+  .switch input:checked + .knob{background:var(--b3)}
+  .switch input:checked + .knob::after{transform:translateX(17px)}
+  .switch input:focus-visible + .knob{outline:2px solid var(--b3);outline-offset:3px}
+  .switch span{font-size:14px}
+  .filter .note{font-size:13px;color:var(--text-dim)}
+
+  nav{position:sticky;top:0;z-index:20;margin:26px 0 0;padding:12px 0;
+    background:rgba(14,11,24,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .navrow{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none}
+  .navrow::-webkit-scrollbar{display:none}
+  .navrow a{flex:0 0 auto;display:flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--text-dim);
+    border:1px solid var(--line);border-radius:999px;padding:7px 15px 7px 11px;font-size:14px;white-space:nowrap;
+    transition:color .18s,border-color .18s,background .18s}
+  .navrow a .n{font-family:var(--num);font-weight:700;font-size:15px;color:var(--c)}
+  .navrow a:hover,.navrow a:focus-visible{color:var(--text);border-color:var(--c);background:rgba(255,255,255,.04)}
+
+  section{padding-top:62px;scroll-margin-top:70px}
+  .bosshead{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .bossno{font-family:var(--num);font-weight:700;font-size:44px;line-height:1;color:var(--c)}
+  .bossname{font-size:26px;font-weight:700;margin:0}
+  .element{font-family:var(--num);font-size:13px;letter-spacing:.2em;color:var(--c);
+    border:1px solid var(--c);border-radius:4px;padding:1px 8px;opacity:.85}
+  .count{margin-left:auto;font-family:var(--num);font-size:15px;color:var(--text-dim);letter-spacing:.06em}
+  .count b{color:var(--c);font-weight:700}
+
+  ol{list-style:none;margin:0;padding:0}
+  li{position:relative;border-bottom:1px solid var(--line);padding:20px 0 18px 18px}
+  li::before{content:"";position:absolute;left:0;top:20px;bottom:18px;width:2px;background:var(--c);
+    opacity:.28;border-radius:2px;transition:opacity .18s}
+  li:hover::before{opacity:1}
+  li.off{opacity:.4}
+  li.off::before{background:var(--text-dim);opacity:.2}
+  li.off:hover{opacity:.75}
+  .title{display:block;color:var(--text);text-decoration:none;font-size:16px;font-weight:500;text-underline-offset:3px}
+  .title:hover,.title:focus-visible{text-decoration:underline;text-decoration-color:var(--c)}
+  .sub{margin-top:9px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;
+    font-family:var(--num);font-size:14px;color:var(--text-dim);letter-spacing:.03em}
+  .date{font-variant-numeric:tabular-nums}
+  .carry{color:var(--text);border:1px solid var(--line);border-radius:4px;padding:0 7px}
+  .url{color:var(--text-dim);text-decoration:none;overflow-wrap:anywhere}
+  .url:hover,.url:focus-visible{color:var(--c);text-decoration:underline}
+
+  .dmg{margin-top:12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;max-width:560px}
+  .track{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+  .fill{height:100%;width:var(--w);border-radius:3px;
+    background:linear-gradient(90deg,color-mix(in srgb,var(--c) 45%,transparent),var(--c));
+    transform-origin:left;animation:grow .7s cubic-bezier(.2,.8,.25,1) both}
+  @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .figure{font-family:var(--num);font-weight:700;font-size:19px;color:var(--c);line-height:1}
+
+  .empty{display:none;color:var(--text-dim);font-size:14px;padding:22px 0}
+  body.only-priconne li.off{display:none}
+  body.only-priconne section.blank .empty{display:block}
+
+  footer{margin-top:76px;padding-top:22px;border-top:1px solid var(--line);color:var(--text-dim);font-size:13px}
+  a:focus-visible{outline:2px solid var(--c,var(--b3));outline-offset:3px;border-radius:3px}
+
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.fill{animation:none}}
+  @media (max-width:560px){.bossno{font-size:34px}.bossname{font-size:21px}.count{width:100%;margin-left:0}}
+</style>
+</head>
+
+<body class="only-priconne"><div class="wrap">
+<header>
+<p class="eyebrow">priconne-cb-yt-collector</p>
+<h1>クランバトル 攻略動画<br><span class="month">2026 / 09</span></h1>
+<p class="meta"><span class="cmd">search.list q=ボス名 × 5（各最大3ページ）</span><span>取得日時 2026-09-23 12:33 JST</span><span>プリコネ関連（暫定）33 件 / 全 41 件</span></p>
+<p class="meta">検索対象：2026-09-01 00:00 JST 以降。各ボス1ページで終了（次ページなし）。9月途中の取得結果で、全動画の網羅を保証するものではありません。</p>
+<div class="filter"><label class="switch"><input type="checkbox" id="pf" checked><span class="knob"></span><span>プリコネ関連のみ表示（暫定）</span></label><span class="note">オフにすると同名の他作品・企業なども表示します。</span></div>
+</header><nav><div class="navrow">
+<a href="#boss1" style="--c:var(--b1)"><span class="n">1</span>フロストハウンド</a>
+<a href="#boss2" style="--c:var(--b2)"><span class="n">2</span>ランドスロース</a>
+<a href="#boss3" style="--c:var(--b3)"><span class="n">3</span>ジャッカルシーフ</a>
+<a href="#boss4" style="--c:var(--b4)"><span class="n">4</span>ダークガーゴイル</a>
+<a href="#boss5" style="--c:var(--b5)"><span class="n">5</span>グラットン</a>
+</div></nav>
+<section id="boss1" style="--c:var(--b1)"><div class="bosshead"><span class="bossno">01</span><h2 class="bossname">フロストハウンド</h2><span class="count"><b>2</b> / 2 件</span></div><ol>
+<li data-video-id="d0QEAMy7mkc"><a class="title" href="https://www.youtube.com/watch?v=d0QEAMy7mkc" target="_blank" rel="noopener">【プリコネR】クランバトル　フロストハウンド　２．８億【光物】【フルオート】</a><div class="sub"><time class="date" datetime="2026-09-22T17:04:04Z">2026-09-23 02:04 JST</time><span>taki2 taki</span><a class="url" href="https://www.youtube.com/watch?v=d0QEAMy7mkc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=d0QEAMy7mkc</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:100.00%"></div></div><span class="figure">2.8億</span></div>
+</li>
+<li data-video-id="FyHekzgHFw0"><a class="title" href="https://www.youtube.com/watch?v=FyHekzgHFw0" target="_blank" rel="noopener">【プリコネR】4段階目 フロストハウンド 9757万 28s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T04:24:28Z">2026-09-22 13:24 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=FyHekzgHFw0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=FyHekzgHFw0</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:34.85%"></div></div><span class="figure">9757万</span></div>
+</li>
+</ol><p class="empty">この検索結果にプリコネ関連の動画はありません。</p></section>
+<section id="boss2" style="--c:var(--b2)"><div class="bosshead"><span class="bossno">02</span><h2 class="bossname">ランドスロース</h2><span class="count"><b>7</b> / 7 件</span></div><ol>
+<li data-video-id="ZRHi9d5mFPQ"><a class="title" href="https://www.youtube.com/watch?v=ZRHi9d5mFPQ" target="_blank" rel="noopener">【プリコネR】クランバトル　ランドスロース　２．９億【水物】【フルオート】</a><div class="sub"><time class="date" datetime="2026-09-22T23:32:16Z">2026-09-23 08:32 JST</time><span>taki2 taki</span><a class="url" href="https://www.youtube.com/watch?v=ZRHi9d5mFPQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=ZRHi9d5mFPQ</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:100.00%"></div></div><span class="figure">2.9億</span></div>
+</li>
+<li data-video-id="zEdnPqrEcg0"><a class="title" href="https://www.youtube.com/watch?v=zEdnPqrEcg0" target="_blank" rel="noopener">【プリコネR】【目押しなし】4段階目 ランドスロース 21927万 47s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T16:45:24Z">2026-09-23 01:45 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=zEdnPqrEcg0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=zEdnPqrEcg0</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:75.61%"></div></div><span class="figure">21927万</span></div>
+</li>
+<li data-video-id="nSCCVK0WVTM"><a class="title" href="https://www.youtube.com/watch?v=nSCCVK0WVTM" target="_blank" rel="noopener">【プリコネR】4段階目 ランドスロース 22344万 47s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T14:10:07Z">2026-09-22 23:10 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=nSCCVK0WVTM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=nSCCVK0WVTM</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:77.05%"></div></div><span class="figure">22344万</span></div>
+</li>
+<li data-video-id="EISTJM-0OhQ"><a class="title" href="https://www.youtube.com/watch?v=EISTJM-0OhQ" target="_blank" rel="noopener">プリコネ クラバト 2026年9月 2段階目 1～3ボス共通 物理消滅編成(フロストハウンドは属性無視)(ハロマツ、カノリ、リベノゾ、星6ミツキ(SP)、ニュツキ)</a><div class="sub"><time class="date" datetime="2026-09-22T08:29:38Z">2026-09-22 17:29 JST</time><span>MasDai</span><a class="url" href="https://www.youtube.com/watch?v=EISTJM-0OhQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=EISTJM-0OhQ</a></div>
+</li>
+<li data-video-id="FTcyJJy0fC4"><a class="title" href="https://www.youtube.com/watch?v=FTcyJJy0fC4" target="_blank" rel="noopener">【プリコネR】4段階 ランドスロース 20496万 53s</a><div class="sub"><time class="date" datetime="2026-09-22T08:11:57Z">2026-09-22 17:11 JST</time><span>芽須夏希</span><a class="url" href="https://www.youtube.com/watch?v=FTcyJJy0fC4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=FTcyJJy0fC4</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:70.68%"></div></div><span class="figure">20496万</span></div>
+</li>
+<li data-video-id="gAAXavQOoBY"><a class="title" href="https://www.youtube.com/watch?v=gAAXavQOoBY" target="_blank" rel="noopener">【プリコネR】4段階 ランドスロース 16188万 43s</a><div class="sub"><time class="date" datetime="2026-09-22T07:53:13Z">2026-09-22 16:53 JST</time><span>芽須夏希</span><a class="url" href="https://www.youtube.com/watch?v=gAAXavQOoBY" target="_blank" rel="noopener">https://www.youtube.com/watch?v=gAAXavQOoBY</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:55.82%"></div></div><span class="figure">16188万</span></div>
+</li>
+<li data-video-id="YAcdfUyp5QM"><a class="title" href="https://www.youtube.com/watch?v=YAcdfUyp5QM" target="_blank" rel="noopener">【プリコネR】4段階目 ランドスロース 9631万 30s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T06:47:48Z">2026-09-22 15:47 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=YAcdfUyp5QM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=YAcdfUyp5QM</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:33.21%"></div></div><span class="figure">9631万</span></div>
+</li>
+</ol><p class="empty">この検索結果にプリコネ関連の動画はありません。</p></section>
+<section id="boss3" style="--c:var(--b3)"><div class="bosshead"><span class="bossno">03</span><h2 class="bossname">ジャッカルシーフ</h2><span class="count"><b>9</b> / 9 件</span></div><ol>
+<li data-video-id="g8rklt6Le-k"><a class="title" href="https://www.youtube.com/watch?v=g8rklt6Le-k" target="_blank" rel="noopener">ジャッカルシーフ 49264 強いと54800 m0.5</a><div class="sub"><time class="date" datetime="2026-09-23T01:36:13Z">2026-09-23 10:36 JST</time><span>あじ</span><a class="url" href="https://www.youtube.com/watch?v=g8rklt6Le-k" target="_blank" rel="noopener">https://www.youtube.com/watch?v=g8rklt6Le-k</a></div>
+</li>
+<li data-video-id="p6_JztrDh7U"><a class="title" href="https://www.youtube.com/watch?v=p6_JztrDh7U" target="_blank" rel="noopener">【プリコネ】ジャッカルシーフ4段階目5億6083万【2026年9月クランバトル】</a><div class="sub"><time class="date" datetime="2026-09-23T01:12:56Z">2026-09-23 10:12 JST</time><span>noppon (のっぽん)</span><a class="url" href="https://www.youtube.com/watch?v=p6_JztrDh7U" target="_blank" rel="noopener">https://www.youtube.com/watch?v=p6_JztrDh7U</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:100.00%"></div></div><span class="figure">5億6083万</span></div>
+</li>
+<li data-video-id="3TVBtw9i4cU"><a class="title" href="https://www.youtube.com/watch?v=3TVBtw9i4cU" target="_blank" rel="noopener">【プリコネR】クランバトル　ジャッカルシーフ　３．６億【火物】【フルオート】</a><div class="sub"><time class="date" datetime="2026-09-22T23:39:27Z">2026-09-23 08:39 JST</time><span>taki2 taki</span><a class="url" href="https://www.youtube.com/watch?v=3TVBtw9i4cU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=3TVBtw9i4cU</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:64.19%"></div></div><span class="figure">3.6億</span></div>
+</li>
+<li data-video-id="320k3OWJ3dI"><a class="title" href="https://www.youtube.com/watch?v=320k3OWJ3dI" target="_blank" rel="noopener">【プリコネR】4段階 ジャッカルシーフ 17596万 45s</a><div class="sub"><time class="date" datetime="2026-09-22T23:11:35Z">2026-09-23 08:11 JST</time><span>芽須夏希</span><a class="url" href="https://www.youtube.com/watch?v=320k3OWJ3dI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=320k3OWJ3dI</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:31.37%"></div></div><span class="figure">17596万</span></div>
+</li>
+<li data-video-id="OnJXZExbTlw"><a class="title" href="https://www.youtube.com/watch?v=OnJXZExbTlw" target="_blank" rel="noopener">【プリコネR】4段階目 ジャッカルシーフ 9620万 25s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T19:56:43Z">2026-09-23 04:56 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=OnJXZExbTlw" target="_blank" rel="noopener">https://www.youtube.com/watch?v=OnJXZExbTlw</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:17.15%"></div></div><span class="figure">9620万</span></div>
+</li>
+<li data-video-id="HY0_ZHwpgd4"><a class="title" href="https://www.youtube.com/watch?v=HY0_ZHwpgd4" target="_blank" rel="noopener">【プリコネR】4段階目 ジャッカルシーフ 8779万 25s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T18:23:33Z">2026-09-23 03:23 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=HY0_ZHwpgd4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=HY0_ZHwpgd4</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:15.65%"></div></div><span class="figure">8779万</span></div>
+</li>
+<li data-video-id="EISTJM-0OhQ"><a class="title" href="https://www.youtube.com/watch?v=EISTJM-0OhQ" target="_blank" rel="noopener">プリコネ クラバト 2026年9月 2段階目 1～3ボス共通 物理消滅編成(フロストハウンドは属性無視)(ハロマツ、カノリ、リベノゾ、星6ミツキ(SP)、ニュツキ)</a><div class="sub"><time class="date" datetime="2026-09-22T08:29:38Z">2026-09-22 17:29 JST</time><span>MasDai</span><a class="url" href="https://www.youtube.com/watch?v=EISTJM-0OhQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=EISTJM-0OhQ</a></div>
+</li>
+<li data-video-id="dJdpDOdvAcg"><a class="title" href="https://www.youtube.com/watch?v=dJdpDOdvAcg" target="_blank" rel="noopener">【プリコネR】4段階目 ジャッカルシーフ 8119万 24s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T07:50:22Z">2026-09-22 16:50 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=dJdpDOdvAcg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=dJdpDOdvAcg</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:14.48%"></div></div><span class="figure">8119万</span></div>
+</li>
+<li data-video-id="DFvP23ZCFAc"><a class="title" href="https://www.youtube.com/watch?v=DFvP23ZCFAc" target="_blank" rel="noopener">【プリコネR】4段階 ジャッカルシーフ 17393万 46s</a><div class="sub"><time class="date" datetime="2026-09-22T06:06:40Z">2026-09-22 15:06 JST</time><span>芽須夏希</span><a class="url" href="https://www.youtube.com/watch?v=DFvP23ZCFAc" target="_blank" rel="noopener">https://www.youtube.com/watch?v=DFvP23ZCFAc</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:31.01%"></div></div><span class="figure">17393万</span></div>
+</li>
+</ol><p class="empty">この検索結果にプリコネ関連の動画はありません。</p></section>
+<section id="boss4" style="--c:var(--b4)"><div class="bosshead"><span class="bossno">04</span><h2 class="bossname">ダークガーゴイル</h2><span class="count"><b>4</b> / 4 件</span></div><ol>
+<li data-video-id="Zqm_XHBR3m0"><a class="title" href="https://www.youtube.com/watch?v=Zqm_XHBR3m0" target="_blank" rel="noopener">ダークガーゴイル 46097 m0</a><div class="sub"><time class="date" datetime="2026-09-23T02:34:52Z">2026-09-23 11:34 JST</time><span>あじ</span><a class="url" href="https://www.youtube.com/watch?v=Zqm_XHBR3m0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Zqm_XHBR3m0</a></div>
+</li>
+<li data-video-id="UhX4G6k8Fp0"><a class="title" href="https://www.youtube.com/watch?v=UhX4G6k8Fp0" target="_blank" rel="noopener">【プリコネR】クランバトル　ダークガーゴイル　３．５億【光物】【フルオート】</a><div class="sub"><time class="date" datetime="2026-09-22T23:46:39Z">2026-09-23 08:46 JST</time><span>taki2 taki</span><a class="url" href="https://www.youtube.com/watch?v=UhX4G6k8Fp0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UhX4G6k8Fp0</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:100.00%"></div></div><span class="figure">3.5億</span></div>
+</li>
+<li data-video-id="sx9v2x_EiMI"><a class="title" href="https://www.youtube.com/watch?v=sx9v2x_EiMI" target="_blank" rel="noopener">【プリコネR】4段階 ダークガーゴイル 22322万 54s</a><div class="sub"><time class="date" datetime="2026-09-22T23:11:17Z">2026-09-23 08:11 JST</time><span>芽須夏希</span><a class="url" href="https://www.youtube.com/watch?v=sx9v2x_EiMI" target="_blank" rel="noopener">https://www.youtube.com/watch?v=sx9v2x_EiMI</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:63.78%"></div></div><span class="figure">22322万</span></div>
+</li>
+<li data-video-id="7HtUtWZQDAk"><a class="title" href="https://www.youtube.com/watch?v=7HtUtWZQDAk" target="_blank" rel="noopener">【プリコネR】4段階目 ダークガーゴイル 9084万 27s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T08:35:47Z">2026-09-22 17:35 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=7HtUtWZQDAk" target="_blank" rel="noopener">https://www.youtube.com/watch?v=7HtUtWZQDAk</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:25.95%"></div></div><span class="figure">9084万</span></div>
+</li>
+</ol><p class="empty">この検索結果にプリコネ関連の動画はありません。</p></section>
+<section id="boss5" style="--c:var(--b5)"><div class="bosshead"><span class="bossno">05</span><h2 class="bossname">グラットン</h2><span class="count"><b>11</b> / 19 件</span></div><ol>
+<li data-video-id="r0AU9-h9Zy0"><a class="title" href="https://www.youtube.com/watch?v=r0AU9-h9Zy0" target="_blank" rel="noopener">【プリコネR】クランバトル　グラットン　２．７億【水物】【フルオート】</a><div class="sub"><time class="date" datetime="2026-09-22T23:52:19Z">2026-09-23 08:52 JST</time><span>taki2 taki</span><a class="url" href="https://www.youtube.com/watch?v=r0AU9-h9Zy0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=r0AU9-h9Zy0</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:48.82%"></div></div><span class="figure">2.7億</span></div>
+</li>
+<li data-video-id="UJMn8Ehtu5o"><a class="title" href="https://www.youtube.com/watch?v=UJMn8Ehtu5o" target="_blank" rel="noopener">【プリコネ】グラットン物理参考5.53億（4段階目）目押し0-1</a><div class="sub"><time class="date" datetime="2026-09-22T16:10:17Z">2026-09-23 01:10 JST</time><span>たつきちゃん</span><a class="url" href="https://www.youtube.com/watch?v=UJMn8Ehtu5o" target="_blank" rel="noopener">https://www.youtube.com/watch?v=UJMn8Ehtu5o</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:100.00%"></div></div><span class="figure">5.53億</span></div>
+</li>
+<li data-video-id="W-vRzAKCGAQ"><a class="title" href="https://www.youtube.com/watch?v=W-vRzAKCGAQ" target="_blank" rel="noopener">【プリコネR】4段階目グラットン　物理（水）5億3100万【9月クランバトル】</a><div class="sub"><time class="date" datetime="2026-09-22T14:04:30Z">2026-09-22 23:04 JST</time><span>さんだ</span><a class="url" href="https://www.youtube.com/watch?v=W-vRzAKCGAQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=W-vRzAKCGAQ</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:96.02%"></div></div><span class="figure">5億3100万</span></div>
+</li>
+<li data-video-id="Gdu8zJnUznU"><a class="title" href="https://www.youtube.com/watch?v=Gdu8zJnUznU" target="_blank" rel="noopener">【プリコネR】4段階目 グラットン 11058万 30s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T11:08:36Z">2026-09-22 20:08 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=Gdu8zJnUznU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Gdu8zJnUznU</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:20.00%"></div></div><span class="figure">11058万</span></div>
+</li>
+<li data-video-id="kE-igC-qxjA"><a class="title" href="https://www.youtube.com/watch?v=kE-igC-qxjA" target="_blank" rel="noopener">【プリコネR】 4段階目　グラットン　4.85億　目押しなし</a><div class="sub"><time class="date" datetime="2026-09-22T10:31:50Z">2026-09-22 19:31 JST</time><span>バリスタ</span><a class="url" href="https://www.youtube.com/watch?v=kE-igC-qxjA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=kE-igC-qxjA</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:87.70%"></div></div><span class="figure">4.85億</span></div>
+</li>
+<li data-video-id="Lhx46MKrgz4"><a class="title" href="https://www.youtube.com/watch?v=Lhx46MKrgz4" target="_blank" rel="noopener">【プリコネR】4段階目 グラットン 5101万 21s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T10:18:48Z">2026-09-22 19:18 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=Lhx46MKrgz4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Lhx46MKrgz4</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:9.22%"></div></div><span class="figure">5101万</span></div>
+</li>
+<li data-video-id="tMgffzxR4kA"><a class="title" href="https://www.youtube.com/watch?v=tMgffzxR4kA" target="_blank" rel="noopener">【プリコネR】4段階目 グラットン 9669万 30s持ち越し編成【9月クランバトル】【クラバト】</a><div class="sub"><time class="date" datetime="2026-09-22T09:29:45Z">2026-09-22 18:29 JST</time><span>ネブソク</span><a class="url" href="https://www.youtube.com/watch?v=tMgffzxR4kA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=tMgffzxR4kA</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:17.48%"></div></div><span class="figure">9669万</span></div>
+</li>
+<li data-video-id="MPdLJ1Qlb1c"><a class="title" href="https://www.youtube.com/watch?v=MPdLJ1Qlb1c" target="_blank" rel="noopener">【プリコネ】グラットン物理参考5.33億（4段階目）目押し0</a><div class="sub"><time class="date" datetime="2026-09-22T09:15:18Z">2026-09-22 18:15 JST</time><span>たつきちゃん</span><a class="url" href="https://www.youtube.com/watch?v=MPdLJ1Qlb1c" target="_blank" rel="noopener">https://www.youtube.com/watch?v=MPdLJ1Qlb1c</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:96.38%"></div></div><span class="figure">5.33億</span></div>
+</li>
+<li data-video-id="PkVd7bZlA3M"><a class="title" href="https://www.youtube.com/watch?v=PkVd7bZlA3M" target="_blank" rel="noopener">【プリコネR】（更新版概要欄から）4段階目グラットン　物理（水）4億8600万【9月クランバトル】</a><div class="sub"><time class="date" datetime="2026-09-22T06:31:08Z">2026-09-22 15:31 JST</time><span>さんだ</span><a class="url" href="https://www.youtube.com/watch?v=PkVd7bZlA3M" target="_blank" rel="noopener">https://www.youtube.com/watch?v=PkVd7bZlA3M</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:87.88%"></div></div><span class="figure">4億8600万</span></div>
+</li>
+<li data-video-id="vpNO2tQc1as"><a class="title" href="https://www.youtube.com/watch?v=vpNO2tQc1as" target="_blank" rel="noopener">グラットン 持ち越し 30s8400/51s13700ぐらい</a><div class="sub"><time class="date" datetime="2026-09-22T05:00:42Z">2026-09-22 14:00 JST</time><span>どんどこどん</span><a class="url" href="https://www.youtube.com/watch?v=vpNO2tQc1as" target="_blank" rel="noopener">https://www.youtube.com/watch?v=vpNO2tQc1as</a></div>
+</li>
+<li data-video-id="sikg2jbVWQU"><a class="title" href="https://www.youtube.com/watch?v=sikg2jbVWQU" target="_blank" rel="noopener">【プリコネR】4段階 グラットン 8572万 31s</a><div class="sub"><time class="date" datetime="2026-09-22T04:39:38Z">2026-09-22 13:39 JST</time><span>芽須夏希</span><a class="url" href="https://www.youtube.com/watch?v=sikg2jbVWQU" target="_blank" rel="noopener">https://www.youtube.com/watch?v=sikg2jbVWQU</a></div>
+<div class="dmg"><div class="track"><div class="fill" style="--w:15.50%"></div></div><span class="figure">8572万</span></div>
+</li>
+<li class="off" data-video-id="R7TU_rMhyGA"><a class="title" href="https://www.youtube.com/watch?v=R7TU_rMhyGA" target="_blank" rel="noopener">Ogor Gluttons!</a><div class="sub"><time class="date" datetime="2026-09-21T13:00:13Z">2026-09-21 22:00 JST</time><span>Obscurities in Miniature</span><a class="url" href="https://www.youtube.com/watch?v=R7TU_rMhyGA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=R7TU_rMhyGA</a></div>
+</li>
+<li class="off" data-video-id="p-z5p6zA4ak"><a class="title" href="https://www.youtube.com/watch?v=p-z5p6zA4ak" target="_blank" rel="noopener">「自分の人生を自分らしく生きるためにグラットンがある！」飲食で人を喜ばせる仕事の魅力と従業員への想いを語る!徳永孝進ヒストリー第二弾｜黒毛和牛ホルモン大衆焼肉しんすけ</a><div class="sub"><time class="date" datetime="2026-09-18T01:34:14Z">2026-09-18 10:34 JST</time><span>株式会社グラットン</span><a class="url" href="https://www.youtube.com/watch?v=p-z5p6zA4ak" target="_blank" rel="noopener">https://www.youtube.com/watch?v=p-z5p6zA4ak</a></div>
+</li>
+<li class="off" data-video-id="BFSYzXqYwGQ"><a class="title" href="https://www.youtube.com/watch?v=BFSYzXqYwGQ" target="_blank" rel="noopener">WH_AoS_新グラットン_筆塗り_作業配信_20260916</a><div class="sub"><time class="date" datetime="2026-09-16T15:57:41Z">2026-09-17 00:57 JST</time><span>ぢんぐ@ホビートピア</span><a class="url" href="https://www.youtube.com/watch?v=BFSYzXqYwGQ" target="_blank" rel="noopener">https://www.youtube.com/watch?v=BFSYzXqYwGQ</a></div>
+</li>
+<li class="off" data-video-id="yv_2-egwX3o"><a class="title" href="https://www.youtube.com/watch?v=yv_2-egwX3o" target="_blank" rel="noopener">WH_AoS_新グラットン_表面処理_作業配信_20260912</a><div class="sub"><time class="date" datetime="2026-09-13T03:40:10Z">2026-09-13 12:40 JST</time><span>ぢんぐ@ホビートピア</span><a class="url" href="https://www.youtube.com/watch?v=yv_2-egwX3o" target="_blank" rel="noopener">https://www.youtube.com/watch?v=yv_2-egwX3o</a></div>
+</li>
+<li class="off" data-video-id="qfs2NRO8MPM"><a class="title" href="https://www.youtube.com/watch?v=qfs2NRO8MPM" target="_blank" rel="noopener">see you on the other side #bojackhorseman #bojack #stitch #viral #crowdfire #mrbutton #glutton #toot</a><div class="sub"><time class="date" datetime="2026-09-12T12:02:13Z">2026-09-12 21:02 JST</time><span>layla&#x27;s toys</span><a class="url" href="https://www.youtube.com/watch?v=qfs2NRO8MPM" target="_blank" rel="noopener">https://www.youtube.com/watch?v=qfs2NRO8MPM</a></div>
+</li>
+<li class="off" data-video-id="fWMcfEcAEx4"><a class="title" href="https://www.youtube.com/watch?v=fWMcfEcAEx4" target="_blank" rel="noopener">【本要約クイズ】LIFE SHIFT / リンダ･グラットン</a><div class="sub"><time class="date" datetime="2026-09-09T23:00:34Z">2026-09-10 08:00 JST</time><span>ビジネス書ート / business short</span><a class="url" href="https://www.youtube.com/watch?v=fWMcfEcAEx4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=fWMcfEcAEx4</a></div>
+</li>
+<li class="off" data-video-id="7VQLlVdgaRA"><a class="title" href="https://www.youtube.com/watch?v=7VQLlVdgaRA" target="_blank" rel="noopener">Glutton Award2026</a><div class="sub"><time class="date" datetime="2026-09-09T02:00:03Z">2026-09-09 11:00 JST</time><span>株式会社グラットン</span><a class="url" href="https://www.youtube.com/watch?v=7VQLlVdgaRA" target="_blank" rel="noopener">https://www.youtube.com/watch?v=7VQLlVdgaRA</a></div>
+</li>
+<li class="off" data-video-id="qBb37eDcq_M"><a class="title" href="https://www.youtube.com/watch?v=qBb37eDcq_M" target="_blank" rel="noopener">雑談ビルド！塩漬けにしてた新作グラットン【#ウォーハンマーAoS】</a><div class="sub"><time class="date" datetime="2026-09-03T03:14:59Z">2026-09-03 12:14 JST</time><span>雪城あさぎ</span><a class="url" href="https://www.youtube.com/watch?v=qBb37eDcq_M" target="_blank" rel="noopener">https://www.youtube.com/watch?v=qBb37eDcq_M</a></div>
+</li>
+</ol><p class="empty">この検索結果にプリコネ関連の動画はありません。</p></section>
+<footer>
+延べ 41 件 / ユニーク 40 件。プリコネ関連（暫定）は延べ 33 件 / ユニーク 32 件。ボスごとの検索結果を保持しているため、同じ動画が複数セクションに現れます。<br>
+関連判定はタイトル・チャンネル名・API が返す説明文に基づく暫定判定です。動画本編は未確認。薄い行は他作品・企業などの8件です。<br>
+ダメージバーはタイトルに明記された「億・万」表記を各ボス内の最大値で正規化しています。単位のない数値は推測しません。<br>
+取得条件：part=snippet / type=video / order=date / maxResults=50 / regionCode=JP / relevanceLanguage=ja / publishedAfter=2026-08-31T15:00:00Z。検索語は各ボスの正式名のみ。<br>
+検索5回。リポジトリの100ユニット/回の見積もりで500ユニット。Bot のOR検索とは別に取得した参照データです。<br>
+<a class="url" href="https://priconne-redive.jp/news/event/37700/">ボス構成の公式告知</a> · <a class="url" href="priconne_cb_2026-09_search.json">取得データ・暫定判定</a>
+</footer></div>
+<script>
+  var cb = document.getElementById('pf');
+  function apply(){
+    document.body.classList.toggle('only-priconne', cb.checked);
+    document.querySelectorAll('section').forEach(function(s){
+      var visible = s.querySelectorAll('li:not(.off)').length;
+      s.classList.toggle('blank', visible === 0);
+    });
+  }
+  cb.addEventListener('change', apply);
+  apply();
+</script>
+</body>
+</html>
