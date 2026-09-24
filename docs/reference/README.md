@@ -10,6 +10,8 @@
 | [priconne_cb_2026-08_update-0826.html](priconne_cb_2026-08_update-0826.html) | 上を 08-25 に取ったときとの差分。`video_id` で前回分を除いた新規70件（延べ80件）だけを同じ体裁で並べたもの |
 | [priconne_cb_2026-09_full.html](priconne_cb_2026-09_full.html) | 2026年9月の5ボス。2026-09-23 12:33 JST 取得、9月1日 JST 以降、正式名ごと最大3ページ（実際は各1ページ）。延べ41件・ユニーク40件。関連は暫定で延べ33件・ユニーク32件 |
 | [priconne_cb_2026-09_search.json](priconne_cb_2026-09_search.json) | 9月のAPI取得データ、検索条件、ページ数、取得日時、暫定判定の対象ID |
+| [priconne_cb_2026-09_update-0924.html](priconne_cb_2026-09_update-0924.html) | 9月24日21:55 JST取得。前回9月23日12:33:16 JST以降を検索し、既存IDを除外した新規22件（ボス別延べ29件）。関連は暫定21件（延べ28件） |
+| [priconne_cb_2026-09_update-0924_search.json](priconne_cb_2026-09_update-0924_search.json) | 更新分のAPI取得データ（既存IDも保持）、取得条件・日時、ボス別新規ID、暫定判定 |
 
 9月版の関連判定はタイトル・チャンネル名・説明文による暫定判定で、本編は未確認。月途中の取得結果であり、月全体の網羅を保証しない。
 
