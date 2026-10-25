@@ -1,17 +1,17 @@
 # 対象月（YYYY-MM）。この値と実行時の月が一致しない場合は起動時に警告する
 # ※ 毎月、運用者がボス名とエイリアスを書き換えること。
 #    エイリアスを実装者が推測で追加してはならない（AGENTS.md / docs/spec/05-configuration.md 参照）
-# 出典: https://priconne-redive.jp/news/event/37700/
-month: "2026-09"
+# 出典: https://priconne-redive.jp/news/05780895/
+month: "2026-10"
 
 bosses:
   - index: 1
-    name: "フロストハウンド"
+    name: "グレーターゴーレム"
   - index: 2
-    name: "ランドスロース"
+    name: "ターボファング"
   - index: 3
-    name: "ジャッカルシーフ"
+    name: "マダムプリズム"
   - index: 4
-    name: "ダークガーゴイル"
+    name: "アーク・デアム"
   - index: 5
-    name: "グラットン"
+    name: "レサトパルト"

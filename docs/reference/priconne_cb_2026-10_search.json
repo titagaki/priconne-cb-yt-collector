@@ -1,0 +1,1279 @@
+{
+  "month": "2026-10",
+  "started_at": "2026-10-24T09:54:13.879423+00:00",
+  "published_after": "2026-10-23T03:00:00Z",
+  "search_parameters": {
+    "part": "snippet",
+    "type": "video",
+    "order": "date",
+    "maxResults": 50,
+    "regionCode": "JP",
+    "relevanceLanguage": "ja",
+    "publishedAfter": "2026-10-23T03:00:00Z"
+  },
+  "max_pages_per_boss": 3,
+  "bosses": [
+    {
+      "index": 1,
+      "name": "グレーターゴーレム",
+      "pages": 1,
+      "has_more": false,
+      "items": [
+        {
+          "kind": "youtube#searchResult",
+          "etag": "BNO6tRP29BvnGYoxv_reCqfA1AU",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "N1KY_sAiC70"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T19:02:01Z",
+            "channelId": "UCA5yhZaMh4wHvFjPCF6WD6Q",
+            "title": "【プリコネR】4段階目 グレーターゴーレム 6314万 21s持ち越し編成【10月クランバトル】【クラバト】",
+            "description": "クラバト グレーターゴーレム 持ち越し 今月の持ち越し動画 再生リスト https://www.youtube.com/playlist?list=PLAhwbIL-auwo ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/N1KY_sAiC70/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/N1KY_sAiC70/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/N1KY_sAiC70/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/N1KY_sAiC70/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/N1KY_sAiC70/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ネブソク",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T19:02:01Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "VGHnwGFdymORzr-YAXVnF2HHXa4",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "guLRZgi0m_w"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T15:06:35Z",
+            "channelId": "UCA5yhZaMh4wHvFjPCF6WD6Q",
+            "title": "【プリコネR】4段階目 グレーターゴーレム 23050万 33s持ち越し編成【10月クランバトル】【クラバト】",
+            "description": "クラバト グレーターゴーレム 持ち越し 今月の持ち越し動画 再生リスト https://www.youtube.com/playlist?list=PLAhwbIL-auwo ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/guLRZgi0m_w/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/guLRZgi0m_w/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/guLRZgi0m_w/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/guLRZgi0m_w/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/guLRZgi0m_w/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ネブソク",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T15:06:35Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "xEQZ_tUOezfABHehXLOe0ceah6A",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "kLNis2IteCo"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T14:04:57Z",
+            "channelId": "UCLsnNBH1g47iYkKiLEUQtjw",
+            "title": "【プリコネR】クランバトル　グレーターゴーレム　３．６億【風物】【フルオート】",
+            "description": "フルオートで.",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/kLNis2IteCo/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/kLNis2IteCo/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/kLNis2IteCo/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/kLNis2IteCo/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/kLNis2IteCo/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "taki2 taki",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T14:04:57Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "zGM5OIUAUCcxZIcuXAT75Xsv3mA",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "wk3Vdguya00"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T13:44:07Z",
+            "channelId": "UC-NPJ88kaF_LerNebiXxI0Q",
+            "title": "グレーターゴーレム 5.52億 目押しなし",
+            "description": "参考agさん CR15/15/15/15/15 MS164 ロールは大部分が8-3で、一部が9-2 TP不問 OXOOX Auto off 1:16 プレシア OOOOX Auto ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/wk3Vdguya00/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/wk3Vdguya00/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/wk3Vdguya00/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/wk3Vdguya00/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/wk3Vdguya00/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ケーキ食べますか",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T13:44:07Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "X7ytycmsomjYVs3TWogGQZ5iqgs",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "IOlr9YkBxLw"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T10:09:58Z",
+            "channelId": "UCA5yhZaMh4wHvFjPCF6WD6Q",
+            "title": "【プリコネR】4段階目 グレーターゴーレム 21007万 33s持ち越し編成【10月クランバトル】【クラバト】",
+            "description": "クラバト グレーターゴーレム 持ち越し 今月の持ち越し動画 再生リスト https://www.youtube.com/playlist?list=PLAhwbIL-auwo ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/IOlr9YkBxLw/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/IOlr9YkBxLw/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/IOlr9YkBxLw/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/IOlr9YkBxLw/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/IOlr9YkBxLw/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ネブソク",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T10:09:58Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "7pX2Jza0Dg5w7dl1cstYePQn9Vc",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "lIgwlr4UjSs"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T06:18:11Z",
+            "channelId": "UCJJFJnH9G0r5h2IJ-xXb6Pg",
+            "title": "プリコネR 4段階目 グレーターゴーレム 持ち越し 33s 1.5億 2026/10",
+            "description": "硬いチカ、カッチカチカ 今後プリコネ動画は基本的に上げることはないと思います 全員R42 コネクトRANK:アヤネ6 / クリチカ6 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/lIgwlr4UjSs/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/lIgwlr4UjSs/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/lIgwlr4UjSs/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/lIgwlr4UjSs/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/lIgwlr4UjSs/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "sagoosoiya",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T06:18:11Z"
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "ターボファング",
+      "pages": 1,
+      "has_more": false,
+      "items": [
+        {
+          "kind": "youtube#searchResult",
+          "etag": "s2vemZTH2lutDTMVepKLRwwlGRI",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "NfUlA4lcssI"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T07:38:05Z",
+            "channelId": "UC5Wu5ky9B7R73yEwpdBdjPQ",
+            "title": "【プリコネR】4段階目ターボファング　魔法（闇）4億7900万【10月クランバトル】",
+            "description": "概要欄お団子併記しました 属性レベル：闇Lv1250 属性スキル強化：8ページ目全て マスタースキル：155個目（属性2%UP）まで ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/NfUlA4lcssI/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/NfUlA4lcssI/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/NfUlA4lcssI/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/NfUlA4lcssI/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              }
+            },
+            "channelTitle": "さんだ",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T07:38:05Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "4Jz1XSJssw2pLUUz_3GI0xnukM0",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "AzexNYJnKrc"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T00:02:05Z",
+            "channelId": "UCLsnNBH1g47iYkKiLEUQtjw",
+            "title": "【プリコネR】クランバトル　ターボファング　３億【闇物】【フルオート】",
+            "description": "フルオートで.",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/AzexNYJnKrc/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/AzexNYJnKrc/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/AzexNYJnKrc/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/AzexNYJnKrc/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/AzexNYJnKrc/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "taki2 taki",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T00:02:05Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "narLs1gez6ggVMKqUvmbLAIhPG8",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "45e69BfwfI4"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T22:11:18Z",
+            "channelId": "UCA5yhZaMh4wHvFjPCF6WD6Q",
+            "title": "【プリコネR】4段階目 ターボファング 8309万 22s持ち越し編成【10月クランバトル】【クラバト】",
+            "description": "クラバト ターボファング 持ち越し 今月の持ち越し動画 再生リスト https://www.youtube.com/playlist?list=PLAhwbIL-auwo ◇編成 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/45e69BfwfI4/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/45e69BfwfI4/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/45e69BfwfI4/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/45e69BfwfI4/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/45e69BfwfI4/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ネブソク",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T22:11:18Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "2dh1cGFgsVdZaOTW31AG8NZuDxY",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "n6DswexpaB0"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T14:09:00Z",
+            "channelId": "UCjONr-LhzB1_HaIeXwD8F5w",
+            "title": "ターボファング 53989 目押し1[プリコネ]",
+            "description": "属性1250 ノード 8ページ目 第8合流 マスター162 ロール(左上,右上,左下,右下) アタッカー/8-4,8-3,8-4,8-3 ブレイカー/9-0,8-4,8-4 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/n6DswexpaB0/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/n6DswexpaB0/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/n6DswexpaB0/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/n6DswexpaB0/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/n6DswexpaB0/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "クローン",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T14:09:00Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "NOWIH20BHny8QtQmpV8qWAPjD0I",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "-X0SaHV6Ue8"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T04:35:04Z",
+            "channelId": "UCA5yhZaMh4wHvFjPCF6WD6Q",
+            "title": "【プリコネR】4段階目 ターボファング 6206万 22s持ち越し編成【10月クランバトル】【クラバト】",
+            "description": "クラバト ターボファング 持ち越し 今月の持ち越し動画 再生リスト https://www.youtube.com/playlist?list=PLAhwbIL-auwo ◇編成 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/-X0SaHV6Ue8/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/-X0SaHV6Ue8/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/-X0SaHV6Ue8/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/-X0SaHV6Ue8/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/-X0SaHV6Ue8/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ネブソク",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T04:35:04Z"
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "マダムプリズム",
+      "pages": 1,
+      "has_more": false,
+      "items": [
+        {
+          "kind": "youtube#searchResult",
+          "etag": "YqpYhHW6SCjzTWefrFz6rXOSCnc",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "M69WE2dTX7U"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T05:58:58Z",
+            "channelId": "UCxMmVDTEkeQ-Z05Jngi7LLQ",
+            "title": "【プリコネR】4段階 マダムプリズム 22012万 47s",
+            "description": "キュリア R42最強 CR15 アカリエル R42最強 CR15 水モネ R42最強 CR15 ニュサレ R42最強 CR15 胡坐 R42最強 CR15 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/M69WE2dTX7U/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/M69WE2dTX7U/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/M69WE2dTX7U/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/M69WE2dTX7U/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              }
+            },
+            "channelTitle": "芽須夏希",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T05:58:58Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "Xgqt9ZJ-xMyuO8cWxjEk5k9t2jo",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "bYEOI8Dl3S8"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T04:20:56Z",
+            "channelId": "UC5Wu5ky9B7R73yEwpdBdjPQ",
+            "title": "【プリコネR】4段階目マダムプリズム　魔法（光）5億7700万【10月クランバトル】",
+            "description": "更新前→https://youtu.be/x_C7-hYUVU8 参考：れおんまる様 概要欄お団子併記しました 属性レベル：光Lv1250 属性スキル ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/bYEOI8Dl3S8/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/bYEOI8Dl3S8/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/bYEOI8Dl3S8/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/bYEOI8Dl3S8/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              }
+            },
+            "channelTitle": "さんだ",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T04:20:56Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "qRSBv1TOUFaRx8l89JjMZNYHHMs",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "ctmWuw5kBVc"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T00:09:17Z",
+            "channelId": "UCLsnNBH1g47iYkKiLEUQtjw",
+            "title": "【プリコネR】クランバトル　マダムプリズム　４．３億【光魔】【フルオート】",
+            "description": "フルオートで.",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/ctmWuw5kBVc/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/ctmWuw5kBVc/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/ctmWuw5kBVc/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/ctmWuw5kBVc/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/ctmWuw5kBVc/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "taki2 taki",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T00:09:17Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "f8OQufr_-nrZq1pPSyXny_hXLiU",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "zGZrDbOayYA"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T14:55:17Z",
+            "channelId": "UC5Wu5ky9B7R73yEwpdBdjPQ",
+            "title": "【プリコネR】4段階目マダムプリズム　魔法（光）5億7500万【10月クランバトル】",
+            "description": "参考：れおんまる様 概要欄お団子併記しました 属性レベル：光Lv1250 属性スキル強化：8ページ目全て マスタースキル：155個 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/zGZrDbOayYA/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/zGZrDbOayYA/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/zGZrDbOayYA/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/zGZrDbOayYA/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              }
+            },
+            "channelTitle": "さんだ",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T14:55:17Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "-8uxPPz0n60hzmQ7EJFJPO0dQ7E",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "DztiXsCFRBA"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T13:15:41Z",
+            "channelId": "UCTfioEaxproTISSmFke2VuA",
+            "title": "プリコネ クラバト 2026年10月 2段階目 マダムプリズム(3ボス) ＆ アーク・デアム(4ボス)共通 光物理 消滅編成(星6ペコ(SP)、リベカヤ、昌、ピュアリー、クリクレジッタ)",
+            "description": "プリコネ クラバト 2026年10月 2段階目 3・4ボス共通 光物理消滅編成 2段階目のマダムプリズム(3ボス)、アーク・デアム(4ボス) ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "MasDai",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T13:15:41Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "8Bxvx31MbpY-3Uw3kWiSsqZmSig",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "gy5EXo-h7NM"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T06:55:25Z",
+            "channelId": "UC45u0nfULsnMZCP810CX0EA",
+            "title": "【プリコネ】マダムプリズム魔法参考5.80億（4段階目）目押し0",
+            "description": "編成参考：Astordor さま ALL CR15 TP9-4 ---- ◇パーティ編成 アカリ（エンジェル） ☆5 Lv409 RANK42 ヨリ（エンジェル） ☆5 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/gy5EXo-h7NM/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/gy5EXo-h7NM/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/gy5EXo-h7NM/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/gy5EXo-h7NM/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/gy5EXo-h7NM/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "たつきちゃん",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T06:55:25Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "hQqm1UL51O1SLsDz4Myv5j0L5JI",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "vIIuK6FH1Ds"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T05:29:39Z",
+            "channelId": "UCA5yhZaMh4wHvFjPCF6WD6Q",
+            "title": "【プリコネR】4段階目 マダムプリズム 9982万 22s持ち越し編成【10月クランバトル】【クラバト】",
+            "description": "クラバト マダムプリズム 持ち越し 今月の持ち越し動画 再生リスト https://www.youtube.com/playlist?list=PLAhwbIL-auwo ◇編成 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/vIIuK6FH1Ds/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/vIIuK6FH1Ds/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/vIIuK6FH1Ds/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/vIIuK6FH1Ds/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/vIIuK6FH1Ds/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ネブソク",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T05:29:39Z"
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "name": "アーク・デアム",
+      "pages": 1,
+      "has_more": false,
+      "items": [
+        {
+          "kind": "youtube#searchResult",
+          "etag": "8vmqtM571bqyOCnb_Q1iqk8bEMc",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "WEzLeYtI4fo"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T00:16:41Z",
+            "channelId": "UCLsnNBH1g47iYkKiLEUQtjw",
+            "title": "【プリコネR】クランバトル　アーク・デアム　２．５億【火魔】【フルオート】",
+            "description": "フルオートで.",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/WEzLeYtI4fo/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/WEzLeYtI4fo/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/WEzLeYtI4fo/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/WEzLeYtI4fo/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/WEzLeYtI4fo/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "taki2 taki",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T00:16:41Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "-8uxPPz0n60hzmQ7EJFJPO0dQ7E",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "DztiXsCFRBA"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T13:15:41Z",
+            "channelId": "UCTfioEaxproTISSmFke2VuA",
+            "title": "プリコネ クラバト 2026年10月 2段階目 マダムプリズム(3ボス) ＆ アーク・デアム(4ボス)共通 光物理 消滅編成(星6ペコ(SP)、リベカヤ、昌、ピュアリー、クリクレジッタ)",
+            "description": "プリコネ クラバト 2026年10月 2段階目 3・4ボス共通 光物理消滅編成 2段階目のマダムプリズム(3ボス)、アーク・デアム(4ボス) ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/DztiXsCFRBA/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "MasDai",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T13:15:41Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "isfmHCL5Opg2K986bKs7dPDSFwU",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "PimB1H2vM7k"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T07:16:14Z",
+            "channelId": "UCA5yhZaMh4wHvFjPCF6WD6Q",
+            "title": "【プリコネR】4段階目 アーク・デアム 13709万 33s持ち越し編成【10月クランバトル】【クラバト】",
+            "description": "クラバト アーク・デアム 持ち越し 今月の持ち越し動画 再生リスト https://www.youtube.com/playlist?list=PLAhwbIL-auwo ◇編成 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/PimB1H2vM7k/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/PimB1H2vM7k/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/PimB1H2vM7k/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/PimB1H2vM7k/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/PimB1H2vM7k/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ネブソク",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T07:16:14Z"
+          }
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "name": "レサトパルト",
+      "pages": 1,
+      "has_more": false,
+      "items": [
+        {
+          "kind": "youtube#searchResult",
+          "etag": "NUwDmmqNog6pWp25EqSyPPbYXVU",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "VG4qFPpdSEY"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T06:01:21Z",
+            "channelId": "UC45u0nfULsnMZCP810CX0EA",
+            "title": "【プリコネ】レサトパルトをやる枠",
+            "description": "",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/VG4qFPpdSEY/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/VG4qFPpdSEY/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/VG4qFPpdSEY/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/VG4qFPpdSEY/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/VG4qFPpdSEY/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "たつきちゃん",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T06:01:21Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "CmoQ037eYpHCKMZ39fMNSHxHlJ4",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "wWAYbIkdY2M"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T05:13:06Z",
+            "channelId": "UC45u0nfULsnMZCP810CX0EA",
+            "title": "【プリコネ】レサトパルト物理参考5.48億（4段階目）目押し6",
+            "description": "編成参考：あじさま、鞘戸詩音さま、たくみたんさま ---- ◇ユニオンバースト発動時間 1:30 バトル開始 1:12 ノゾミ 通常CL最速 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/wWAYbIkdY2M/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/wWAYbIkdY2M/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/wWAYbIkdY2M/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/wWAYbIkdY2M/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/wWAYbIkdY2M/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "たつきちゃん",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T05:13:06Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "_TtxOS-CV4B0LFzx9bZgQf5TP6g",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "fVKFrWH4QM8"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-24T00:24:55Z",
+            "channelId": "UCLsnNBH1g47iYkKiLEUQtjw",
+            "title": "【プリコネR】クランバトル　レサトパルト　２．５億【水物】【フルオート】",
+            "description": "フルオートで.",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/fVKFrWH4QM8/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/fVKFrWH4QM8/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/fVKFrWH4QM8/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/fVKFrWH4QM8/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/fVKFrWH4QM8/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "taki2 taki",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-24T00:24:55Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "vABcS67YAnf1BYRNZFA9WPGmXeU",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "ERkTRAgk0mk"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T19:05:20Z",
+            "channelId": "UCfbpWftM1f3OcEeOQ8De1YQ",
+            "title": "5ボス レサトパルト TP8-4↑目押し1回　5.4億タイミング用",
+            "description": "編成参考あじ様 鞘戸詩音様 水物理 目押し1回 5億4000万 TP8-5 CR(15/15/15/15/15) ※チエルは耐久高めじゃないと落ちるかも ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/ERkTRAgk0mk/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/ERkTRAgk0mk/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/ERkTRAgk0mk/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/ERkTRAgk0mk/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/ERkTRAgk0mk/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "たくみたん",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T19:05:20Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "Fo-b-_5Yb30jMoTyB8YvjpyNYWo",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "FxHPpzKIzCs"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T15:46:50Z",
+            "channelId": "UC9yoIUaNd5AekWIUu2B6v3w",
+            "title": "5ボス レサトパルト 52400",
+            "description": "あじ様参考 ``` 1:30 OOXOO オートオン 0:55 クリス OOOOX 0:47 スミレ XOOOO 0:43 チエル XOOOX オートオフ （0:41 クリス） ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/FxHPpzKIzCs/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/FxHPpzKIzCs/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/FxHPpzKIzCs/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/FxHPpzKIzCs/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/FxHPpzKIzCs/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              },
+              "fhd": {
+                "url": "https://i.ytimg.com/vi/FxHPpzKIzCs/fhddefault.jpg",
+                "width": 1920,
+                "height": 1080
+              }
+            },
+            "channelTitle": "ちょこ",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T15:46:50Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "Iw0RboDk8zY_lsBa1THwqYaHiR0",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "mLDwUM61QPA"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T13:05:34Z",
+            "channelId": "UC45u0nfULsnMZCP810CX0EA",
+            "title": "【プリコネ】レサトパルト物理参考4.70億（4段階目）目押し3",
+            "description": "編成参考：痩せたいゼリーさま ALL CR15 TP9-4 ---- ◇パーティ編成 スミレ ☆5 Lv409 RANK42 タマキ ☆5 Lv409 RANK42 ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/mLDwUM61QPA/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/mLDwUM61QPA/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/mLDwUM61QPA/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/mLDwUM61QPA/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/mLDwUM61QPA/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "たつきちゃん",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T13:05:34Z"
+          }
+        },
+        {
+          "kind": "youtube#searchResult",
+          "etag": "cdbjvC5gSGRdSBNHjW_8uU1L25s",
+          "id": {
+            "kind": "youtube#video",
+            "videoId": "Pu0LDe8AoUE"
+          },
+          "snippet": {
+            "publishedAt": "2026-10-23T12:02:24Z",
+            "channelId": "UCA5yhZaMh4wHvFjPCF6WD6Q",
+            "title": "【プリコネR】4段階目 レサトパルト 8743万 22s持ち越し編成【10月クランバトル】【クラバト】",
+            "description": "クラバト グレーターゴーレム 持ち越し 今月の持ち越し動画 再生リスト https://www.youtube.com/playlist?list=PLAhwbIL-auwo ...",
+            "thumbnails": {
+              "default": {
+                "url": "https://i.ytimg.com/vi/Pu0LDe8AoUE/default.jpg",
+                "width": 120,
+                "height": 90
+              },
+              "medium": {
+                "url": "https://i.ytimg.com/vi/Pu0LDe8AoUE/mqdefault.jpg",
+                "width": 320,
+                "height": 180
+              },
+              "high": {
+                "url": "https://i.ytimg.com/vi/Pu0LDe8AoUE/hqdefault.jpg",
+                "width": 480,
+                "height": 360
+              },
+              "standard": {
+                "url": "https://i.ytimg.com/vi/Pu0LDe8AoUE/sddefault.jpg",
+                "width": 640,
+                "height": 480
+              },
+              "maxres": {
+                "url": "https://i.ytimg.com/vi/Pu0LDe8AoUE/maxresdefault.jpg",
+                "width": 1280,
+                "height": 720
+              }
+            },
+            "channelTitle": "ネブソク",
+            "liveBroadcastContent": "none",
+            "publishTime": "2026-10-23T12:02:24Z"
+          }
+        }
+      ]
+    }
+  ],
+  "completed_at": "2026-10-24T09:54:14.815382+00:00",
+  "review": {
+    "basis": "タイトル・チャンネル名・APIの説明文による暫定判定。全27件を関連と判断。動画本編未確認。",
+    "off_video_ids": []
+  }
+}
